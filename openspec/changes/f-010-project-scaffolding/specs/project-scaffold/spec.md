@@ -22,8 +22,8 @@ The project SHALL have Tailwind CSS installed and configured following the shadc
 
 ---
 
-### Requirement: shadcn/ui and Radix UI primitives available
-The project SHALL have shadcn/ui initialised (`npx shadcn init`) with at least one component copied into `src/components/ui/`, and Radix UI peer dependencies installed.
+### Requirement: shadcn/ui and Base UI primitives available
+The project SHALL have shadcn/ui initialised (`npx shadcn init`) with at least one component copied into `src/components/ui/`, and Base UI (`@base-ui/react`) peer dependencies installed. (Note: the `base-nova` shadcn style uses Base UI rather than Radix UI.)
 
 #### Scenario: shadcn/ui component renders
 - **WHEN** a shadcn/ui component (e.g., `Button`) is imported and rendered

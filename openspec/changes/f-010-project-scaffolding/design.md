@@ -24,7 +24,9 @@ Vite provides near-instant dev-server startup and HMR via native ESM. CRA is dep
 React 19 is the current stable release and ships first-class support for concurrent features, the new compiler, and improved `use()` hooks. Starting on 19 avoids a future major migration.
 
 ### Tailwind CSS v4 + shadcn/ui
-Tailwind provides utility-first styling with no runtime overhead. shadcn/ui gives accessible, unstyled Radix UI primitives with Tailwind-based variants — exactly what a settings modal and toggles need. Alternative (CSS Modules) rejected: more boilerplate, no design-system alignment.
+Tailwind provides utility-first styling with no runtime overhead. shadcn/ui gives accessible, unstyled Base UI primitives (via the `base-nova` style) with Tailwind-based variants — exactly what a settings modal and toggles need. Alternative (CSS Modules) rejected: more boilerplate, no design-system alignment.
+
+Integration uses `@tailwindcss/postcss` (PostCSS plugin) rather than `@tailwindcss/vite` (Vite plugin). `@tailwindcss/vite@4.x` declares a peer dependency of `vite@^5.2.0 || ^6 || ^7` which conflicts with `vite@8` used by this project. `@tailwindcss/postcss` has no peer dependencies, resolves the conflict, and produces identical output. Vite has built-in PostCSS support so no additional configuration is needed.
 
 ### React Router v7 (framework mode — client-only)
 React Router v7 is the successor to Remix routing and integrates cleanly with Vite. Used in SPA / client-only mode (no SSR). Provides future-proof nested routing for any multi-view expansion.
