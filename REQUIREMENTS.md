@@ -8,7 +8,7 @@
 
 Use this checklist to track overall feature completion status.
 
-- [ ] **F-010** Project scaffolding (Vite + React 19 + TypeScript + Tailwind + shadcn/ui)
+- [x] **F-010** Project scaffolding (Vite + React 19 + TypeScript + Tailwind + shadcn/ui)
 - [ ] **F-020** ESLint + Prettier code quality setup
 - [ ] **F-030** Unit tests (Vitest + React Testing Library)
 - [ ] **F-040** End-to-end tests (Playwright)
@@ -52,7 +52,7 @@ Use this checklist to track overall feature completion status.
 ### F-010 — Project Scaffolding
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 Set up the full development environment with all required tools and libraries in a single runnable project.
 
