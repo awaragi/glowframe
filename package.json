@@ -1,12 +1,15 @@
 {
   "name": "glowframe",
-  "private": true,
+  "description": "Full-screen fill light for video calls and selfies",
+  "license": "MIT",
+  "private": false,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint . --ext ts,tsx",
+    "lint": "eslint . --ext ts,tsx,js",
+    "format": "prettier --write 'src/**/*.{ts,tsx,js,json}' '*.{ts,js,json}'",
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test"
@@ -55,6 +58,5 @@
     "typescript-eslint": "^8.57.0",
     "vite": "^8.0.0",
     "vitest": "^4.1.0"
-  },
-  "description": "Full-screen fill light for video calls and selfies"
+  }
 }

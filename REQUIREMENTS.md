@@ -9,7 +9,7 @@
 Use this checklist to track overall feature completion status.
 
 - [x] **F-010** Project scaffolding (Vite + React 19 + TypeScript + Tailwind + shadcn/ui)
-- [ ] **F-020** ESLint + Prettier code quality setup
+- [x] **F-020** ESLint + Prettier code quality setup
 - [ ] **F-030** Unit tests (Vitest + React Testing Library)
 - [ ] **F-040** End-to-end tests (Playwright)
 - [ ] **F-050** Committed `dist/` build for GitHub Pages serving

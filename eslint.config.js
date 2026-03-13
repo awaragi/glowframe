@@ -43,5 +43,13 @@ export default defineConfig([
       'react-refresh/only-export-components': 'off',
     },
   },
+  // Root-level JS config files
+  {
+    files: ['*.js'],
+    extends: [js.configs.recommended, prettierConfig],
+    plugins: { prettier },
+    rules: {
+      'prettier/prettier': 'warn',
+    },
+  },
 ])
-
