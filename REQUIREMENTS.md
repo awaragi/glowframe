@@ -9,19 +9,19 @@
 Use this checklist to track overall feature completion status.
 
 - [ ] **F-010** Project scaffolding (Vite + React 19 + TypeScript + Tailwind + shadcn/ui)
-- [ ] **F-020** Committed `dist/` build for GitHub Pages serving
-- [ ] **F-030** Core light display — full-screen white/colored fill light
-- [ ] **F-040** Screen Wake Lock API integration
-- [ ] **F-050** Progressive Web App (PWA) support
-- [ ] **F-070** Local storage persistence via Zustand
-- [ ] **F-080** Multiple named profiles
-- [ ] **F-090** Profile settings — light color, brightness, ring format, radii
-- [ ] **F-100** Live settings modal (gear icon, top-right)
-- [ ] **F-110** Fullscreen toggle button
-- [ ] **F-120** Profile share button (URL parameter, auto-clean)
-- [ ] **F-130** ESLint + Prettier code quality setup
-- [ ] **F-140** Unit tests (Vitest + React Testing Library)
-- [ ] **F-150** End-to-end tests (Playwright)
+- [ ] **F-020** ESLint + Prettier code quality setup
+- [ ] **F-030** Unit tests (Vitest + React Testing Library)
+- [ ] **F-040** End-to-end tests (Playwright)
+- [ ] **F-050** Committed `dist/` build for GitHub Pages serving
+- [ ] **F-060** Core light display — full-screen white/colored fill light
+- [ ] **F-070** Screen Wake Lock API integration
+- [ ] **F-080** Progressive Web App (PWA) support
+- [ ] **F-090** Local storage persistence via Zustand
+- [ ] **F-100** Multiple named profiles
+- [ ] **F-110** Profile settings — light color, brightness, ring format, radii
+- [ ] **F-120** Live settings modal (gear icon, top-right)
+- [ ] **F-130** Fullscreen toggle button
+- [ ] **F-140** Profile share button (URL parameter, auto-clean)
 
 ---
 
@@ -70,7 +70,61 @@ Set up the full development environment with all required tools and libraries in
 
 ---
 
-### F-020 — Committed `dist/` Build for GitHub Pages
+### F-020 — Code Quality (ESLint + Prettier)
+
+**Priority:** Critical  
+**Status:** Not started
+
+Establish linting and formatting rules immediately after scaffolding so every subsequent commit is clean from the start.
+
+**Requirements:**
+- ESLint configured with `eslint:recommended`, `@typescript-eslint/recommended`, `plugin:react/recommended`, `plugin:react-hooks/recommended`.
+- Prettier configured for consistent formatting (single quotes, 2-space indent, trailing commas).
+- `npm run lint` runs ESLint across `src/`.
+- `npm run format` runs Prettier across `src/`.
+- Pre-commit hook (optional but recommended via `lint-staged` + `husky`) to enforce lint and format on staged files.
+
+---
+
+### F-030 — Unit & Component Tests
+
+**Priority:** Critical  
+**Status:** Not started
+
+Establish the unit testing infrastructure early to enable a TDD workflow from the first feature.
+
+**Requirements:**
+- Vitest configured with `jsdom` environment and React Testing Library setup.
+- Test coverage targets:
+  - Zustand store actions (profile CRUD, settings update).
+  - Profile serialisation / deserialisation (share URL encode/decode).
+  - Settings modal renders correctly and applies live changes.
+  - Wake Lock hook acquires and releases correctly (mock API).
+- `npm run test` runs all unit tests.
+- `npm run test:coverage` generates a coverage report.
+
+---
+
+### F-040 — End-to-End Tests (Playwright)
+
+**Priority:** High  
+**Status:** Not started
+
+Establish the E2E testing infrastructure early to enable an ATDD workflow from the first feature.
+
+**Requirements:**
+- Playwright configured for Chromium (minimum); optionally Firefox and WebKit.
+- Key scenarios covered:
+  - App loads, light surface fills the viewport.
+  - Opening the gear modal, changing brightness, confirming live update.
+  - Creating a new profile, switching to it.
+  - Sharing a profile via URL, reloading with the URL parameter, verifying settings load and parameter is removed.
+  - Fullscreen toggle reflects correct state.
+- `npm run test:e2e` starts the dev server and runs Playwright tests.
+
+---
+
+### F-050 — Committed `dist/` Build for GitHub Pages
 
 **Priority:** Critical  
 **Status:** Not started
@@ -90,7 +144,7 @@ The compiled production build lives inside the repository so GitHub Pages can se
 
 ---
 
-### F-030 — Core Light Display
+### F-060 — Core Light Display
 
 **Priority:** Critical  
 **Status:** Not started
@@ -105,7 +159,7 @@ Render a full-viewport light surface whose color and brightness are driven by th
 
 ---
 
-### F-040 — Screen Wake Lock API
+### F-070 — Screen Wake Lock API
 
 **Priority:** Critical  
 **Status:** Not started
@@ -120,7 +174,7 @@ Prevent the device display from going dark during use.
 
 ---
 
-### F-050 — Progressive Web App (PWA)
+### F-080 — Progressive Web App (PWA)
 
 **Priority:** High  
 **Status:** Not started
@@ -135,7 +189,7 @@ Allow users to install GlowFrame as a standalone app on any device.
 
 ---
 
-### F-070 — Local Storage Persistence
+### F-090 — Local Storage Persistence
 
 **Priority:** Critical  
 **Status:** Not started
@@ -150,7 +204,7 @@ All user profiles and settings survive page reloads and browser restarts.
 
 ---
 
-### F-080 — Multiple Named Profiles
+### F-100 — Multiple Named Profiles
 
 **Priority:** High  
 **Status:** Not started
@@ -168,7 +222,7 @@ Users can create, rename, duplicate, and delete named light profiles.
 
 ---
 
-### F-090 — Profile Settings
+### F-110 — Profile Settings
 
 **Priority:** Critical  
 **Status:** Not started
@@ -194,7 +248,7 @@ Each profile stores a complete set of light appearance parameters.
 
 ---
 
-### F-100 — Live Settings Modal (Gear Icon)
+### F-120 — Live Settings Modal (Gear Icon)
 
 **Priority:** Critical  
 **Status:** Not started
@@ -217,7 +271,7 @@ A compact, always-accessible settings panel lets users adjust all parameters in 
 
 ---
 
-### F-110 — Fullscreen Toggle
+### F-130 — Fullscreen Toggle
 
 **Priority:** Medium  
 **Status:** Not started
@@ -233,7 +287,7 @@ Users can enter and exit native fullscreen mode with a single button press.
 
 ---
 
-### F-120 — Profile Share via URL
+### F-140 — Profile Share via URL
 
 **Priority:** Medium  
 **Status:** Not started
@@ -249,60 +303,6 @@ Users can share a specific profile configuration via a URL that any recipient ca
   2. Either apply it as a temporary override or offer to load it as a new named profile.
   3. Remove the `?profile=…` parameter from the URL (using `history.replaceState`) so it does not persist across refreshes.
 - Invalid or tampered parameters are silently ignored (no crash).
-
----
-
-### F-130 — Code Quality (ESLint + Prettier)
-
-**Priority:** High  
-**Status:** Not started
-
-Maintain a consistent, high-quality codebase.
-
-**Requirements:**
-- ESLint configured with `eslint:recommended`, `@typescript-eslint/recommended`, `plugin:react/recommended`, `plugin:react-hooks/recommended`.
-- Prettier configured for consistent formatting (single quotes, 2-space indent, trailing commas).
-- `npm run lint` runs ESLint across `src/`.
-- `npm run format` runs Prettier across `src/`.
-- Pre-commit hook (optional but recommended via `lint-staged` + `husky`) to enforce lint and format on staged files.
-
----
-
-### F-140 — Unit & Component Tests
-
-**Priority:** High  
-**Status:** Not started
-
-Automated tests covering core logic and UI components.
-
-**Requirements:**
-- Vitest configured with `jsdom` environment and React Testing Library setup.
-- Test coverage targets:
-  - Zustand store actions (profile CRUD, settings update).
-  - Profile serialisation / deserialisation (share URL encode/decode).
-  - Settings modal renders correctly and applies live changes.
-  - Wake Lock hook acquires and releases correctly (mock API).
-- `npm run test` runs all unit tests.
-- `npm run test:coverage` generates a coverage report.
-
----
-
-### F-150 — End-to-End Tests (Playwright)
-
-**Priority:** Medium  
-**Status:** Not started
-
-Automated browser tests verifying critical user journeys.
-
-**Requirements:**
-- Playwright configured for Chromium (minimum); optionally Firefox and WebKit.
-- Key scenarios covered:
-  - App loads, light surface fills the viewport.
-  - Opening the gear modal, changing brightness, confirming live update.
-  - Creating a new profile, switching to it.
-  - Sharing a profile via URL, reloading with the URL parameter, verifying settings load and parameter is removed.
-  - Fullscreen toggle reflects correct state.
-- `npm run test:e2e` starts the dev server and runs Playwright tests.
 
 ---
 
