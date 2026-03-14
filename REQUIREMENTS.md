@@ -13,7 +13,8 @@ Use this checklist to track overall feature completion status.
 - [x] **F-025** Guiding principles for AI (GitHub Copilot)
 - [x] **F-030** Unit tests (Vitest + React Testing Library)
 - [x] **F-040** End-to-end tests (Playwright)
-- [x] **F-050** Committed `dist/` build for GitHub Pages serving
+- [x] **F-050** Committed `docs/` build for GitHub Pages serving
+- [ ] **F-055** E2E test targeting — local dev and GitHub Pages modes
 - [ ] **F-060** Core light display — full-screen white/colored fill light
 - [ ] **F-070** Screen Wake Lock API integration
 - [ ] **F-080** Progressive Web App (PWA) support
@@ -150,23 +151,42 @@ Establish the E2E testing infrastructure early to enable an ATDD workflow from t
 
 ---
 
-### F-050 — Committed `dist/` Build for GitHub Pages
+### F-050 — Committed `docs/` Build for GitHub Pages
 
 **Priority:** Critical  
 **Status:** Not started
 
-The compiled production build lives inside the repository so GitHub Pages can serve it directly from the `dist/` folder without a separate CI deployment pipeline.
+The compiled production build lives inside the repository so GitHub Pages can serve it directly from the `docs/` folder without a separate CI deployment pipeline.
 
 **Requirements:**
-- `dist/` is **not** listed in `.gitignore`; it is tracked and committed to the repository.
-- A `.nojekyll` file is placed inside `dist/` (or at the repo root served by Pages) so GitHub Pages does not process the folder with Jekyll.
-- `npm run build` regenerates `dist/` locally; the developer commits the updated `dist/` as part of any release.
+- `docs/` is **not** listed in `.gitignore`; it is tracked and committed to the repository.
+- A `.nojekyll` file is placed inside `docs/` so GitHub Pages does not process the folder with Jekyll.
+- `npm run build` regenerates `docs/` locally; the developer commits the updated `docs/` as part of any release.
 - The Vite `base` config matches the GitHub Pages sub-path (e.g., `/glowframe/`) so all asset URLs resolve correctly.
-- A `CNAME` file can optionally be placed in `dist/` to support a custom domain without re-running the build.
-- GitHub Pages is configured in the repository settings to serve from the `dist/` folder on the `main` branch (or from the root of a `gh-pages` branch that contains the `dist/` contents).
-- The `src/` source files, config files, and `node_modules/` remain in `.gitignore` as appropriate; only the compiled output in `dist/` is intentionally committed.
+- A `CNAME` file can optionally be placed in `docs/` to support a custom domain without re-running the build.
+- GitHub Pages is configured in the repository settings to serve from the `docs/` folder on the `main` branch.
+- The `src/` source files, config files, and `node_modules/` remain in `.gitignore` as appropriate; only the compiled output in `docs/` is intentionally committed.
 - A brief note in `README.md` explains the build-and-commit workflow so contributors know how to release updates.
 - Future migration to a custom domain or sub-path must require only a `base` change in `vite.config.ts`.
+
+---
+
+### F-055 — E2E Test Targeting (Local Dev and GitHub Pages)
+
+**Priority:** High  
+**Status:** Not started
+
+Playwright tests must be runnable against both the local dev server and the deployed GitHub Pages instance so that regressions can be caught before and after release.
+
+**Requirements:**
+- Two test modes are supported without modifying test files:
+  - **Local mode** (default): targets `http://localhost:5173`, spins up `npm run dev` automatically.
+  - **Pages mode**: targets the live GitHub Pages URL (`https://awaragi.github.io/glowframe/`), does **not** start a dev server.
+- Mode is selected via an environment variable (e.g., `E2E_TARGET=pages`).
+- `npm run test:e2e` runs local mode.
+- `npm run test:e2e:pages` runs Pages mode.
+- The `baseURL` seen by tests is set automatically by the mode — test code never hardcodes a URL.
+- Both modes work with the same test files in `e2e/`.
 
 ---
 
