@@ -10,8 +10,8 @@ Use this checklist to track overall feature completion status.
 
 - [x] **F-010** Project scaffolding (Vite + React 19 + TypeScript + Tailwind + shadcn/ui)
 - [x] **F-020** ESLint + Prettier code quality setup
-- [ ] **F-025** Guiding principles for AI (GitHub Copilot)
-- [ ] **F-030** Unit tests (Vitest + React Testing Library)
+- [x] **F-025** Guiding principles for AI (GitHub Copilot)
+- [x] **F-030** Unit tests (Vitest + React Testing Library)
 - [ ] **F-040** End-to-end tests (Playwright)
 - [ ] **F-050** Committed `dist/` build for GitHub Pages serving
 - [ ] **F-060** Core light display — full-screen white/colored fill light
