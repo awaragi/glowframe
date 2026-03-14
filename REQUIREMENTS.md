@@ -10,6 +10,7 @@ Use this checklist to track overall feature completion status.
 
 - [x] **F-010** Project scaffolding (Vite + React 19 + TypeScript + Tailwind + shadcn/ui)
 - [x] **F-020** ESLint + Prettier code quality setup
+- [ ] **F-025** Guiding principles for AI (GitHub Copilot)
 - [ ] **F-030** Unit tests (Vitest + React Testing Library)
 - [ ] **F-040** End-to-end tests (Playwright)
 - [ ] **F-050** Committed `dist/` build for GitHub Pages serving
@@ -83,6 +84,31 @@ Establish linting and formatting rules immediately after scaffolding so every su
 - `npm run lint` runs ESLint across `src/`.
 - `npm run format` runs Prettier across `src/`.
 - Pre-commit hook (optional but recommended via `lint-staged` + `husky`) to enforce lint and format on staged files.
+
+---
+
+### F-025 — Guiding Principles for AI (GitHub Copilot)
+
+**Priority:** Critical  
+**Status:** Not started
+
+Establish explicit conventions and guardrails so that GitHub Copilot (and any other AI-assisted tooling) produces code that is consistent, secure, and aligned with this project's standards from the first prompt onward.
+
+**Requirements:**
+- Provide a `.github/copilot-instructions.md` file at the repo root that Copilot automatically picks up in VS Code.
+- The instructions file must declare:
+  - **Language & framework context:** TypeScript strict mode, React 19 functional components only, Tailwind CSS for all styling (no inline `style` props except for dynamic computed values), shadcn/ui + Radix UI for all interactive primitives.
+  - **State management:** Zustand store only — no `useState` for cross-component state; `useState` is acceptable only for purely local UI state (e.g., modal open flag).
+  - **Form handling:** React Hook Form + Zod exclusively; never build uncontrolled forms or manual `onChange` chains.
+  - **Testing expectations:** every new utility or hook must have a corresponding Vitest unit test; every new user-facing interaction must be covered by a Playwright scenario.
+  - **Import style:** use absolute imports from `src/` aliases (e.g., `@/components/…`) — never relative `../../` paths beyond one level.
+  - **Security guardrails:** no `dangerouslySetInnerHTML`; all URL/query-parameter inputs must be validated with Zod before use; no secrets or API keys are ever committed.
+  - **Accessibility:** all interactive elements must have accessible labels or `aria-*` attributes; no click handlers on non-interactive HTML elements.
+  - **Scope discipline:** AI must not add unrequested features, refactor surrounding code, or create extra files beyond what is explicitly needed for the task at hand.
+  - **Feature backlog:** if work in progress surfaces a new feature idea, gap, or improvement that is out of scope for the current task, AI must add it as a new numbered entry in the `REQUIREMENTS.md` Implementation Checklist (status `Not started`) rather than implementing it immediately, so it can be prioritised and implemented in a controlled way.
+  - **OpenSpec change naming:** all OpenSpec changes must follow the naming convention `f-<number>-<short-description-slug>` (e.g., `f-010-project-scaffolding`, `f-025-ai-guiding-principles`), where the number matches the corresponding feature ID and the slug is lowercase, hyphen-separated, and concise.
+- The instructions file must be reviewed and updated whenever a new major dependency or architectural pattern is adopted.
+- The `.github/copilot-instructions.md` file is committed to the repository so the same guidance applies to all contributors using Copilot.
 
 ---
 
