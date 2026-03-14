@@ -14,8 +14,8 @@ export class HomePage {
     return this.page.title()
   }
 
-  get heading() {
-    return this.page.getByText('GlowFrame')
+  get lightSurface() {
+    return this.page.getByTestId('light-surface')
   }
 
   get root() {

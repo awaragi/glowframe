@@ -14,8 +14,8 @@ Use this checklist to track overall feature completion status.
 - [x] **F-030** Unit tests (Vitest + React Testing Library)
 - [x] **F-040** End-to-end tests (Playwright)
 - [x] **F-050** Committed `docs/` build for GitHub Pages serving
-- [ ] **F-055** E2E test targeting — local dev and GitHub Pages modes
-- [ ] **F-060** Core light display — full-screen white/colored fill light
+- [x] **F-055** E2E test targeting — local dev and GitHub Pages modes
+- [x] **F-060** Core light display — full-screen white/colored fill light
 - [ ] **F-070** Screen Wake Lock API integration
 - [ ] **F-080** Progressive Web App (PWA) support
 - [ ] **F-090** Local storage persistence via Zustand

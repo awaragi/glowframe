@@ -2,14 +2,21 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 interface AppState {
-  // Populated by later features (F-080 profiles, F-090 settings, etc.)
   _version: number
+  lightColor: string
+  brightness: number
+  setLightColor: (color: string) => void
+  setBrightness: (value: number) => void
 }
 
 export const useAppStore = create<AppState>()(
   persist(
-    () => ({
+    (set) => ({
       _version: 1,
+      lightColor: '#ffffff',
+      brightness: 100,
+      setLightColor: (color) => set({ lightColor: color }),
+      setBrightness: (value) => set({ brightness: value }),
     }),
     {
       name: 'glowframe-store',
