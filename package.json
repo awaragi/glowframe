@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "postbuild": "touch dist/.nojekyll",
+    "postbuild": "touch docs/.nojekyll",
     "lint": "eslint . --ext ts,tsx,js",
     "format": "prettier --write 'src/**/*.{ts,tsx,js,json}' '*.{ts,js,json}'",
     "preview": "vite preview",

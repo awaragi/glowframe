@@ -5,9 +5,9 @@ GlowFrame is a Vite + React 19 + TypeScript app hosted on GitHub Pages. The curr
 ## Goals / Non-Goals
 
 **Goals:**
-- Track `dist/` in git so GitHub Pages can serve from `dist/` on the `main` branch.
-- Configure the Vite `base` option to `/glowframe/` so asset paths resolve correctly under the Pages sub-path.
-- Add `.nojekyll` to `dist/` to disable Jekyll processing.
+- Track `docs/` in git so GitHub Pages can serve from `docs/` on the `main` branch (GitHub Pages only supports `/` or `/docs` as publishing folders).
+- Configure the Vite `base` option to `/glowframe/` and `build.outDir` to `docs` so the compiled output lands in the correct folder.
+- Add `.nojekyll` to `docs/` to disable Jekyll processing.
 - Document the build-and-commit workflow in `README.md`.
 
 **Non-Goals:**
@@ -17,13 +17,13 @@ GlowFrame is a Vite + React 19 + TypeScript app hosted on GitHub Pages. The curr
 
 ## Decisions
 
-### Decision: Commit `dist/` directly rather than use a `gh-pages` branch
+### Decision: Output to `docs/` and commit to `main` (not a `gh-pages` branch)
 
-**Choice:** Remove `dist/` from `.gitignore` and commit it to `main`.
+**Choice:** Set Vite `build.outDir` to `docs`, remove `docs/` from `.gitignore`, and commit it to `main`.
 
-**Rationale:** The simplest path with zero new tooling. GitHub Pages supports serving from a sub-folder (`/docs` or any folder) on `main`. Keeping source and build in the same branch avoids branch management overhead for a project with a single developer.
+**Rationale:** GitHub Pages only permits `/` (root) or `/docs` as the publishing folder when deploying from a branch — `/dist` is not a supported option. Using `docs/` is the path of least resistance: zero new tooling, no separate branch, and GitHub Pages serves it directly from `main`.
 
-**Alternative considered:** A `gh-pages` orphan branch — rejected because it requires either `gh-pages` npm tooling or manual branch management, adding complexity without benefit at this project scale.
+**Alternative considered:** A `gh-pages` orphan branch with `dist/` — rejected because it requires either `gh-pages` npm tooling or manual branch management, adding complexity without benefit at this project scale.
 
 ### Decision: Set `base` to `/glowframe/` in `vite.config.ts`
 
@@ -33,16 +33,16 @@ GlowFrame is a Vite + React 19 + TypeScript app hosted on GitHub Pages. The curr
 
 **Alternative considered:** Using an environment variable for `base` — deferred; one hard-coded path is sufficient now. If the project ever moves to a custom domain at the root, only `base` needs updating to `/`.
 
-### Decision: Place `.nojekyll` inside `dist/` (generated, not manually maintained)
+### Decision: Place `.nojekyll` inside `docs/` (generated, not manually maintained)
 
-**Choice:** Add a `postbuild` npm script that touches `dist/.nojekyll` after every build.
+**Choice:** Add a `postbuild` npm script that touches `docs/.nojekyll` after every build.
 
-**Rationale:** Ensures `.nojekyll` is always present after `npm run build`, requiring no manual step. The file is committed as part of `dist/`.
+**Rationale:** Ensures `.nojekyll` is always present after `npm run build`, requiring no manual step. The file is committed as part of `docs/`.
 
 **Alternative considered:** Placing `.nojekyll` at the repo root — works for GitHub Pages, but the root-level file is unrelated to the Vite output and would be confusing in this project's structure.
 
 ## Risks / Trade-offs
 
-- **Risk: `dist/` grows over time** → `dist/` is a compiled output and is regenerated entirely on each build; git history will accumulate build diffs. Mitigation: treat releases as intentional commits; squash if history bloat becomes an issue.
+- **Risk: `docs/` grows over time** → `docs/` is a compiled output and is regenerated entirely on each build; git history will accumulate build diffs. Mitigation: treat releases as intentional commits; squash if history bloat becomes an issue.
 - **Risk: Developers forget to rebuild before committing** → Documented in `README.md`; a future CI step could enforce this. No automated guard is added now (out of scope).
 - **Risk: Base path mismatch if repository is renamed** → Requires only changing `base` in `vite.config.ts` and rebuilding. Low friction, documented.

@@ -5,6 +5,9 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   base: '/glowframe/',
+  build: {
+    outDir: 'docs',
+  },
   plugins: [react()],
   resolve: {
     alias: {

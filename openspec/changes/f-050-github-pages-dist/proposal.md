@@ -13,15 +13,15 @@ GlowFrame needs to be publicly accessible via GitHub Pages without requiring a C
 ## Capabilities
 
 ### New Capabilities
-- `github-pages-dist`: Configuration and workflow for serving the committed `dist/` build via GitHub Pages, including Vite base-path setup, `.nojekyll` file, and developer release documentation.
+- `github-pages-dist`: Configuration and workflow for serving the committed `docs/` build via GitHub Pages, including Vite `outDir`/base-path setup, `.nojekyll` file, and developer release documentation.
 
 ### Modified Capabilities
 <!-- No existing spec-level requirements are changing. -->
 
 ## Impact
 
-- **`vite.config.ts`**: `base` option set to `/glowframe/`.
-- **`.gitignore`**: `dist/` entry removed so the build output is tracked.
-- **`dist/.nojekyll`**: Added as a committed file (generated via `npm run build` or manually).
+- **`vite.config.ts`**: `base` option set to `/glowframe/`; `build.outDir` set to `docs`.
+- **`.gitignore`**: `dist/` entry restored (ignored); `docs/` entry removed so the build output is tracked.
+- **`docs/.nojekyll`**: Added as a committed file (generated via `npm run build` postbuild script).
 - **`README.md`**: New section describing the build-and-commit release workflow.
 - No runtime code changes; no new dependencies.

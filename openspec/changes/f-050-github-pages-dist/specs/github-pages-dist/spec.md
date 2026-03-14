@@ -1,11 +1,11 @@
 ## ADDED Requirements
 
-### Requirement: dist/ is tracked in version control
-The repository SHALL track the `dist/` directory in git. The `.gitignore` file MUST NOT contain an entry that excludes `dist/` or its contents.
+### Requirement: docs/ is tracked in version control
+The repository SHALL track the `docs/` directory in git. The `.gitignore` file MUST NOT contain an entry that excludes `docs/` or its contents. Vite's `build.outDir` SHALL be set to `docs`.
 
-#### Scenario: dist/ is committed to main branch
+#### Scenario: docs/ is committed to main branch
 - **WHEN** a developer runs `git status` after `npm run build`
-- **THEN** the `dist/` directory and its contents appear as tracked files (not ignored)
+- **THEN** the `docs/` directory and its contents appear as tracked files (not ignored)
 
 ---
 
@@ -22,21 +22,21 @@ The Vite configuration SHALL set `base` to `/glowframe/` so that all generated a
 
 ---
 
-### Requirement: .nojekyll file present in dist/
-The `dist/` directory SHALL contain a `.nojekyll` file so GitHub Pages does not apply Jekyll processing to the build output.
+### Requirement: .nojekyll file present in docs/
+The `docs/` directory SHALL contain a `.nojekyll` file so GitHub Pages does not apply Jekyll processing to the build output.
 
 #### Scenario: .nojekyll exists after build
 - **WHEN** `npm run build` completes
-- **THEN** `dist/.nojekyll` exists as a zero-byte or empty file
+- **THEN** `docs/.nojekyll` exists as a zero-byte or empty file
 
 ---
 
 ### Requirement: Build-and-commit workflow documented in README
-The `README.md` SHALL contain a section explaining the release workflow: run `npm run build`, commit the updated `dist/`, and push to `main`.
+The `README.md` SHALL contain a section explaining the release workflow: run `npm run build`, commit the updated `docs/`, and push to `main`.
 
 #### Scenario: README contains release instructions
 - **WHEN** a contributor reads `README.md`
-- **THEN** they can find a section that describes how to build and commit `dist/` to publish a new release
+- **THEN** they can find a section that describes how to build and commit `docs/` to publish a new release
 
 ---
 
