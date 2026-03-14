@@ -13,7 +13,7 @@ Use this checklist to track overall feature completion status.
 - [x] **F-025** Guiding principles for AI (GitHub Copilot)
 - [x] **F-030** Unit tests (Vitest + React Testing Library)
 - [x] **F-040** End-to-end tests (Playwright)
-- [ ] **F-050** Committed `dist/` build for GitHub Pages serving
+- [x] **F-050** Committed `dist/` build for GitHub Pages serving
 - [ ] **F-060** Core light display — full-screen white/colored fill light
 - [ ] **F-070** Screen Wake Lock API integration
 - [ ] **F-080** Progressive Web App (PWA) support
