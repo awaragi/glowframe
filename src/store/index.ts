@@ -20,6 +20,12 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'glowframe-store',
+      version: 1,
+      partialize: (state) => ({
+        lightColor: state.lightColor,
+        brightness: state.brightness,
+        _version: state._version,
+      }),
     },
   ),
 )

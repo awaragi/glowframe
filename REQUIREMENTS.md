@@ -16,9 +16,9 @@ Use this checklist to track overall feature completion status.
 - [x] **F-050** Committed `docs/` build for GitHub Pages serving
 - [x] **F-055** E2E test targeting — local dev and GitHub Pages modes
 - [x] **F-060** Core light display — full-screen white/colored fill light
-- [ ] **F-070** Screen Wake Lock API integration
-- [ ] **F-080** Progressive Web App (PWA) support
-- [ ] **F-090** Local storage persistence via Zustand
+- [x] **F-070** Screen Wake Lock API integration
+- [x] **F-080** Progressive Web App (PWA) support
+- [x] **F-090** Local storage persistence via Zustand
 - [ ] **F-100** Multiple named profiles
 - [ ] **F-110** Profile settings — light color, brightness, ring format, radii
 - [ ] **F-120** Live settings modal (gear icon, top-right)
@@ -208,7 +208,7 @@ Render a full-viewport light surface whose color and brightness are driven by th
 ### F-070 — Screen Wake Lock API
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 Prevent the device display from going dark during use.
 
@@ -223,7 +223,7 @@ Prevent the device display from going dark during use.
 ### F-080 — Progressive Web App (PWA)
 
 **Priority:** High  
-**Status:** Not started
+**Status:** Complete
 
 Allow users to install GlowFrame as a standalone app on any device.
 
@@ -238,7 +238,7 @@ Allow users to install GlowFrame as a standalone app on any device.
 ### F-090 — Local Storage Persistence
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 All user profiles and settings survive page reloads and browser restarts.
 

@@ -13,3 +13,12 @@ test('home page loads and shows the light surface', async ({ page }) => {
   expect(box!.width).toBe(viewport.width)
   expect(box!.height).toBe(viewport.height)
 })
+
+test('light surface remains visible after going offline', async ({ page, context }) => {
+  const home = new HomePage(page)
+  await home.goto()
+  await expect(home.lightSurface).toBeVisible()
+
+  await context.setOffline(true)
+  await expect(home.lightSurface).toBeVisible()
+})
