@@ -8,7 +8,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'list',
+  reporter: process.env.CI
+    ? [['dot']]
+    : [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: isProdMode ? 'https://awaragi.github.io/glowframe/' : 'http://localhost:5173',
     trace: 'on-first-retry',
