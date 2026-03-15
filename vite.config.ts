@@ -7,7 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   base: '/glowframe/',
   build: {
-    outDir: 'docs',
+    outDir: 'dist',
     chunkSizeWarningLimit: 1000,
   },
   plugins: [

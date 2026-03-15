@@ -1,10 +1,4 @@
-# GitHub Pages Distribution
-
-## Purpose
-
-Defines the requirements for building and deploying GlowFrame to GitHub Pages via a committed `docs/` output directory and correct Vite base-path configuration.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: docs/ is tracked in version control
 The repository SHALL track the `docs/` directory in git. The `.gitignore` file MUST NOT contain an entry that excludes `docs/` or its contents. Vite's `build.outDir` SHALL be set to `dist` (the Vite default). The `docs/` directory SHALL only be updated by running `npm run build:prod`.
@@ -16,19 +10,6 @@ The repository SHALL track the `docs/` directory in git. The `.gitignore` file M
 #### Scenario: npm run build does not modify docs/
 - **WHEN** a developer runs `npm run build` (without `:prod`)
 - **THEN** the `dist/` directory is updated and `docs/` is NOT modified
-
----
-
-### Requirement: Vite base path matches GitHub Pages sub-path
-The Vite configuration SHALL set `base` to `/glowframe/` so that all generated asset URLs are prefixed with the repository sub-path.
-
-#### Scenario: Built assets reference the correct sub-path
-- **WHEN** `npm run build` completes
-- **THEN** all `<script src="...">` and `<link href="...">` entries in `dist/index.html` begin with `/glowframe/`
-
-#### Scenario: App loads correctly at the Pages URL
-- **WHEN** a browser navigates to `https://<user>.github.io/glowframe/`
-- **THEN** the application loads without 404 errors for any asset
 
 ---
 
@@ -50,14 +31,7 @@ The `README.md` SHALL contain a section explaining the two-stage release workflo
 
 ---
 
-### Requirement: Future base path change requires only a single config edit
-The implementation SHALL be structured so that changing the deployment sub-path (or moving to a root-level custom domain) requires only editing `base` in `vite.config.ts` and rebuilding — no other source file changes.
-
-#### Scenario: Changing base path to root
-- **WHEN** a developer changes `base` from `/glowframe/` to `/` in `vite.config.ts` and runs `npm run build`
-- **THEN** all asset URLs in `dist/index.html` are prefixed with `/` and no other source files require modification
-
----
+## ADDED Requirements
 
 ### Requirement: npm run build:prod promotes dist/ to docs/
 A `build:prod` script SHALL exist in `package.json` that copies the contents of `dist/` to `docs/` recursively. A `prebuild:prod` hook SHALL automatically invoke `npm run build` before the copy executes, ensuring `docs/` always reflects a fresh, complete build. The copy operation SHALL first remove `docs/` to avoid accumulating stale assets across builds.

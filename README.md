@@ -7,10 +7,14 @@ A fullscreen white-light web page that turns any display into a soft front-facin
 
 ## Deployment / Release
 
-GlowFrame is hosted on **GitHub Pages** and served directly from the `docs/` folder on the `main` branch. There is no CI pipeline — releases are done manually:
+GlowFrame is hosted on **GitHub Pages** and served directly from the `docs/` folder on the `main` branch. There is no CI pipeline — releases are done manually.
 
-1. **Build:** `npm run build`  
-   This compiles the app to `docs/` and automatically creates `docs/.nojekyll` (via the `postbuild` script) to prevent GitHub Pages from running Jekyll.
+**Two build commands:**
+- `npm run build` — compiles to `dist/` (local dev and testing only, does **not** touch `docs/`).
+- `npm run build:prod` — production release build. Automatically runs `npm run build` first (via `prebuild:prod`), then copies `dist/` to `docs/` and creates `docs/.nojekyll`.
+
+1. **Build for release:** `npm run build:prod`  
+   This compiles the app to `dist/`, copies it to `docs/`, and creates `docs/.nojekyll` to prevent GitHub Pages from running Jekyll.
 
 2. **Commit:** Stage and commit the updated `docs/` folder.  
    ```bash
