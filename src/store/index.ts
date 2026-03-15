@@ -1,16 +1,29 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { MODE_DEFAULTS } from '@/lib/modeDefaults'
+import type {
+  ProfileMode,
+  FullProfile,
+  FullColorProfile,
+  RingProfile,
+  RingColorProfile,
+  SpotProfile,
+  SpotColorProfile,
+} from '@/lib/modeDefaults'
 
-export interface Profile {
-  id: string
-  name: string
-  lightColor: string
-  brightness: number
-  colorTemperature: number
-  ringFormat: 'full' | 'circle' | 'border'
-  innerRadius: number
-  outerRadius: number
-}
+export type { ProfileMode, FullProfile, FullColorProfile, RingProfile, RingColorProfile, SpotProfile, SpotColorProfile } from '@/lib/modeDefaults'
+
+export type Profile = { id: string; name: string } & ProfileMode
+
+// All mode-specific fields combined (mode discriminant stripped first to avoid never collapse)
+type AllModeFields = Partial<
+  Omit<FullProfile, 'mode'> &
+  Omit<FullColorProfile, 'mode'> &
+  Omit<RingProfile, 'mode'> &
+  Omit<RingColorProfile, 'mode'> &
+  Omit<SpotProfile, 'mode'> &
+  Omit<SpotColorProfile, 'mode'>
+>
 
 interface AppState {
   _version: number
@@ -20,7 +33,8 @@ interface AppState {
   renameProfile: (id: string, newName: string) => void
   deleteProfile: (id: string) => void
   setActiveProfile: (id: string) => void
-  updateProfile: (id: string, patch: Partial<Omit<Profile, 'id'>>) => void
+  updateProfile: (id: string, patch: AllModeFields) => void
+  switchMode: (id: string, newMode: ProfileMode['mode']) => void
 }
 
 export function selectActiveProfile(state: AppState): Profile {
@@ -30,25 +44,13 @@ export function selectActiveProfile(state: AppState): Profile {
 const _defaultProfile: Profile = {
   id: crypto.randomUUID(),
   name: 'Default',
-  lightColor: '#ffffff',
-  brightness: 100,
-  colorTemperature: 6500,
-  ringFormat: 'full',
-  innerRadius: 0,
-  outerRadius: 100,
-}
-
-const _profileDefaults: Omit<Profile, 'id' | 'name' | 'lightColor' | 'brightness'> = {
-  colorTemperature: 6500,
-  ringFormat: 'full',
-  innerRadius: 0,
-  outerRadius: 100,
+  ...MODE_DEFAULTS['full'],
 }
 
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
-      _version: 3,
+      _version: 4,
       profiles: [_defaultProfile],
       activeProfileId: _defaultProfile.id,
       createProfile(name) {
@@ -86,47 +88,29 @@ export const useAppStore = create<AppState>()(
       },
       updateProfile(id, patch) {
         set((state) => ({
-          profiles: state.profiles.map((p) => (p.id === id ? { ...p, ...patch } : p)),
+          profiles: state.profiles.map((p) =>
+            p.id === id ? ({ ...p, ...patch } as Profile) : p,
+          ),
+        }))
+      },
+      switchMode(id, newMode) {
+        set((state) => ({
+          profiles: state.profiles.map((p) =>
+            p.id === id
+              ? ({ id: p.id, name: p.name, ...MODE_DEFAULTS[newMode] } as Profile)
+              : p,
+          ),
         }))
       },
     }),
     {
       name: 'glowframe-store',
-      version: 3,
+      version: 4,
       partialize: (state) => ({
         profiles: state.profiles,
         activeProfileId: state.activeProfileId,
         _version: state._version,
       }),
-      migrate(persisted, version) {
-        if (version === 1) {
-          const v1 = persisted as { lightColor?: string; brightness?: number }
-          const migratedProfile: Profile = {
-            id: crypto.randomUUID(),
-            name: 'Default',
-            lightColor: v1.lightColor ?? '#ffffff',
-            brightness: v1.brightness ?? 100,
-            ..._profileDefaults,
-          }
-          return {
-            _version: 3,
-            profiles: [migratedProfile],
-            activeProfileId: migratedProfile.id,
-          }
-        }
-        if (version === 2) {
-          const v2 = persisted as {
-            profiles: Omit<Profile, 'colorTemperature' | 'ringFormat' | 'innerRadius' | 'outerRadius'>[]
-            activeProfileId: string
-          }
-          return {
-            _version: 3,
-            profiles: v2.profiles.map((p) => ({ ...p, ..._profileDefaults })),
-            activeProfileId: v2.activeProfileId,
-          }
-        }
-        return persisted as AppState
-      },
     },
   ),
 )

@@ -4,14 +4,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Plus, Trash2 } from 'lucide-react'
 import { useAppStore, selectActiveProfile } from '@/store/index'
-import type { Profile } from '@/store/index'
+import type { ProfileMode } from '@/store/index'
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { Slider } from '@/components/ui/slider'
 import {
   Select,
   SelectContent,
@@ -22,22 +21,31 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import FullModeSettings from '@/components/mode-settings/FullModeSettings'
+import FullColorModeSettings from '@/components/mode-settings/FullColorModeSettings'
+import RingModeSettings from '@/components/mode-settings/RingModeSettings'
+import RingColorModeSettings from '@/components/mode-settings/RingColorModeSettings'
+import SpotModeSettings from '@/components/mode-settings/SpotModeSettings'
+import SpotColorModeSettings from '@/components/mode-settings/SpotColorModeSettings'
 
-const profileSchema = z.object({
+const nameSchema = z.object({
   name: z.string().min(1).max(64),
-  lightColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-  brightness: z.number().min(0).max(100),
-  colorTemperature: z.number().min(1000).max(10000),
-  ringFormat: z.enum(['full', 'circle', 'border']),
-  innerRadius: z.number().min(0).max(100),
-  outerRadius: z.number().min(0).max(100),
 })
 
-type ProfileFormValues = z.infer<typeof profileSchema>
+type NameFormValues = z.infer<typeof nameSchema>
 
 interface SettingsModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+}
+
+const MODE_LABELS: Record<ProfileMode['mode'], string> = {
+  'full': 'Full',
+  'full-color': 'Full Color',
+  'ring': 'Ring',
+  'ring-color': 'Ring Color',
+  'spot': 'Spot',
+  'spot-color': 'Spot Color',
 }
 
 export default function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
@@ -48,41 +56,38 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const renameProfile = useAppStore((s) => s.renameProfile)
   const deleteProfile = useAppStore((s) => s.deleteProfile)
   const setActiveProfile = useAppStore((s) => s.setActiveProfile)
-  const updateProfile = useAppStore((s) => s.updateProfile)
+  const storeUpdateProfile = useAppStore((s) => s.updateProfile)
+  const switchMode = useAppStore((s) => s.switchMode)
 
-  const { register, setValue, watch, reset } = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      name: activeProfile.name,
-      lightColor: activeProfile.lightColor,
-      brightness: activeProfile.brightness,
-      colorTemperature: activeProfile.colorTemperature,
-      ringFormat: activeProfile.ringFormat,
-      innerRadius: activeProfile.innerRadius,
-      outerRadius: activeProfile.outerRadius,
-    },
-    mode: 'onChange',
+  const updateProfile = (patch: Parameters<typeof storeUpdateProfile>[1]) =>
+    storeUpdateProfile(activeProfileId, patch)
+
+  const { register, reset } = useForm<NameFormValues>({
+    resolver: zodResolver(nameSchema),
+    defaultValues: { name: activeProfile.name },
   })
 
   useEffect(() => {
-    reset({
-      name: activeProfile.name,
-      lightColor: activeProfile.lightColor,
-      brightness: activeProfile.brightness,
-      colorTemperature: activeProfile.colorTemperature,
-      ringFormat: activeProfile.ringFormat,
-      innerRadius: activeProfile.innerRadius,
-      outerRadius: activeProfile.outerRadius,
-    })
+    reset({ name: activeProfile.name })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProfileId, reset])
 
-  function patch<K extends keyof ProfileFormValues>(field: K, value: ProfileFormValues[K]) {
-    setValue(field, value as never)
-    updateProfile(activeProfileId, { [field]: value } as Partial<Omit<Profile, 'id'>>)
+  function renderModeSettings() {
+    switch (activeProfile.mode) {
+      case 'full':
+        return <FullModeSettings profile={activeProfile} updateProfile={updateProfile} />
+      case 'full-color':
+        return <FullColorModeSettings profile={activeProfile} updateProfile={updateProfile} />
+      case 'ring':
+        return <RingModeSettings profile={activeProfile} updateProfile={updateProfile} />
+      case 'ring-color':
+        return <RingColorModeSettings profile={activeProfile} updateProfile={updateProfile} />
+      case 'spot':
+        return <SpotModeSettings profile={activeProfile} updateProfile={updateProfile} />
+      case 'spot-color':
+        return <SpotColorModeSettings profile={activeProfile} updateProfile={updateProfile} />
+    }
   }
-
-  const ringFormat = watch('ringFormat')
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -153,96 +158,30 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
             />
           </section>
 
-          {/* Light color */}
+          {/* Mode selector */}
           <section>
-            <Label htmlFor="light-color">Light Color</Label>
-            <input
-              id="light-color"
-              type="color"
-              {...register('lightColor')}
-              onChange={(e) => patch('lightColor', e.target.value)}
-              className="mt-1 block h-10 w-full cursor-pointer rounded-md border border-input"
-              aria-label="Light color picker"
-            />
-          </section>
-
-          {/* Brightness */}
-          <section>
-            <Label>Brightness ({watch('brightness')}%)</Label>
-            <Slider
-              className="mt-2"
-              value={[watch('brightness')]}
-              onValueChange={(v) => patch('brightness', Array.isArray(v) ? v[0] : (v as number))}
-              min={0}
-              max={100}
-              step={1}
-              aria-label="Brightness"
-            />
-          </section>
-
-          {/* Color Temperature */}
-          <section>
-            <Label>Color Temperature ({watch('colorTemperature')}K)</Label>
-            <Slider
-              className="mt-2"
-              value={[watch('colorTemperature')]}
-              onValueChange={(v) => patch('colorTemperature', Array.isArray(v) ? v[0] : (v as number))}
-              min={1000}
-              max={10000}
-              step={100}
-              aria-label="Color temperature"
-            />
-          </section>
-
-          {/* Ring Format */}
-          <section>
-            <Label>Ring Format</Label>
+            <Label>Mode</Label>
             <Select
-              value={watch('ringFormat')}
-              onValueChange={(value) =>
-                patch('ringFormat', value as 'full' | 'circle' | 'border')
-              }
+              value={activeProfile.mode}
+              onValueChange={(value) => switchMode(activeProfileId, value as ProfileMode['mode'])}
             >
-              <SelectTrigger className="mt-1 w-full" aria-label="Ring format">
+              <SelectTrigger
+                className="mt-1 w-full"
+                aria-label="Mode selector"
+                data-testid="mode-selector"
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="full">Full</SelectItem>
-                <SelectItem value="circle">Circle</SelectItem>
-                <SelectItem value="border">Border</SelectItem>
+                {(Object.entries(MODE_LABELS) as [ProfileMode['mode'], string][]).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>{label}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </section>
 
-          {/* Inner/Outer Radius — only when ringFormat !== 'full' */}
-          {ringFormat !== 'full' && (
-            <>
-              <section>
-                <Label>Inner Radius ({watch('innerRadius')}%)</Label>
-                <Slider
-                  className="mt-2"
-                  value={[watch('innerRadius')]}
-                  onValueChange={(v) => patch('innerRadius', Array.isArray(v) ? v[0] : (v as number))}
-                  min={0}
-                  max={100}
-                  step={1}
-                  aria-label="Inner radius"
-                />
-              </section>
-              <section>
-                <Label>Outer Radius ({watch('outerRadius')}%)</Label>
-                <Slider
-                  className="mt-2"
-                  value={[watch('outerRadius')]}
-                  onValueChange={(v) => patch('outerRadius', Array.isArray(v) ? v[0] : (v as number))}
-                  min={0}
-                  max={100}
-                  step={1}
-                  aria-label="Outer radius"
-                />
-              </section>
-            </>
-          )}
+          {/* Mode-specific settings */}
+          {renderModeSettings()}
         </div>
       </SheetContent>
     </Sheet>

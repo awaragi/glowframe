@@ -1,5 +1,14 @@
 import type { Page } from '@playwright/test'
 
+const MODE_LABELS: Record<string, string> = {
+  'full': 'Full',
+  'full-color': 'Full Color',
+  'ring': 'Ring',
+  'ring-color': 'Ring Color',
+  'spot': 'Spot',
+  'spot-color': 'Spot Color',
+}
+
 export class SettingsPage {
   constructor(private readonly page: Page) {}
 
@@ -19,31 +28,22 @@ export class SettingsPage {
     return this.page.getByRole('button', { name: 'New profile' })
   }
 
-  get brightnessSliderThumb() {
-    // The brightness slider section label contains "Brightness"
-    return this.page.locator('section', { hasText: /Brightness \(/ }).getByRole('slider').first()
+  get modeSelector() {
+    return this.page.getByTestId('mode-selector')
   }
 
-  /** The slider root element for brightness — use its bounding box to calculate click positions */
-  get brightnessSlider() {
-    return this.page.locator('section', { hasText: /Brightness \(/ }).locator('[data-slot="slider"]')
+  get lightSurface() {
+    return this.page.getByTestId('light-surface')
   }
 
-  /** Label element that reflects the live brightness value, e.g. "Brightness (75%)" */
-  get brightnessLabel() {
-    return this.page.locator('section', { hasText: /Brightness \(/ }).locator('label').first()
+  async lightSurfaceMode() {
+    return this.page.getByTestId('light-surface').getAttribute('data-mode')
   }
 
-  get colorTemperatureSlider() {
-    return this.page.locator('section', { hasText: /Color Temperature \(/ }).locator('[data-slot="slider"]')
-  }
-
-  get colorTemperatureLabel() {
-    return this.page.locator('section', { hasText: /Color Temperature \(/ }).locator('label').first()
-  }
-
-  get colorTemperatureSliderThumb() {
-    return this.page.locator('section', { hasText: /Color Temperature \(/ }).getByRole('slider').first()
+  async selectMode(mode: string) {
+    await this.modeSelector.click()
+    const label = MODE_LABELS[mode] ?? mode
+    await this.page.getByRole('option', { name: label }).click()
   }
 
   profileButton(name: string) {

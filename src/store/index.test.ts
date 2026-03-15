@@ -1,23 +1,21 @@
 import { useAppStore, selectActiveProfile } from '@/store'
+import type { Profile } from '@/store'
+import { MODE_DEFAULTS } from '@/lib/modeDefaults'
 
-function makeProfile(overrides?: Record<string, unknown>) {
+function makeFullProfile(overrides: Partial<Profile> = {}): Profile {
   return {
     id: crypto.randomUUID(),
     name: 'Default',
-    lightColor: '#ffffff',
-    brightness: 100,
-    colorTemperature: 6500,
-    ringFormat: 'full' as const,
-    innerRadius: 0,
-    outerRadius: 100,
+    mode: 'full',
+    lightTemperature: 6500,
+    lightBrightness: 100,
     ...overrides,
-  }
+  } as Profile
 }
 
-function resetStore(profileFields?: Parameters<typeof makeProfile>[0]) {
-  const profile = makeProfile(profileFields)
+function resetStore(profile: Profile = makeFullProfile()) {
   useAppStore.setState({
-    _version: 3,
+    _version: 4,
     profiles: [profile],
     activeProfileId: profile.id,
   })
@@ -29,8 +27,8 @@ describe('useAppStore', () => {
     resetStore()
   })
 
-  it('initialises with _version 3', () => {
-    expect(useAppStore.getState()._version).toBe(3)
+  it('initialises with _version 4', () => {
+    expect(useAppStore.getState()._version).toBe(4)
   })
 
   it('initialises with a default profile named "Default"', () => {
@@ -39,14 +37,13 @@ describe('useAppStore', () => {
     expect(state.profiles[0].name).toBe('Default')
   })
 
-  it('initialises with default lightColor #ffffff on the default profile', () => {
+  it('default profile seeds from MODE_DEFAULTS full', () => {
     const active = selectActiveProfile(useAppStore.getState())
-    expect(active.lightColor).toBe('#ffffff')
-  })
-
-  it('initialises with default brightness 100 on the default profile', () => {
-    const active = selectActiveProfile(useAppStore.getState())
-    expect(active.brightness).toBe(100)
+    expect(active.mode).toBe('full')
+    if (active.mode === 'full') {
+      expect(active.lightTemperature).toBe(MODE_DEFAULTS['full'].lightTemperature)
+      expect(active.lightBrightness).toBe(MODE_DEFAULTS['full'].lightBrightness)
+    }
   })
 
   it('selectActiveProfile returns the active profile', () => {
@@ -56,24 +53,40 @@ describe('useAppStore', () => {
   })
 
   describe('createProfile', () => {
-    it('clones active profile settings into the new profile', () => {
-      const state = useAppStore.getState()
-      const activeId = state.activeProfileId
-      // Update the active profile's lightColor first
-      useAppStore.setState({
-        profiles: state.profiles.map((p) =>
-          p.id === activeId ? { ...p, lightColor: '#ff8800', brightness: 80 } : p,
-        ),
-      })
+    it('clones active profile settings (including mode) into the new profile', () => {
+      const active = makeFullProfile({ id: 'a1', lightTemperature: 3000, lightBrightness: 80 })
+      resetStore(active)
       useAppStore.getState().createProfile('Warm')
       const newState = useAppStore.getState()
       const newProfile = newState.profiles.find((p) => p.name === 'Warm')
       expect(newProfile).toBeDefined()
-      expect(newProfile!.lightColor).toBe('#ff8800')
-      expect(newProfile!.brightness).toBe(80)
-      // Extended fields should also clone
-      expect(newProfile!.colorTemperature).toBe(6500)
-      expect(newProfile!.ringFormat).toBe('full')
+      expect(newProfile!.mode).toBe('full')
+      if (newProfile!.mode === 'full') {
+        expect(newProfile!.lightTemperature).toBe(3000)
+        expect(newProfile!.lightBrightness).toBe(80)
+      }
+    })
+
+    it('clones mode-specific fields when active profile is ring mode', () => {
+      const ringProfile: Profile = {
+        id: 'r1',
+        name: 'Ring',
+        mode: 'ring',
+        lightTemperature: 6500,
+        lightBrightness: 100,
+        innerRadius: 30,
+        outerRadius: 70,
+        backgroundLightTemperature: 0,
+        backgroundLightBrightness: 0,
+      }
+      resetStore(ringProfile)
+      useAppStore.getState().createProfile('Ring Copy')
+      const newProfile = useAppStore.getState().profiles.find((p) => p.name === 'Ring Copy')!
+      expect(newProfile.mode).toBe('ring')
+      if (newProfile.mode === 'ring') {
+        expect(newProfile.innerRadius).toBe(30)
+        expect(newProfile.outerRadius).toBe(70)
+      }
     })
 
     it('switches activeProfileId to the new profile', () => {
@@ -111,7 +124,6 @@ describe('useAppStore', () => {
     it('removes the specified non-active profile', () => {
       useAppStore.getState().createProfile('Extra')
       const extraId = useAppStore.getState().profiles.find((p) => p.name === 'Extra')!.id
-      // Switch active back to first profile so Extra is non-active
       useAppStore.getState().setActiveProfile(useAppStore.getState().profiles[0].id)
       useAppStore.getState().deleteProfile(extraId)
       expect(useAppStore.getState().profiles.find((p) => p.id === extraId)).toBeUndefined()
@@ -146,19 +158,89 @@ describe('useAppStore', () => {
   describe('updateProfile', () => {
     it('merges a patch into the specified profile', () => {
       const id = useAppStore.getState().activeProfileId
-      useAppStore.getState().updateProfile(id, { brightness: 42, ringFormat: 'circle' })
+      useAppStore.getState().updateProfile(id, { lightBrightness: 42 })
       const profile = useAppStore.getState().profiles.find((p) => p.id === id)!
-      expect(profile.brightness).toBe(42)
-      expect(profile.ringFormat).toBe('circle')
+      if (profile.mode === 'full') {
+        expect(profile.lightBrightness).toBe(42)
+      }
     })
 
     it('does not affect other profiles', () => {
       useAppStore.getState().createProfile('B')
       const bId = useAppStore.getState().activeProfileId
       const aId = useAppStore.getState().profiles[0].id
-      useAppStore.getState().updateProfile(bId, { brightness: 10 })
+      useAppStore.getState().updateProfile(bId, { lightBrightness: 10 })
       const a = useAppStore.getState().profiles.find((p) => p.id === aId)!
-      expect(a.brightness).toBe(100)
+      if (a.mode === 'full') {
+        expect(a.lightBrightness).toBe(100)
+      }
+    })
+
+    it('does not change the mode when patching mode-specific fields', () => {
+      const id = useAppStore.getState().activeProfileId
+      useAppStore.getState().updateProfile(id, { lightBrightness: 50 })
+      const profile = useAppStore.getState().profiles.find((p) => p.id === id)!
+      expect(profile.mode).toBe('full')
+    })
+  })
+
+  describe('switchMode', () => {
+    it('replaces mode-specific fields with MODE_DEFAULTS for the new mode', () => {
+      const id = useAppStore.getState().activeProfileId
+      useAppStore.getState().switchMode(id, 'ring')
+      const profile = useAppStore.getState().profiles.find((p) => p.id === id)!
+      expect(profile.mode).toBe('ring')
+      if (profile.mode === 'ring') {
+        expect(profile.innerRadius).toBe(MODE_DEFAULTS['ring'].innerRadius)
+        expect(profile.outerRadius).toBe(MODE_DEFAULTS['ring'].outerRadius)
+        expect(profile.backgroundLightBrightness).toBe(MODE_DEFAULTS['ring'].backgroundLightBrightness)
+      }
+    })
+
+    it('preserves id and name on mode switch', () => {
+      const profile = makeFullProfile({ id: 'keep-id', name: 'My Profile' })
+      resetStore(profile)
+      useAppStore.getState().switchMode('keep-id', 'spot-color')
+      const updated = useAppStore.getState().profiles.find((p) => p.id === 'keep-id')!
+      expect(updated.id).toBe('keep-id')
+      expect(updated.name).toBe('My Profile')
+    })
+
+    it('removes old mode fields after switching', () => {
+      const ringProfile: Profile = {
+        id: 'r1',
+        name: 'Ring',
+        mode: 'ring',
+        lightTemperature: 6500,
+        lightBrightness: 100,
+        innerRadius: 30,
+        outerRadius: 70,
+        backgroundLightTemperature: 0,
+        backgroundLightBrightness: 0,
+      }
+      resetStore(ringProfile)
+      useAppStore.getState().switchMode('r1', 'full')
+      const updated = useAppStore.getState().profiles.find((p) => p.id === 'r1')!
+      expect(updated.mode).toBe('full')
+      expect((updated as Record<string, unknown>)['innerRadius']).toBeUndefined()
+    })
+
+    it('can switch through all six modes', () => {
+      const id = useAppStore.getState().activeProfileId
+      const modes = ['full', 'full-color', 'ring', 'ring-color', 'spot', 'spot-color'] as const
+      for (const mode of modes) {
+        useAppStore.getState().switchMode(id, mode)
+        expect(useAppStore.getState().profiles.find((p) => p.id === id)!.mode).toBe(mode)
+      }
+    })
+
+    it('does not affect other profiles', () => {
+      const firstId = useAppStore.getState().activeProfileId
+      useAppStore.getState().createProfile('Second')
+      const secondId = useAppStore.getState().activeProfileId
+      useAppStore.getState().switchMode(secondId, 'spot')
+      const first = useAppStore.getState().profiles.find((p) => p.id === firstId)!
+      expect(first.mode).toBe('full')
     })
   })
 
@@ -177,48 +259,11 @@ describe('useAppStore', () => {
     expect(hasFunctions).toBe(false)
   })
 
-  describe('migrate', () => {
-    it('converts v1 data to v3 profile shape with extended defaults', () => {
-      const migrate = useAppStore.persist.getOptions().migrate!
-      const result = migrate({ lightColor: '#ffcc00', brightness: 60, _version: 1 }, 1) as {
-        profiles: {
-          lightColor: string
-          brightness: number
-          name: string
-          colorTemperature: number
-          ringFormat: string
-          innerRadius: number
-          outerRadius: number
-        }[]
-        activeProfileId: string
-        _version: number
-      }
-      expect(result._version).toBe(3)
-      expect(result.profiles).toHaveLength(1)
-      expect(result.profiles[0].lightColor).toBe('#ffcc00')
-      expect(result.profiles[0].brightness).toBe(60)
-      expect(result.profiles[0].name).toBe('Default')
-      expect(result.profiles[0].colorTemperature).toBe(6500)
-      expect(result.profiles[0].ringFormat).toBe('full')
-      expect(result.profiles[0].innerRadius).toBe(0)
-      expect(result.profiles[0].outerRadius).toBe(100)
-    })
+  it('store version is 4', () => {
+    expect(useAppStore.persist.getOptions().version).toBe(4)
+  })
 
-    it('converts v2 data to v3 by applying extended field defaults', () => {
-      const migrate = useAppStore.persist.getOptions().migrate!
-      const profileId = crypto.randomUUID()
-      const v2Data = {
-        _version: 2,
-        profiles: [{ id: profileId, name: 'Test', lightColor: '#aabbcc', brightness: 75 }],
-        activeProfileId: profileId,
-      }
-      const result = migrate(v2Data, 2) as {
-        profiles: { colorTemperature: number; ringFormat: string }[]
-        _version: number
-      }
-      expect(result._version).toBe(3)
-      expect(result.profiles[0].colorTemperature).toBe(6500)
-      expect(result.profiles[0].ringFormat).toBe('full')
-    })
+  it('no migrate function is registered (no migration from prior versions)', () => {
+    expect(useAppStore.persist.getOptions().migrate).toBeUndefined()
   })
 })

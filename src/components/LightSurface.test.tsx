@@ -1,124 +1,58 @@
-import { render, act } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { useAppStore } from '@/store'
 import type { Profile } from '@/store'
 import LightSurface from './LightSurface'
 
-function makeProfile(overrides?: Partial<Profile>) {
-  return {
-    id: crypto.randomUUID(),
-    name: 'Default',
-    lightColor: '#ffffff',
-    brightness: 100,
-    colorTemperature: 6500,
-    ringFormat: 'full' as const,
-    innerRadius: 0,
-    outerRadius: 100,
-    ...overrides,
-  }
-}
-
-function resetStore(profileFields?: Parameters<typeof makeProfile>[0]) {
-  const profile = makeProfile(profileFields)
+function resetStore(profile: Profile) {
   useAppStore.setState({
-    _version: 3,
+    _version: 4,
     profiles: [profile],
     activeProfileId: profile.id,
   })
-  return profile
 }
 
-function setActiveProfileFields(fields: Partial<Parameters<typeof makeProfile>[0]>) {
-  const state = useAppStore.getState()
-  const activeId = state.activeProfileId
-  useAppStore.setState({
-    profiles: state.profiles.map((p) => (p.id === activeId ? { ...p, ...fields } : p)),
-  })
-}
+const baseId = () => crypto.randomUUID()
 
-describe('LightSurface', () => {
-  beforeEach(() => {
-    resetStore()
+describe('LightSurface dispatcher', () => {
+  it('renders data-mode="full" for full mode profile', () => {
+    const profile: Profile = { id: baseId(), name: 'Test', mode: 'full', lightTemperature: 6500, lightBrightness: 100 }
+    resetStore(profile)
+    const { getByTestId } = render(<LightSurface />)
+    expect(getByTestId('light-surface')).toHaveAttribute('data-mode', 'full')
   })
 
-  describe('full format', () => {
-    it('applies default white background and full brightness filter', () => {
-      // At 6500K, white is slightly tinted — we just check it renders
-      const { getByTestId } = render(<LightSurface />)
-      const el = getByTestId('light-surface')
-      expect(el).toHaveAttribute('data-ring-format', 'full')
-      expect(el).toHaveStyle({ filter: 'brightness(1)' })
-    })
-
-    it('applies reduced brightness filter', () => {
-      setActiveProfileFields({ brightness: 50 })
-      const { getByTestId } = render(<LightSurface />)
-      expect(getByTestId('light-surface')).toHaveStyle({ filter: 'brightness(0.5)' })
-    })
-
-    it('re-renders when brightness changes after mount', () => {
-      const { getByTestId } = render(<LightSurface />)
-      act(() => setActiveProfileFields({ brightness: 50 }))
-      expect(getByTestId('light-surface')).toHaveStyle({ filter: 'brightness(0.5)' })
-    })
-
-    it('re-renders when lightColor changes after mount', () => {
-      // neutral temperature and pure red — blended result should have high red channel
-      setActiveProfileFields({ colorTemperature: 1000, lightColor: '#ff0000' })
-      const { getByTestId } = render(<LightSurface />)
-      const el = getByTestId('light-surface')
-      const bg = el.style.backgroundColor
-      expect(bg).toBeTruthy()
-    })
+  it('renders data-mode="full-color" for full-color mode profile', () => {
+    const profile: Profile = { id: baseId(), name: 'Test', mode: 'full-color', lightColor: '#ff0000' }
+    resetStore(profile)
+    const { getByTestId } = render(<LightSurface />)
+    expect(getByTestId('light-surface')).toHaveAttribute('data-mode', 'full-color')
   })
 
-  describe('circle format', () => {
-    it('renders with data-ring-format="circle"', () => {
-      resetStore({ ringFormat: 'circle', innerRadius: 20, outerRadius: 80 })
-      const { getByTestId } = render(<LightSurface />)
-      expect(getByTestId('light-surface')).toHaveAttribute('data-ring-format', 'circle')
-    })
-
-    it('applies the brightness filter in circle mode', () => {
-      resetStore({ ringFormat: 'circle', brightness: 75 })
-      const { getByTestId } = render(<LightSurface />)
-      expect(getByTestId('light-surface')).toHaveStyle({ filter: 'brightness(0.75)' })
-    })
-
-    it('renders an annular ring — transparent inside innerRadius, colored between inner and outer, transparent outside outerRadius', () => {
-      resetStore({ ringFormat: 'circle', innerRadius: 20, outerRadius: 80, lightColor: '#ffffff', colorTemperature: 6500 })
-      const { getByTestId } = render(<LightSurface />)
-      const el = getByTestId('light-surface')
-      // 'circle' format must NOT use a solid backgroundColor fill (that is 'full' format)
-      // It should use a radial-gradient via the 'background' shorthand property
-      expect(el.style.backgroundColor).toBeFalsy()
-      // The brightness filter is still applied
-      expect(el).toHaveStyle({ filter: 'brightness(1)' })
-    })
+  it('renders data-mode="ring" for ring mode profile', () => {
+    const profile: Profile = { id: baseId(), name: 'Test', mode: 'ring', lightTemperature: 6500, lightBrightness: 100, innerRadius: 20, outerRadius: 80, backgroundLightTemperature: 0, backgroundLightBrightness: 0 }
+    resetStore(profile)
+    const { getByTestId } = render(<LightSurface />)
+    expect(getByTestId('light-surface')).toHaveAttribute('data-mode', 'ring')
   })
 
-  describe('border format', () => {
-    it('renders with data-ring-format="border"', () => {
-      resetStore({ ringFormat: 'border', innerRadius: 0, outerRadius: 10 })
-      const { getByTestId } = render(<LightSurface />)
-      expect(getByTestId('light-surface')).toHaveAttribute('data-ring-format', 'border')
-    })
-
-    it('applies the brightness filter in border mode', () => {
-      resetStore({ ringFormat: 'border', brightness: 60 })
-      const { getByTestId } = render(<LightSurface />)
-      expect(getByTestId('light-surface')).toHaveStyle({ filter: 'brightness(0.6)' })
-    })
+  it('renders data-mode="ring-color" for ring-color mode profile', () => {
+    const profile: Profile = { id: baseId(), name: 'Test', mode: 'ring-color', lightColor: '#00ff00', innerRadius: 20, outerRadius: 80, backgroundColor: '#000000' }
+    resetStore(profile)
+    const { getByTestId } = render(<LightSurface />)
+    expect(getByTestId('light-surface')).toHaveAttribute('data-mode', 'ring-color')
   })
 
-  describe('color temperature', () => {
-    it('uses blendWithTemperature to derive the rendered color', () => {
-      // At 1000K (warm), white should become warm-tinted
-      resetStore({ lightColor: '#ffffff', colorTemperature: 1000 })
-      const { getByTestId } = render(<LightSurface />)
-      const el = getByTestId('light-surface')
-      // The rendered backgroundColor should not be pure white
-      // jsdom computes inline styles so we can check the style prop was set
-      expect(el.style.backgroundColor).toBeTruthy()
-    })
+  it('renders data-mode="spot" for spot mode profile', () => {
+    const profile: Profile = { id: baseId(), name: 'Test', mode: 'spot', lightTemperature: 6500, lightBrightness: 100, radius: 40, backgroundLightTemperature: 0, backgroundLightBrightness: 0 }
+    resetStore(profile)
+    const { getByTestId } = render(<LightSurface />)
+    expect(getByTestId('light-surface')).toHaveAttribute('data-mode', 'spot')
+  })
+
+  it('renders data-mode="spot-color" for spot-color mode profile', () => {
+    const profile: Profile = { id: baseId(), name: 'Test', mode: 'spot-color', lightColor: '#0000ff', radius: 40, backgroundColor: '#000000' }
+    resetStore(profile)
+    const { getByTestId } = render(<LightSurface />)
+    expect(getByTestId('light-surface')).toHaveAttribute('data-mode', 'spot-color')
   })
 })
