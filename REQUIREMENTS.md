@@ -19,9 +19,9 @@ Use this checklist to track overall feature completion status.
 - [x] **F-070** Screen Wake Lock API integration
 - [x] **F-080** Progressive Web App (PWA) support
 - [x] **F-090** Local storage persistence via Zustand
-- [ ] **F-100** Multiple named profiles
-- [ ] **F-110** Profile settings — light color, brightness, ring format, radii
-- [ ] **F-120** Live settings modal (gear icon, top-right)
+- [x] **F-100** Multiple named profiles
+- [x] **F-110** Profile settings — light color, brightness, ring format, radii
+- [x] **F-120** Live settings modal (gear icon, top-right)
 - [ ] **F-130** Fullscreen toggle button
 - [ ] **F-140** Profile share button (URL parameter, auto-clean)
 
@@ -253,7 +253,7 @@ All user profiles and settings survive page reloads and browser restarts.
 ### F-100 — Multiple Named Profiles
 
 **Priority:** High  
-**Status:** Not started
+**Status:** Complete
 
 Users can create, rename, duplicate, and delete named light profiles.
 
@@ -271,7 +271,7 @@ Users can create, rename, duplicate, and delete named light profiles.
 ### F-110 — Profile Settings
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 Each profile stores a complete set of light appearance parameters.
 
@@ -297,7 +297,7 @@ Each profile stores a complete set of light appearance parameters.
 ### F-120 — Live Settings Modal (Gear Icon)
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 A compact, always-accessible settings panel lets users adjust all parameters in real time.
 

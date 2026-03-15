@@ -1,10 +1,4 @@
-# Local Storage Persistence
-
-## Purpose
-
-Defines local storage persistence requirements — ensuring user profiles survive page reloads and browser restarts via Zustand's `persist` middleware, with an explicit schema version, partialised field list, and migration support.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Settings persisted to localStorage
 The Zustand store SHALL persist `profiles`, `activeProfileId`, and `_version` to `localStorage` under the key `glowframe-store`, restoring them on the next page load.

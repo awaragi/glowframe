@@ -15,4 +15,4 @@
 ## 2. Verify and commit
 
 - [x] 2.1 Confirm `.github/copilot-instructions.md` is tracked by Git (not listed in `.gitignore`)
-- [ ] 2.2 Open a Copilot chat in VS Code and verify the instruction file is being picked up (Copilot references project conventions)
+- [x] 2.2 Open a Copilot chat in VS Code and verify the instruction file is being picked up (Copilot references project conventions)

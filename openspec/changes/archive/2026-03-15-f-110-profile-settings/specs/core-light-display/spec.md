@@ -1,17 +1,4 @@
-# Core Light Display
-
-## Purpose
-
-Defines the core full-viewport light surface — the primary visual output of GlowFrame. The light surface fills the entire screen with a configurable color and brightness, serving as a front-facing fill light for video calls, selfies, and recording.
-
-## Requirements
-
-### Requirement: Full-viewport light surface
-The system SHALL render a single `LightSurface` component that fills exactly 100 vw × 100 vh with no scrollbars or visible overflow.
-
-#### Scenario: Light surface fills viewport
-- **WHEN** the app loads at the root path `/`
-- **THEN** a single background element covers the full viewport width and height with no scrollbars visible
+## MODIFIED Requirements
 
 ### Requirement: Background color derived from lightColor, brightness, and colorTemperature
 The system SHALL compute the displayed background color from the active profile's `lightColor`, `brightness`, and `colorTemperature` values. `brightness` is applied via CSS `filter: brightness(<value>)`. `colorTemperature` modulates a warm-to-cool tint blended over `lightColor`.
@@ -49,17 +36,3 @@ The system SHALL re-render the `LightSurface` immediately whenever any active pr
 #### Scenario: Any profile field update triggers re-render
 - **WHEN** any of `lightColor`, `brightness`, `colorTemperature`, `ringFormat`, `innerRadius`, or `outerRadius` is changed on the active profile
 - **THEN** the displayed surface updates within the same render cycle
-
-### Requirement: No UI chrome on the light surface
-The system SHALL display no scrollbars, navigation elements, or other UI chrome while the light surface is active (gear and fullscreen buttons are introduced by later features and are out of scope here).
-
-#### Scenario: Clean full-screen light view
-- **WHEN** the app is at the root path `/`
-- **THEN** only the light surface background is visible; no scrollbars appear and no other UI elements are rendered
-
-### Requirement: Default Zustand state
-The Zustand store SHALL provide default values of `lightColor: "#ffffff"` and `brightness: 100` when no persisted state exists.
-
-#### Scenario: First launch defaults
-- **WHEN** the app is loaded for the first time with no prior localStorage state
-- **THEN** `lightColor` is `"#ffffff"` and `brightness` is `100`
