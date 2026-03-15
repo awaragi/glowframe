@@ -78,7 +78,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   }, [activeProfileId, reset])
 
   function patch<K extends keyof ProfileFormValues>(field: K, value: ProfileFormValues[K]) {
-    setValue(field, value)
+    setValue(field, value as never)
     updateProfile(activeProfileId, { [field]: value } as Partial<Omit<Profile, 'id'>>)
   }
 

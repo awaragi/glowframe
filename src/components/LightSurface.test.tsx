@@ -1,8 +1,9 @@
 import { render, act } from '@testing-library/react'
 import { useAppStore } from '@/store'
+import type { Profile } from '@/store'
 import LightSurface from './LightSurface'
 
-function makeProfile(overrides?: Partial<Parameters<typeof useAppStore.setState>[0]['profiles']>[0]) {
+function makeProfile(overrides?: Partial<Profile>) {
   return {
     id: crypto.randomUUID(),
     name: 'Default',

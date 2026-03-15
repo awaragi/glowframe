@@ -8,6 +8,7 @@ export default defineConfig({
   base: '/glowframe/',
   build: {
     outDir: 'docs',
+    chunkSizeWarningLimit: 1000,
   },
   plugins: [
     react(),
