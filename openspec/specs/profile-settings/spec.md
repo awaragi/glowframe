@@ -6,63 +6,55 @@ Defines the extended profile settings capabilities — adding color temperature,
 
 ## Requirements
 
-### Requirement: Extended Profile type fields
-Each `Profile` SHALL include `colorTemperature` (integer 1000–10000, representing Kelvin), `ringFormat` (`"full" | "circle" | "border"`), `innerRadius` (integer 0–100, percentage), and `outerRadius` (integer 0–100, percentage).
-
-#### Scenario: Profile contains all extended fields
-- **WHEN** a profile is created or loaded from storage
-- **THEN** it has `colorTemperature`, `ringFormat`, `innerRadius`, and `outerRadius` alongside `id`, `name`, `lightColor`, and `brightness`
-
-### Requirement: Default values for extended fields
-The default "Default" profile seed SHALL initialise `colorTemperature` to `6500`, `ringFormat` to `"full"`, `innerRadius` to `0`, and `outerRadius` to `100`.
-
-#### Scenario: First launch extended defaults
-- **WHEN** the app loads with no prior localStorage state
-- **THEN** the default profile has `colorTemperature: 6500`, `ringFormat: "full"`, `innerRadius: 0`, and `outerRadius: 100`
-
 ### Requirement: Live profile field update action
-The Zustand store SHALL provide an `updateProfile(id, patch)` action that merges a partial `Profile` object (excluding `id`) into the matching profile entry immediately.
+The Zustand store SHALL provide an `updateProfile(id, patch)` action that merges a partial set of mode-specific fields (excluding `id`, `name`, and `mode`) into the matching profile entry immediately. Changing the `mode` discriminant is NOT permitted via `updateProfile`; use `switchMode` instead.
 
-#### Scenario: colorTemperature update applies live
-- **WHEN** `updateProfile(activeId, { colorTemperature: 3200 })` is called
-- **THEN** the active profile's `colorTemperature` is `3200` without a page reload
+#### Scenario: lightTemperature update applies live
+- **WHEN** `updateProfile(activeId, { lightTemperature: 3200 })` is called on a temperature-based mode profile
+- **THEN** the active profile's `lightTemperature` is `3200` without a page reload
 
-#### Scenario: ringFormat update applies live
-- **WHEN** `updateProfile(activeId, { ringFormat: "circle" })` is called
-- **THEN** the active profile's `ringFormat` is `"circle"`
+#### Scenario: lightColor update applies live
+- **WHEN** `updateProfile(activeId, { lightColor: '#ff8800' })` is called on a color-based mode profile
+- **THEN** the active profile's `lightColor` is `'#ff8800'`
 
-#### Scenario: innerRadius and outerRadius updates apply live
-- **WHEN** `updateProfile(activeId, { innerRadius: 20, outerRadius: 80 })` is called
-- **THEN** the active profile has `innerRadius: 20` and `outerRadius: 80`
+#### Scenario: radius update applies live
+- **WHEN** `updateProfile(activeId, { radius: 30 })` is called on a spot or spot-color profile
+- **THEN** the active profile's `radius` is `30`
 
-### Requirement: Full ring format rendering
-When `ringFormat` is `"full"`, the system SHALL render a solid color filling the entire viewport, identical to the pre-profile rendering.
+### Requirement: Mode selector in settings UI
+The settings panel SHALL display a mode selector that shows the active profile's current `mode` and allows the user to switch to any of the six modes. Selecting a new mode triggers `switchMode` and is destructive.
 
-#### Scenario: Full format fills viewport
-- **WHEN** `ringFormat` is `"full"`
-- **THEN** the entire viewport background is the computed light color with no transparent areas
+#### Scenario: Mode selector shows current mode
+- **WHEN** the settings panel is open and the active profile has `mode: 'ring'`
+- **THEN** the mode selector displays `ring` as the selected value
 
-### Requirement: Circle ring format rendering
-When `ringFormat` is `"circle"`, the system SHALL render an annular ring centred in the viewport. The ring's inner and outer radii are defined as percentages of `min(100vw, 100vh)`.
+#### Scenario: Switching mode via selector updates profile mode
+- **WHEN** the user selects `spot-color` in the mode selector
+- **THEN** `switchMode(activeProfileId, 'spot-color')` is called and the settings panel updates to show spot-color fields
 
-#### Scenario: Circle ring is visible between inner and outer radius
-- **WHEN** `ringFormat` is `"circle"`, `innerRadius` is `20`, and `outerRadius` is `80`
-- **THEN** a circular ring is visible between 20% and 80% of the viewport's shorter dimension; areas inside the inner radius and outside the outer radius are transparent
+### Requirement: Mode-scoped settings sections
+The settings panel SHALL render only the fields relevant to the active profile's `mode`. When the mode changes, the displayed fields update accordingly.
 
-### Requirement: Border ring format rendering
-When `ringFormat` is `"border"`, the system SHALL render a rectangular frame band around the viewport edges. The band thickness is derived from `outerRadius - innerRadius` as a percentage of `min(100vw, 100vh)`.
+#### Scenario: full mode shows temperature and brightness controls only
+- **WHEN** active profile has `mode: 'full'`
+- **THEN** the settings panel shows `lightTemperature` and `lightBrightness` sliders and does NOT show `lightColor`, radius, or background controls
 
-#### Scenario: Border ring frames the edges
-- **WHEN** `ringFormat` is `"border"`, `innerRadius` is `0`, and `outerRadius` is `10`
-- **THEN** a rectangular light band appears around the perimeter of the viewport; the interior is transparent
+#### Scenario: full-color mode shows color picker only
+- **WHEN** active profile has `mode: 'full-color'`
+- **THEN** the settings panel shows the `lightColor` picker and does NOT show temperature, brightness, or background controls
 
-### Requirement: Color temperature tinting
-The system SHALL blend a warm-to-cool tint derived from `colorTemperature` (warm at low K, cool at high K) over `lightColor` before applying the brightness filter.
+#### Scenario: ring mode shows all ring fields
+- **WHEN** active profile has `mode: 'ring'`
+- **THEN** the settings panel shows `lightTemperature`, `lightBrightness`, `innerRadius`, `outerRadius`, `backgroundLightTemperature`, and `backgroundLightBrightness` controls
 
-#### Scenario: Warm temperature produces warmer tint
-- **WHEN** `colorTemperature` is `2700` and `lightColor` is `"#ffffff"`
-- **THEN** the rendered surface has a warm orange-yellow tint
+#### Scenario: ring-color mode shows ring-color fields
+- **WHEN** active profile has `mode: 'ring-color'`
+- **THEN** the settings panel shows `lightColor`, `innerRadius`, `outerRadius`, and `backgroundColor` controls
 
-#### Scenario: Neutral temperature produces near-white output
-- **WHEN** `colorTemperature` is `6500` and `lightColor` is `"#ffffff"`
-- **THEN** the rendered surface is close to neutral white
+#### Scenario: spot mode shows all spot fields
+- **WHEN** active profile has `mode: 'spot'`
+- **THEN** the settings panel shows `lightTemperature`, `lightBrightness`, `radius`, `backgroundLightTemperature`, and `backgroundLightBrightness` controls
+
+#### Scenario: spot-color mode shows spot-color fields
+- **WHEN** active profile has `mode: 'spot-color'`
+- **THEN** the settings panel shows `lightColor`, `radius`, and `backgroundColor` controls

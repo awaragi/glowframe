@@ -98,5 +98,5 @@
 
 - [x] 12.1 Delete or update `ExampleForm.tsx` if it references any removed profile fields
 - [x] 12.2 Run `npm run test` — all unit tests pass
-- [ ] 12.3 Run `npm run build` — TypeScript compiles with no errors
-- [ ] 12.4 Run `npm run test:e2e` — all E2E specs pass
+- [x] 12.3 Run `npm run build` — TypeScript compiles with no errors
+- [x] 12.4 Run `npm run test:e2e` — all E2E specs pass
