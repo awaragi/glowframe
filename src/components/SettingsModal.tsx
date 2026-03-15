@@ -172,7 +172,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
             <Slider
               className="mt-2"
               value={[watch('brightness')]}
-              onValueChange={(values: number[]) => patch('brightness', values[0])}
+              onValueChange={(v) => patch('brightness', Array.isArray(v) ? v[0] : (v as number))}
               min={0}
               max={100}
               step={1}
@@ -186,7 +186,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
             <Slider
               className="mt-2"
               value={[watch('colorTemperature')]}
-              onValueChange={(values: number[]) => patch('colorTemperature', values[0])}
+              onValueChange={(v) => patch('colorTemperature', Array.isArray(v) ? v[0] : (v as number))}
               min={1000}
               max={10000}
               step={100}
@@ -222,7 +222,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                 <Slider
                   className="mt-2"
                   value={[watch('innerRadius')]}
-                  onValueChange={(values: number[]) => patch('innerRadius', values[0])}
+                  onValueChange={(v) => patch('innerRadius', Array.isArray(v) ? v[0] : (v as number))}
                   min={0}
                   max={100}
                   step={1}
@@ -234,7 +234,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                 <Slider
                   className="mt-2"
                   value={[watch('outerRadius')]}
-                  onValueChange={(values: number[]) => patch('outerRadius', values[0])}
+                  onValueChange={(v) => patch('outerRadius', Array.isArray(v) ? v[0] : (v as number))}
                   min={0}
                   max={100}
                   step={1}
