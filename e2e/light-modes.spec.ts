@@ -75,8 +75,8 @@ test('ring mode: settings shows all ring sliders', async ({ page }) => {
   await settings.open()
   await settings.selectMode('ring')
 
-  await expect(page.getByRole('slider', { name: 'Light temperature' })).toBeVisible()
-  await expect(page.getByRole('slider', { name: 'Light brightness' })).toBeVisible()
+  await expect(page.getByRole('slider', { name: 'Light temperature', exact: true })).toBeVisible()
+  await expect(page.getByRole('slider', { name: 'Light brightness', exact: true })).toBeVisible()
   await expect(page.getByRole('slider', { name: 'Inner radius' })).toBeVisible()
   await expect(page.getByRole('slider', { name: 'Outer radius' })).toBeVisible()
   await expect(page.getByRole('slider', { name: 'Background light temperature' })).toBeVisible()
@@ -145,8 +145,8 @@ test('spot mode: settings shows lightTemperature, lightBrightness, radius, backg
   await settings.open()
   await settings.selectMode('spot')
 
-  await expect(page.getByRole('slider', { name: 'Light temperature' })).toBeVisible()
-  await expect(page.getByRole('slider', { name: 'Light brightness' })).toBeVisible()
+  await expect(page.getByRole('slider', { name: 'Light temperature', exact: true })).toBeVisible()
+  await expect(page.getByRole('slider', { name: 'Light brightness', exact: true })).toBeVisible()
   await expect(page.getByRole('slider', { name: 'Radius' })).toBeVisible()
   await expect(page.getByRole('slider', { name: 'Background light temperature' })).toBeVisible()
   await expect(page.getByRole('slider', { name: 'Background light brightness' })).toBeVisible()

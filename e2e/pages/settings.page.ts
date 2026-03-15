@@ -43,7 +43,7 @@ export class SettingsPage {
   async selectMode(mode: string) {
     await this.modeSelector.click()
     const label = MODE_LABELS[mode] ?? mode
-    await this.page.getByRole('option', { name: label }).click()
+    await this.page.getByRole('option', { name: label, exact: true }).click()
   }
 
   profileButton(name: string) {
