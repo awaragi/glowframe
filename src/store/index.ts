@@ -72,9 +72,16 @@ export const useAppStore = create<AppState>()(
       },
       deleteProfile(id) {
         set((state) => {
-          if (state.profiles.length <= 1) return state
-          const idx = state.profiles.findIndex((p) => p.id === id)
           const newProfiles = state.profiles.filter((p) => p.id !== id)
+          if (newProfiles.length === 0) {
+            const fresh: Profile = {
+              id: crypto.randomUUID(),
+              name: 'Default',
+              ...MODE_DEFAULTS['full'],
+            }
+            return { profiles: [fresh], activeProfileId: fresh.id }
+          }
+          const idx = state.profiles.findIndex((p) => p.id === id)
           let newActiveId = state.activeProfileId
           if (state.activeProfileId === id) {
             const prevIdx = Math.max(0, idx - 1)

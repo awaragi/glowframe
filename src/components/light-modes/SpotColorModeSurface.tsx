@@ -18,7 +18,7 @@ export default function SpotColorModeSurface({ profile }: Props) {
         data-testid="light-surface-fg"
         className="fixed inset-0"
         style={{
-          backgroundImage: `radial-gradient(circle, ${lightColor} 0%, ${lightColor} ${radius}%, transparent ${radius}%)`,
+          backgroundImage: `radial-gradient(circle closest-side, ${lightColor} 0%, ${lightColor} ${radius}%, transparent ${radius}%)`,
           backgroundSize: 'min(100vw, 100vh) min(100vw, 100vh)',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',

@@ -18,7 +18,7 @@ export default function RingColorModeSurface({ profile }: Props) {
         data-testid="light-surface-fg"
         className="fixed inset-0"
         style={{
-          backgroundImage: `radial-gradient(circle, transparent ${innerRadius}%, ${lightColor} ${innerRadius}%, ${lightColor} ${outerRadius}%, transparent ${outerRadius}%)`,
+          backgroundImage: `radial-gradient(circle closest-side, transparent ${innerRadius}%, ${lightColor} ${innerRadius}%, ${lightColor} ${outerRadius}%, transparent ${outerRadius}%)`,
           backgroundSize: 'min(100vw, 100vh) min(100vw, 100vh)',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',

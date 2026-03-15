@@ -138,10 +138,14 @@ describe('useAppStore', () => {
       expect(state.profiles.find((p) => p.id === state.activeProfileId)).toBeDefined()
     })
 
-    it('is a no-op when only one profile remains', () => {
+    it('deleting the last profile creates a fresh default profile', () => {
       const id = useAppStore.getState().activeProfileId
       useAppStore.getState().deleteProfile(id)
-      expect(useAppStore.getState().profiles).toHaveLength(1)
+      const state = useAppStore.getState()
+      expect(state.profiles).toHaveLength(1)
+      expect(state.profiles[0].name).toBe('Default')
+      expect(state.profiles[0].id).not.toBe(id)
+      expect(state.activeProfileId).toBe(state.profiles[0].id)
     })
   })
 

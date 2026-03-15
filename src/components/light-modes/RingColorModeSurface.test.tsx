@@ -51,4 +51,10 @@ describe('RingColorModeSurface', () => {
     expect(getByTestId('light-surface-bg')).toBeInTheDocument()
     expect(getByTestId('light-surface-fg')).toBeInTheDocument()
   })
+
+  it('foreground radial-gradient shape uses closest-side so 100% maps to max screen dimension', () => {
+    const { getByTestId } = render(<RingColorModeSurface profile={makeProfile()} />)
+    const fg = getByTestId('light-surface-fg')
+    expect(fg.style.backgroundImage).toMatch(/circle\s+closest-side/)
+  })
 })

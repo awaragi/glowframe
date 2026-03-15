@@ -66,9 +66,9 @@ describe('SettingsModal', () => {
     expect(useAppStore.getState().profiles[1].name).toBe('New Profile')
   })
 
-  it('delete button is disabled when only one profile exists', () => {
+  it('delete button is always enabled (deleting the last profile resets to a new default)', () => {
     render(<SettingsModal open={true} onOpenChange={() => {}} />)
-    expect(screen.getByRole('button', { name: /Delete/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /Delete/i })).toBeEnabled()
   })
 
   it('delete button calls deleteProfile when multiple profiles exist', async () => {

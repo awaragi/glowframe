@@ -51,4 +51,10 @@ describe('SpotModeSurface', () => {
     const { getByTestId } = render(<SpotModeSurface profile={makeProfile({ backgroundLightBrightness: 75 })} />)
     expect(getByTestId('light-surface-bg')).toHaveStyle({ filter: 'brightness(0.75)' })
   })
+
+  it('foreground radial-gradient shape uses closest-side so 100% maps to max screen dimension', () => {
+    const { getByTestId } = render(<SpotModeSurface profile={makeProfile()} />)
+    const fg = getByTestId('light-surface-fg')
+    expect(fg.style.backgroundImage).toMatch(/circle\s+closest-side/)
+  })
 })

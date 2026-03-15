@@ -63,4 +63,10 @@ describe('RingModeSurface', () => {
     expect(fg.style.backgroundImage).toContain('20%')
     expect(fg.style.backgroundImage).toContain('80%')
   })
+
+  it('foreground radial-gradient shape uses closest-side so 100% maps to max screen dimension', () => {
+    const { getByTestId } = render(<RingModeSurface profile={makeProfile()} />)
+    const fg = getByTestId('light-surface-fg')
+    expect(fg.style.backgroundImage).toMatch(/circle\s+closest-side/)
+  })
 })

@@ -134,7 +134,6 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                     size="icon"
                     className="h-7 w-7 shrink-0"
                     onClick={() => deleteProfile(profile.id)}
-                    disabled={profiles.length <= 1}
                     aria-label={`Delete ${profile.name}`}
                   >
                     <Trash2 className="size-3.5" />
@@ -170,7 +169,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                 aria-label="Mode selector"
                 data-testid="mode-selector"
               >
-                <SelectValue />
+                {MODE_LABELS[activeProfile.mode]}
               </SelectTrigger>
               <SelectContent>
                 {(Object.entries(MODE_LABELS) as [ProfileMode['mode'], string][]).map(([value, label]) => (
