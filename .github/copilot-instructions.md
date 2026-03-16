@@ -47,6 +47,16 @@ Every new piece of code must be accompanied by tests.
 
 ---
 
+## Build & Test Verification
+
+After every code generation or modification, verify the change compiles and all unit tests pass.
+
+- Run `npm run build` after every code generation or modification to catch TypeScript and Vite compilation errors before considering a task complete.
+- Run `npm run test` (Vitest) after every code change to verify no existing unit tests are broken.
+- Playwright e2e tests (`npm run test:e2e`) are **excluded** from mandatory automatic runs — they are a manual / pre-PR step only.
+
+---
+
 ## Import Style
 
 Use absolute imports via the `@/` path alias.

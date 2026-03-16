@@ -108,6 +108,24 @@ The instruction file SHALL state that when in-progress work surfaces a new out-o
 
 ---
 
+### Requirement: Build verification mandated
+The instruction file SHALL mandate that after every code generation or modification, the AI must run `npm run build` to catch TypeScript and Vite compilation errors before considering a task complete.
+
+#### Scenario: Build check rule stated
+- **WHEN** the instructions file is read
+- **THEN** it explicitly requires running `npm run build` after every code generation or modification
+
+---
+
+### Requirement: Unit test verification mandated
+The instruction file SHALL mandate that after every code change, the AI must run `npm run test` (Vitest) to verify no existing unit tests are broken.
+
+#### Scenario: Unit test run rule stated
+- **WHEN** the instructions file is read
+- **THEN** it explicitly requires running `npm run test` after every code change
+
+---
+
 ### Requirement: OpenSpec change naming convention declared
 The instruction file SHALL state that all OpenSpec changes must follow the naming convention `f-<number>-<short-description-slug>` (e.g., `f-025-ai-guiding-principles`).
 
