@@ -11,6 +11,6 @@
 
 ## 3. Verification
 
-- [ ] 3.1 Run `npm run test:e2e:demo` and confirm a visible Chrome window opens with noticeably slowed interactions and sequential test execution
+- [x] 3.1 Run `npm run test:e2e:demo` and confirm a visible Chrome window opens with noticeably slowed interactions and sequential test execution
 - [x] 3.2 Run `npm run test:e2e` and confirm all tests still pass headlessly at full speed (no regression)
 - [x] 3.3 Run `npm run build` to confirm no TypeScript compilation errors

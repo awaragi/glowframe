@@ -22,9 +22,9 @@ Use this checklist to track overall feature completion status.
 - [x] **F-100** Multiple named profiles
 - [x] **F-110** Profile settings — light color, brightness, ring format, radii
 - [x] **F-120** Live settings modal (gear icon, top-right)
-- [ ] **F-130** Fullscreen toggle button
+- [x] **F-130** Fullscreen toggle button
 - [ ] **F-140** Profile share button (URL parameter, auto-clean)
-- [ ] **F-150** E2E demo mode (headed, slowed, sequential)
+- [x] **F-150** E2E demo mode (headed, slowed, sequential)
 
 ---
 
@@ -76,7 +76,7 @@ Set up the full development environment with all required tools and libraries in
 ### F-150 — E2E Demo Mode
 
 **Priority:** Low  
-**Status:** Not started
+**Status:** Complete
 
 Provide a way to run the Playwright end-to-end suite in a visible, slowed-down mode suitable for live technical demonstrations.
 
@@ -338,7 +338,7 @@ A compact, always-accessible settings panel lets users adjust all parameters in 
 ### F-130 — Fullscreen Toggle
 
 **Priority:** Medium  
-**Status:** Not started
+**Status:** Complete
 
 Users can enter and exit native fullscreen mode with a single button press.
 

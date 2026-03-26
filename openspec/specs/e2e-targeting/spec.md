@@ -7,7 +7,7 @@ This capability defines how Playwright E2E tests select their target environment
 ## Requirements
 
 ### Requirement: E2E_TARGET environment variable selects the test target
-The Playwright configuration SHALL read the `E2E_TARGET` environment variable to determine which target to run tests against. When `E2E_TARGET` is `prod`, the test target SHALL be the live GitHub Pages deployment. When `E2E_TARGET` is unset or any other value, the target SHALL be the local dev server.
+The Playwright configuration SHALL read the `E2E_TARGET` environment variable to determine which target to run tests against. When `E2E_TARGET` is `prod`, the test target SHALL be the live GitHub Pages deployment. When `E2E_TARGET` is unset or any other value, the target SHALL be the local dev server. The configuration SHALL also read the `E2E_DEMO` environment variable independently; `E2E_TARGET` and `E2E_DEMO` are orthogonal controls.
 
 #### Scenario: Default mode targets local dev server
 - **WHEN** `npm run test:e2e` is executed with no `E2E_TARGET` variable set
