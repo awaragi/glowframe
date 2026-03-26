@@ -24,6 +24,7 @@ Use this checklist to track overall feature completion status.
 - [x] **F-120** Live settings modal (gear icon, top-right)
 - [ ] **F-130** Fullscreen toggle button
 - [ ] **F-140** Profile share button (URL parameter, auto-clean)
+- [ ] **F-150** E2E demo mode (headed, slowed, sequential)
 
 ---
 
@@ -69,6 +70,23 @@ Set up the full development environment with all required tools and libraries in
 - Add Vitest and React Testing Library.
 - Add Playwright for E2E tests.
 - Provide `npm run dev`, `npm run build`, `npm run test`, `npm run test:e2e`, `npm run lint` scripts.
+
+---
+
+### F-150 — E2E Demo Mode
+
+**Priority:** Low  
+**Status:** Not started
+
+Provide a way to run the Playwright end-to-end suite in a visible, slowed-down mode suitable for live technical demonstrations.
+
+**Requirements:**
+- Add an opt-in `E2E_DEMO=true` environment variable that activates demo mode.
+- When active, launch the browser in headed (non-headless) mode.
+- When active, apply a `slowMo` delay of ~800 ms per action so interactions are clearly visible.
+- When active, disable `fullyParallel` so tests run sequentially and are easy to follow.
+- Expose a `test:e2e:demo` npm script that sets `E2E_DEMO=true` and runs `playwright test`.
+- Existing `test:e2e` and `test:e2e:prod` scripts must remain unaffected and continue to run headlessly at full speed.
 
 ---
 
