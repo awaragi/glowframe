@@ -11,9 +11,9 @@ The Playwright configuration SHALL read the `E2E_DEMO` environment variable. Whe
 - **WHEN** `E2E_DEMO=true` is set
 - **THEN** each Playwright action is delayed by approximately 800 ms so interactions are clearly observable
 
-#### Scenario: Demo mode runs tests sequentially
+#### Scenario: Demo mode runs tests sequentially in a single window
 - **WHEN** `E2E_DEMO=true` is set
-- **THEN** `fullyParallel` is `false` and tests execute one at a time
+- **THEN** `fullyParallel` is `false`, `workers` is `1`, and exactly one browser window is open at any time
 
 #### Scenario: Demo mode is inactive by default
 - **WHEN** `E2E_DEMO` is unset or any value other than `"true"`

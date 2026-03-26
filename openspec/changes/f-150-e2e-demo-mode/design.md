@@ -33,11 +33,11 @@ The project has a Playwright E2E suite that runs headlessly at full speed. All e
 
 **Rationale:** Visible enough for a live audience to follow each interaction without the run becoming tedious. Easily tuned by changing the env-var value in the script if needed.
 
-### D-3: Disable `fullyParallel` in demo mode
+### D-3: Disable `fullyParallel` and set `workers: 1` in demo mode
 
-**Decision:** Set `fullyParallel: false` when `E2E_DEMO=true`.
+**Decision:** Set `fullyParallel: false` and `workers: 1` when `E2E_DEMO=true`.
 
-**Rationale:** Parallel windows are confusing to watch. Sequential execution makes demonstrations easier to narrate and follow.
+**Rationale:** `fullyParallel: false` stops test *files* running in parallel, but Playwright still spawns multiple worker processes (one per CPU core) by default. Without `workers: 1`, multiple browser windows open simultaneously. Setting both ensures exactly one visible window runs at a time, which is essential for a coherent demonstration.
 
 ## Risks / Trade-offs
 
