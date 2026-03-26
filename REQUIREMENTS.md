@@ -25,6 +25,13 @@ Use this checklist to track overall feature completion status.
 - [x] **F-130** Fullscreen toggle button
 - [ ] **F-140** Profile share button (URL parameter, auto-clean)
 - [x] **F-150** E2E demo mode (headed, slowed, sequential)
+- [ ] **F-160** Ring radius cross-validation (enforce innerRadius < outerRadius)
+- [ ] **F-165** Preset reordering with visible sequence numbers
+- [ ] **F-170** Keyboard shortcuts help dialog (`?` icon, grouped modal)
+- [ ] **F-175** Keyboard shortcuts for params + number keys to switch presets
+- [ ] **F-180** Touch gestures — swipe left/right cycles presets, swipe up/down changes brightness
+- [ ] **F-185** Profile bulk import / export — download and restore all presets as a JSON file
+- [ ] **F-190** What's New dialog — surface release notes when a new PWA version installs
 
 ---
 
@@ -367,6 +374,212 @@ Users can share a specific profile configuration via a URL that any recipient ca
   2. Either apply it as a temporary override or offer to load it as a new named profile.
   3. Remove the `?profile=…` parameter from the URL (using `history.replaceState`) so it does not persist across refreshes.
 - Invalid or tampered parameters are silently ignored (no crash).
+
+---
+
+### F-160 — Ring Radius Cross-Validation
+
+**Priority:** Medium  
+**Status:** Not started
+
+Prevent invalid ring geometry by ensuring `innerRadius` is always strictly less than `outerRadius` whenever a ring format is active.
+
+**Requirements:**
+- The Zod schema for profile settings must include a `.refine()` rule that rejects any configuration where `innerRadius >= outerRadius` when `ringFormat` is `"circle"` or `"border"`.
+- The settings modal must surface a clear, inline validation message adjacent to the radius sliders when the constraint is violated (e.g., *"Inner radius must be smaller than outer radius"*).
+- React Hook Form must prevent the form from persisting an invalid state to Zustand; the last valid values must be retained in the store until the user resolves the conflict.
+- When the user drags `innerRadius` up to meet or exceed `outerRadius`, the UI must clamp or warn — not silently apply broken values.
+- Unit tests must cover: valid combinations, boundary violations (equal values), and the Zod refinement error message.
+- E2E scenario: attempt to set equal radii via the sliders and verify the error message appears and settings are not corrupted.
+
+---
+
+### F-165 — Preset Reordering and Sequence Numbers
+
+**Priority:** Low  
+**Status:** Not started
+
+Allow users to reorder their saved presets and display a persistent sequence number beside each preset so the order is visible and aligns with keyboard shortcuts (`1`–`9`) and touch-swipe navigation.
+
+**Requirements:**
+- Each preset in the settings modal profile list displays a sequence number badge (e.g., `1`, `2`, `3`, …) to the left of the preset name.
+- Users can reorder presets by drag-and-drop within the profile list in the settings modal.
+- Drag-and-drop must use a keyboard-accessible approach (Radix UI or equivalent) so the order can also be changed without a pointer device.
+- The sequence number updates live as items are dragged; it always reflects the current position in the list.
+- Preset order is persisted in Zustand / `localStorage` as part of the profile list array ordering; no separate `order` field is required.
+- Only the first 9 presets are reachable via `1`–`9` keyboard shortcuts (F-175) and left/right swipe (F-180); presets beyond position 9 are still accessible via the settings modal but have no shortcut.
+- The sequence number badge is visually distinct from the preset name and does not overflow or truncate for single or double-digit numbers.
+- Reordering must not change any preset's settings, name, or ID — only its position in the list.
+- Unit tests must cover: reorder action updates array order correctly, sequence numbers derive from array index, positions beyond 9 are accessible but have no shortcut.
+- E2E scenario: drag preset #3 to position #1, verify the sequence numbers update and pressing `1` on the keyboard activates the relocated preset.
+
+---
+
+### F-170 — Keyboard Shortcuts Help Dialog
+
+**Priority:** Low  
+**Status:** Not started
+
+Provide a discoverable help dialog that lists all available keyboard shortcuts, grouped by context, rather than cluttering individual controls with per-button hints.
+
+**Requirements:**
+- A `?` icon button is fixed in the top-right corner alongside the gear and fullscreen buttons.
+- Clicking `?` (or pressing `?` / `Shift+/` when focus is not in a form control) opens a modal dialog listing all keyboard shortcuts.
+- The dialog uses a Radix UI `Dialog` / shadcn/ui `Dialog` primitive and is closeable via the × button, `Escape`, or clicking outside.
+- Shortcuts are presented in a two-column (`key` | `action`) table, organised under the following named groups:
+  - **Global** — shortcuts active in all states (e.g., `F` fullscreen, `S` settings, `?` help).
+  - **Light surface** — shortcuts active when the settings modal is closed (e.g., `↑` / `↓` brightness, `←` / `→` color temperature, `1`–`9` preset selection).
+  - **Ring & Border modes** — shortcuts that only apply when `ringFormat` is `"circle"` or `"border"` (e.g., `[` / `]` outer radius, `{` / `}` inner radius).
+  - **Settings modal** — shortcuts active inside the settings modal (e.g., `Escape` close).
+- Keys are rendered with `<kbd>` elements for semantic correctness and visual clarity.
+- The dialog itself must not intercept any of the listed shortcuts (except `Escape` to close).
+- Shortcut handling must be centralised in a single `useKeyboardShortcuts` hook so bindings are easy to audit and extend.
+- The hook must be fully unit-tested (all registered shortcuts, focus-guard behaviour).
+- The `?` button must have an `aria-label="Keyboard shortcuts"` for screen-reader users.
+
+---
+
+### F-175 — Keyboard Shortcuts for Parameter Adjustment and Preset Switching
+
+**Priority:** Low  
+**Status:** Not started
+
+Provide keyboard shortcuts for switching between saved presets (profiles) by their sequence number, and for incrementally adjusting the active profile's parameters without opening the settings modal.
+
+**Requirements:**
+
+**Preset selection (works in all states when focus is not in a form control):**
+
+| Key | Action |
+|---|---|
+| `1` | Switch to preset #1 (first in display order) |
+| `2` | Switch to preset #2 |
+| `3` | Switch to preset #3 |
+| `4`–`9` | Switch to preset #4–#9 if they exist; no-op otherwise |
+
+- The sequence number of each preset is determined by its display order as defined in F-165; the number shown next to the preset in the UI matches the keyboard shortcut key.
+- If fewer presets exist than the key pressed, the shortcut is silently ignored.
+
+**Parameter adjustment (works in all states when focus is not in a form control):**
+
+| Key | Parameter | Step |
+|---|---|---|
+| `←` / `→` | `colorTemperature` | −100 K / +100 K |
+| `↑` / `↓` | `brightness` | +5 % / −5 % |
+| `[` / `]` | `outerRadius` | −2 % / +2 % (only in `"circle"` and `"border"` modes) |
+| `{` / `}` (Shift+`[`/`]`) | `innerRadius` | −2 % / +2 % (only in `"circle"` and `"border"` modes) |
+
+**Constraints:**
+- All adjustments must clamp to the parameter's valid range (e.g., brightness stays within 0–100 %; colorTemperature within 1000–10 000 K; radii within 0–100 %).
+- `innerRadius` adjustments must not allow `innerRadius` to reach or exceed the current `outerRadius` (and vice-versa); the value is clamped silently at `outerRadius − 1` (or `innerRadius + 1` respectively).
+- All shortcuts must be absorbed by the centralised `useKeyboardShortcuts` hook introduced in F-170; F-175 extends that hook's binding table.
+- Shortcuts must not fire when focus is inside a text input, `<select>`, or other form control, or when the settings modal has focus.
+- Each shortcut binding must appear in the appropriate context group within the F-170 keyboard shortcuts help dialog.
+- Unit tests must cover: each preset-switch binding (including out-of-range no-op), each parameter-adjustment step, boundary clamping, and the innerRadius/outerRadius guard.
+- E2E scenario: with at least two presets saved, press `2` to switch to preset #2, adjust brightness with `↑`, adjust color temperature with `→`, adjust outerRadius with `]`, and verify the surface updates live.
+
+---
+
+### F-180 — Touch Gestures on the Light Surface
+
+**Priority:** Medium  
+**Status:** Not started
+
+Allow touch-screen users to cycle between presets and adjust brightness directly on the light surface without opening any UI controls.
+
+**Requirements:**
+
+| Gesture | Action |
+|---|---|
+| Swipe left | Switch to the next preset in display order (wraps from last to first) |
+| Swipe right | Switch to the previous preset in display order (wraps from first to last) |
+| Swipe up | Increase `brightness` by 5 % (clamped at 100 %) |
+| Swipe down | Decrease `brightness` by 5 % (clamped at 0 %) |
+
+- A swipe is recognised when the touch travel distance exceeds a minimum threshold (≥ 40 px) and the gesture is predominantly horizontal or vertical (dominant-axis detection).
+- Diagonal swipes below a 60°/30° axis split are ignored to avoid ambiguous triggers.
+- Gesture detection must be implemented in a `useTouchGestures` hook that accepts callbacks; it must not depend on any third-party gesture library.
+- The hook attaches `touchstart` / `touchend` listeners to the light-surface element (not `window`) to avoid interfering with browser scroll or other elements.
+- Gesture events must not propagate to open any settings modal or trigger any button action.
+- When only a single preset exists, left/right swipe is a no-op.
+- A brief, non-intrusive visual cue (e.g., a transient toast or edge flash) must indicate which preset was switched to, so the user has feedback without looking at the UI.
+- The `useTouchGestures` hook must be fully unit-tested (direction detection, threshold guard, axis-dominance logic, single-preset no-op).
+- E2E scenario (touch-emulated): simulate a left swipe on the light surface and verify the active preset changes; simulate a swipe-up and verify brightness increases.
+
+---
+
+### F-185 — Profile Bulk Import / Export
+
+**Priority:** Low  
+**Status:** Not started
+
+Allow users to back up their entire preset library and restore it on another device, browser, or after clearing storage — without being limited to sharing one profile at a time via URL (F-140).
+
+**Requirements:**
+
+**Export:**
+- An **Export all presets** button is available in the settings modal (e.g., in the profile manager section footer).
+- Clicking it triggers a browser file download of `glowframe-profiles.json`.
+- The file contains a versioned envelope:
+  ```json
+  { "version": 1, "exportedAt": "<ISO timestamp>", "profiles": [ … ] }
+  ```
+- The `profiles` array is the full Zustand profile list serialised to plain JSON, including every parameter defined in F-110.
+- The exported `version` field matches the Zustand store schema version (F-090) so future migrations can handle old files.
+
+**Import:**
+- An **Import presets** button opens a native `<input type="file" accept=".json">` file picker (no drag-and-drop required in this version).
+- The selected file is read fully in-browser using the `FileReader` API — no network upload ever occurs.
+- Validation pipeline (all steps run before mutating state):
+  1. Parse as JSON; reject with "Not a valid JSON file" on parse failure.
+  2. Validate the envelope shape and `version` field with a Zod schema; reject with "Unrecognised file format" if the envelope is invalid.
+  3. Validate each profile entry against the full profile Zod schema; entries that fail are skipped individually (partial import allowed).
+  4. If the `version` in the file is older than the current store schema version, apply the same migration logic used by Zustand's `migrate` option before validating entries.
+- Merge strategy for valid entries:
+  - Profiles whose `id` already exists in the store are skipped (not overwritten).
+  - Profiles whose `name` already exists (but different `id`) have a numeric suffix appended, e.g., "Sunset (2)".
+  - Profiles whose `id` and `name` are both new are appended to the end of the list.
+- On completion, a toast notification summarises the outcome, e.g., *"5 presets imported, 2 skipped (already exist), 1 skipped (invalid)"*.
+- On any fatal error (envelope invalid, JSON unparseable), the existing profile list must not be mutated.
+- The import button is disabled while a file is being processed to prevent double-submission.
+- Unit tests must cover: valid round-trip (export then import), `id` collision skip, name-collision suffix, partial import on mixed-validity input, envelope schema rejection, pre-migration file handling, fatal-error state-preservation guarantee.
+- E2E scenario: create three named presets, export, clear `localStorage`, reload, import the file, verify all three presets appear with correct settings; then import the same file again and verify duplicates are skipped with the toast reporting them.
+
+---
+
+### F-190 — What's New Dialog
+
+**Priority:** Low  
+**Status:** Not started
+
+Inform users of meaningful changes when a new version of the PWA silently updates in the background, so they notice improvements without hunting for release notes or being confused by changed behaviour.
+
+**Requirements:**
+
+**Version tracking:**
+- The build embeds a version string via a Vite define constant (e.g., `import.meta.env.VITE_APP_VERSION`, populated from `package.json` version at build time).
+- The app stores the last-seen version in `localStorage` under a dedicated key (separate from the Zustand profile store).
+- On every app load, the stored version is compared to the embedded version. If they differ — or no stored version exists and the app has pre-existing profile data (i.e., not a true first install) — the What's New dialog is queued to show.
+
+**Dialog content:**
+- Release notes are embedded as a static structured constant in the source (e.g., `src/lib/changelog.ts`) — no network request, no markdown file parsing at runtime.
+- Each release entry has: `version` string, `date` string, and an array of `{ category, text }` note items.
+- Categories are: `New`, `Improved`, `Fixed`. Each note is rendered with a coloured badge and a single descriptive sentence.
+- Only the notes for the current version are shown by default; an expandable "Previous releases" disclosure reveals older entries.
+
+**Dialog behaviour:**
+- The dialog is shown automatically on the first render after a version change, using a Radix UI `Dialog` primitive.
+- It must not block interaction — it renders as an overlay and does not trap focus aggressively (user can click outside to dismiss).
+- Dismissal options: "Got it" button, `Escape` key, or clicking outside. On any dismissal, the current version is written to `localStorage`.
+- The dialog does **not** re-appear on subsequent reloads until the next version increment.
+- A "What's New" link in the settings modal footer (and optionally in the F-170 help dialog) opens the dialog manually at any time, regardless of version state.
+
+**First-install handling:**
+- On a genuine first install (no stored version and no pre-existing profile data), the dialog is suppressed — the user does not need to be greeted with release notes for a fresh install.
+
+**Testing:**
+- Unit tests must cover: version-bump triggers dialog, same-version suppresses dialog, genuine first-install suppression, dismissal writes version to storage, manual open from settings ignores version state.
+- E2E scenario: load the app with a mocked previous version in `localStorage`, verify the dialog appears automatically, dismiss it, reload, verify it does not reappear.
 
 ---
 
