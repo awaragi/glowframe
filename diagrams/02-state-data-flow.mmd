@@ -1,0 +1,62 @@
+---
+title: GlowFrame — Zustand Store & State Data Flow
+---
+flowchart TD
+    subgraph Persistence["Persistence (localStorage)"]
+        LS[("localStorage\nkey: glowframe-store")]
+    end
+
+    subgraph Store["useAppStore  —  Zustand State"]
+        direction TB
+        V["_version: number\n(migration guard, currently 4)"]
+        Profiles["profiles: Profile[]"]
+        ActiveID["activeProfileId: string"]
+
+        subgraph ProfileShape["Profile Shape (discriminated union)"]
+            direction LR
+            Base["{ id: string\n  name: string }"]
+            ModeUnion["+ one of 6 ProfileMode variants\n(full | full-color | ring |\nring-color | spot | spot-color)"]
+        end
+    end
+
+    subgraph Actions["Store Actions"]
+        CreateProfile["createProfile(name)\n→ clone active + new UUID\n→ set as active"]
+        RenameProfile["renameProfile(id, newName)\n→ in-place name update"]
+        DeleteProfile["deleteProfile(id)\n→ remove; fallback to prev sibling\n→ create Default if none left"]
+        SetActive["setActiveProfile(id)\n→ update activeProfileId pointer"]
+        UpdateProfile["updateProfile(id, patch)\n→ shallow-merge patch onto profile\n(live settings update)"]
+        SwitchMode["switchMode(id, newMode)\n→ replace all mode fields with\nMODE_DEFAULTS[newMode]\n(keeps id + name)"]
+    end
+
+    subgraph Consumers["State Consumers"]
+        LightSurface["LightSurface\n(renders the light output)"]
+        SettingsModal["SettingsModal\n(profile management + settings drawer)"]
+        ModeSettingsPanels["Mode Settings Panels\n(live slider / picker controls)"]
+    end
+
+    LS <-->|"zustand persist middleware\n(partialise: profiles, activeProfileId, _version)"| Store
+
+    Store -->|"selectActiveProfile()\nfallback → profiles[0]"| LightSurface
+    Store -->|"selectActiveProfile()\nfull profiles list"| SettingsModal
+    SettingsModal -->|read| Store
+
+    SettingsModal --> CreateProfile
+    SettingsModal --> RenameProfile
+    SettingsModal --> DeleteProfile
+    SettingsModal --> SetActive
+    SettingsModal --> SwitchMode
+
+    ModeSettingsPanels -->|"on every\nslider/picker change"| UpdateProfile
+
+    CreateProfile --> Profiles
+    RenameProfile --> Profiles
+    DeleteProfile --> Profiles
+    SetActive --> ActiveID
+    UpdateProfile --> Profiles
+    SwitchMode --> Profiles
+
+    style Persistence fill:#fef3c7,stroke:#d97706
+    style Store fill:#eff6ff,stroke:#3b82f6
+    style Actions fill:#f0fdf4,stroke:#16a34a
+    style Consumers fill:#fdf4ff,stroke:#9333ea
+    style ProfileShape fill:#f8fafc,stroke:#94a3b8,stroke-dasharray:4 4

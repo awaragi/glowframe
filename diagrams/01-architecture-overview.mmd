@@ -1,0 +1,98 @@
+---
+title: GlowFrame — Application Architecture Overview
+---
+graph TB
+    subgraph Browser["Browser / PWA Host"]
+        direction TB
+
+        subgraph Infra["Infrastructure Layer"]
+            SW["Service Worker\n(Workbox generateSW)"]
+            LS["localStorage\nglowframe-store"]
+            WakeLock["Screen Wake Lock API"]
+            FS["Fullscreen API"]
+        end
+
+        subgraph App["React Application  (/glowframe/)"]
+            direction TB
+
+            subgraph Router["React Router v7"]
+                RootLayout["RootLayout\n/ (basename)"]
+                LightRoute["LightPage\n(index)"]
+                ConfigRoute["ConfigPage\n/config"]
+            end
+
+            subgraph State["State Layer"]
+                ZustandStore["useAppStore\n(Zustand + persist)"]
+            end
+
+            subgraph Hooks["Custom Hooks"]
+                UseFS["useFullscreen()"]
+                UseWL["useWakeLock()"]
+            end
+
+            subgraph Components["UI Components"]
+                LightSurface["LightSurface\n(passive display)"]
+                SettingsModal["SettingsModal\n(Sheet drawer)"]
+                GearButton["GearButton"]
+                FullscreenButton["FullscreenButton"]
+
+                subgraph LightModes["Light Mode Surfaces"]
+                    FullMode["FullModeSurface"]
+                    FullColorMode["FullColorModeSurface"]
+                    RingMode["RingModeSurface"]
+                    RingColorMode["RingColorModeSurface"]
+                    SpotMode["SpotModeSurface"]
+                    SpotColorMode["SpotColorModeSurface"]
+                end
+
+                subgraph ModeSettings["Mode Settings Panels"]
+                    FullSettings["FullModeSettings"]
+                    FullColorSettings["FullColorModeSettings"]
+                    RingSettings["RingModeSettings"]
+                    RingColorSettings["RingColorModeSettings"]
+                    SpotSettings["SpotModeSettings"]
+                    SpotColorSettings["SpotColorModeSettings"]
+                end
+            end
+
+            subgraph Lib["Library / Utilities"]
+                KelvinToHex["kelvinToHex()"]
+                BlendTemp["blendWithTemperature()"]
+                ModeDefaults["MODE_DEFAULTS"]
+            end
+        end
+    end
+
+    LS <-->|persist middleware| ZustandStore
+    SW -.->|cache & offline| App
+    UseWL -->|acquire / release| WakeLock
+    UseFS -->|requestFullscreen\nexitFullscreen| FS
+
+    ZustandStore -->|selectActiveProfile| LightSurface
+    ZustandStore -->|selectActiveProfile| SettingsModal
+    SettingsModal -->|updateProfile\nswitchMode\ncreateProfile\ndeleteProfile| ZustandStore
+
+    LightSurface --> LightModes
+    SettingsModal --> ModeSettings
+    ModeSettings -->|updateProfile on change| ZustandStore
+
+    LightModes --> KelvinToHex
+    LightModes --> BlendTemp
+    SettingsModal -->|switchMode| ModeDefaults
+
+    LightRoute --> LightSurface
+    LightRoute --> GearButton
+    LightRoute --> FullscreenButton
+    LightRoute --> SettingsModal
+    LightRoute --> UseFS
+    App --> UseWL
+
+    RootLayout --> LightRoute
+    RootLayout --> ConfigRoute
+
+    style Infra fill:#f0f4ff,stroke:#6366f1
+    style State fill:#fef9ec,stroke:#d97706
+    style Hooks fill:#f0fdf4,stroke:#16a34a
+    style LightModes fill:#fff1f2,stroke:#e11d48
+    style ModeSettings fill:#fdf4ff,stroke:#9333ea
+    style Lib fill:#f0f9ff,stroke:#0284c7

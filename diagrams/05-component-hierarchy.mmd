@@ -1,0 +1,86 @@
+---
+title: GlowFrame — Component Hierarchy & Render Tree
+---
+graph TD
+    subgraph Entry["Entry Point"]
+        Main["main.tsx\nReactDOM.createRoot\nReact Router provider\nbasename: /glowframe/"]
+    end
+
+    subgraph Layout["Layout"]
+        RootLayout["RootLayout\nmin-h-screen bg-background\nOutlet"]
+    end
+
+    subgraph Routes["Routes"]
+        LightPage["LightPage  /\n─────────────────\nlocal: isSettingsOpen\nhook: useFullscreen()\nkeyboard: 'f' → toggle FS"]
+        ConfigPage["ConfigPage  /config\n─────────────────\n'Coming Soon' placeholder"]
+    end
+
+    subgraph LightPageChildren["LightPage Children"]
+        LightSurface["LightSurface\n──────────────────\nStore: selectActiveProfile\nSwitch on profile.mode\nfixed inset-0"]
+        GearButton["GearButton\n──────────────────\nfixed top-4 right-4\nonClick → open settings"]
+        FullscreenButton["FullscreenButton\n──────────────────\nfixed top-4 right-16\nnull if API unavailable\nMaximize2 / Minimize2 icon"]
+        SettingsModal["SettingsModal (Sheet)\n──────────────────\nopen prop + onOpenChange\nProfile list + CRUD\nMode selector\nMode settings panel"]
+    end
+
+    subgraph SurfaceSwitch["LightSurface switch(mode)"]
+        FS["FullModeSurface\nblendWithTemperature\nbrightness filter"]
+        FCS["FullColorModeSurface\nsolidbackground hex"]
+        RS["RingModeSurface\n2-layer donut gradient\nbrightness filters"]
+        RCS["RingColorModeSurface\n2-layer donut gradient\nhex colours"]
+        SS["SpotModeSurface\n2-layer spot gradient\nbrightness filters"]
+        SCS["SpotColorModeSurface\n2-layer spot gradient\nhex colours"]
+    end
+
+    subgraph SettingsModalChildren["SettingsModal internals"]
+        ProfileList["Profile List\nul > li buttons\nactive highlight\ndelete per item"]
+        NewProfileBtn["New Profile Button\nclones active profile"]
+        NameInput["Profile Name Input\nReact Hook Form + Zod\nblur → renameProfile()"]
+        ModeSelect["Mode Selector\nshadcn Select\nonChange → switchMode()"]
+        ModeSettingsPanel["Mode Settings Panel\ndispatched by profile.mode"]
+    end
+
+    subgraph SettingsPanels["Mode Settings Panels"]
+        FSet["FullModeSettings\nTemp slider\nBrightness slider"]
+        FCSet["FullColorModeSettings\nColor picker"]
+        RSet["RingModeSettings\nTemp, Brightness\nInner/Outer Radius\nBG Temp, BG Brightness"]
+        RCSet["RingColorModeSettings\nColor picker\nInner/Outer Radius\nBG Color picker"]
+        SSet["SpotModeSettings\nTemp, Brightness\nRadius\nBG Temp, BG Brightness"]
+        SCSet["SpotColorModeSettings\nColor picker\nRadius\nBG Color picker"]
+    end
+
+    Main --> RootLayout
+    RootLayout --> LightPage
+    RootLayout --> ConfigPage
+
+    LightPage --> LightSurface
+    LightPage --> GearButton
+    LightPage --> FullscreenButton
+    LightPage --> SettingsModal
+
+    LightSurface --> FS
+    LightSurface --> FCS
+    LightSurface --> RS
+    LightSurface --> RCS
+    LightSurface --> SS
+    LightSurface --> SCS
+
+    SettingsModal --> ProfileList
+    SettingsModal --> NewProfileBtn
+    SettingsModal --> NameInput
+    SettingsModal --> ModeSelect
+    SettingsModal --> ModeSettingsPanel
+
+    ModeSettingsPanel --> FSet
+    ModeSettingsPanel --> FCSet
+    ModeSettingsPanel --> RSet
+    ModeSettingsPanel --> RCSet
+    ModeSettingsPanel --> SSet
+    ModeSettingsPanel --> SCSet
+
+    style Entry fill:#f8fafc,stroke:#94a3b8
+    style Layout fill:#f0f9ff,stroke:#0284c7
+    style Routes fill:#f0fdf4,stroke:#16a34a
+    style LightPageChildren fill:#fef9ec,stroke:#d97706
+    style SurfaceSwitch fill:#fff1f2,stroke:#e11d48
+    style SettingsModalChildren fill:#fdf4ff,stroke:#9333ea
+    style SettingsPanels fill:#fdf4ff,stroke:#c084fc,stroke-dasharray:4 4

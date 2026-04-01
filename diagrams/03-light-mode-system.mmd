@@ -1,0 +1,117 @@
+---
+title: GlowFrame — Light Mode System
+---
+classDiagram
+    direction TB
+
+    class ProfileMode {
+        <<discriminated union>>
+    }
+
+    class FullMode {
+        +mode: "full"
+        +lightTemperature: number  %%  1000–10000 K
+        +lightBrightness: number   %%  0–100 %
+    }
+
+    class FullColorMode {
+        +mode: "full-color"
+        +lightColor: string  %%  hex
+    }
+
+    class RingMode {
+        +mode: "ring"
+        +lightTemperature: number
+        +lightBrightness: number
+        +innerRadius: number       %%  0–100 %
+        +outerRadius: number       %%  0–100 %
+        +backgroundLightTemperature: number
+        +backgroundLightBrightness: number
+    }
+
+    class RingColorMode {
+        +mode: "ring-color"
+        +lightColor: string        %%  hex
+        +innerRadius: number
+        +outerRadius: number
+        +backgroundColor: string   %%  hex
+    }
+
+    class SpotMode {
+        +mode: "spot"
+        +lightTemperature: number
+        +lightBrightness: number
+        +radius: number            %%  0–100 %
+        +backgroundLightTemperature: number
+        +backgroundLightBrightness: number
+    }
+
+    class SpotColorMode {
+        +mode: "spot-color"
+        +lightColor: string
+        +radius: number
+        +backgroundColor: string
+    }
+
+    ProfileMode <|-- FullMode
+    ProfileMode <|-- FullColorMode
+    ProfileMode <|-- RingMode
+    ProfileMode <|-- RingColorMode
+    ProfileMode <|-- SpotMode
+    ProfileMode <|-- SpotColorMode
+
+    class FullModeSurface {
+        +Renders: full-screen solid fill
+        +Uses: blendWithTemperature("#fff", K)
+        +CSS filter: brightness(B%)
+    }
+
+    class FullColorModeSurface {
+        +Renders: full-screen solid fill
+        +Uses: lightColor as backgroundColor
+    }
+
+    class RingModeSurface {
+        +Renders: donut radial-gradient
+        +2 layers: background + foreground
+        +Size: min(100vw,100vh) square centred
+        +CSS filter: brightness on each layer
+    }
+
+    class RingColorModeSurface {
+        +Renders: donut radial-gradient
+        +Uses: raw hex colours, no brightness filter
+        +Size: min(100vw,100vh) square centred
+    }
+
+    class SpotModeSurface {
+        +Renders: filled-circle radial-gradient
+        +2 layers: background + foreground spot
+        +Size: min(100vw,100vh) square centred
+        +CSS filter: brightness on each layer
+    }
+
+    class SpotColorModeSurface {
+        +Renders: filled-circle radial-gradient
+        +Uses: raw hex colours, no brightness filter
+        +Size: min(100vw,100vh) square centred
+    }
+
+    FullMode       --> FullModeSurface       : rendered by
+    FullColorMode  --> FullColorModeSurface  : rendered by
+    RingMode       --> RingModeSurface       : rendered by
+    RingColorMode  --> RingColorModeSurface  : rendered by
+    SpotMode       --> SpotModeSurface       : rendered by
+    SpotColorMode  --> SpotColorModeSurface  : rendered by
+
+    class colorTemperature {
+        +kelvinToHex(k) string
+        %%  1000 K → #ffb347 (warm)
+        %%  10000 K → #cce8ff (cool)
+        +blendWithTemperature(baseHex, k) string
+        %%  blends base with kelvin tint at α=0.3
+    }
+
+    FullModeSurface  ..> colorTemperature : uses
+    RingModeSurface  ..> colorTemperature : uses
+    SpotModeSurface  ..> colorTemperature : uses

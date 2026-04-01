@@ -1,0 +1,71 @@
+---
+title: GlowFrame — Key User Interaction Sequences
+---
+sequenceDiagram
+    autonumber
+
+    actor User
+    participant LP as LightPage
+    participant SM as SettingsModal
+    participant Store as useAppStore
+    participant LS as LightSurface
+    participant FS as Fullscreen API
+    participant WL as Wake Lock API
+
+    Note over User,WL: App Startup
+
+    LP->>WL: useWakeLock() — request('screen')
+    WL-->>LP: lock acquired (screen stays on)
+    Store->>Store: rehydrate from localStorage
+    Store-->>LS: selectActiveProfile → render initial light
+
+    Note over User,WL: Open Settings & Switch Mode
+
+    User->>LP: click GearButton
+    LP->>SM: open SettingsModal (isSettingsOpen = true)
+    SM->>Store: read profiles[], activeProfileId
+    Store-->>SM: profile list + active profile
+    User->>SM: select new mode from dropdown
+    SM->>Store: switchMode(id, "ring")
+    Store->>Store: replace mode fields with MODE_DEFAULTS["ring"]
+    Store-->>LS: selectActiveProfile → re-render as RingModeSurface
+    LS-->>User: live light output updates instantly
+
+    Note over User,WL: Adjust Settings (Live Preview)
+
+    User->>SM: drag temperature/brightness slider
+    SM->>Store: updateProfile(id, { lightTemperature: 4000 })
+    Store-->>LS: selectActiveProfile → updated render
+    LS-->>User: light colour/intensity updates in real time
+    Store->>Store: persist to localStorage (debounced middleware)
+
+    Note over User,WL: Manage Profiles
+
+    User->>SM: click "New Profile"
+    SM->>Store: createProfile("New Profile")
+    Store->>Store: clone active profile → assign new UUID
+    Store->>Store: set activeProfileId = new UUID
+    Store-->>SM: updated profile list (new profile highlighted)
+    User->>SM: type new name in name input, blur
+    SM->>Store: renameProfile(id, "Studio Warm")
+    User->>SM: click a different profile in list
+    SM->>Store: setActiveProfile(otherId)
+    Store-->>LS: different profile rendered immediately
+    User->>SM: click delete on a profile
+    SM->>Store: deleteProfile(id)
+    Store->>Store: fallback to previous/adjacent profile
+
+    Note over User,WL: Fullscreen Toggle
+
+    User->>LP: press "f" key (not in text input)
+    LP->>FS: useFullscreen().toggle()
+    FS-->>LP: fullscreenchange event fires
+    LP->>LP: isFullscreen state synced
+    LP-->>User: FullscreenButton icon updates (Maximize2 ↔ Minimize2)
+
+    Note over User,WL: Tab Hidden → Tab Visible (Wake Lock)
+
+    User->>LP: switch browser tab (page hidden)
+    LP->>WL: release wake lock (visibilitychange → hidden)
+    User->>LP: return to tab (page visible)
+    LP->>WL: re-acquire wake lock (visibilitychange → visible)
