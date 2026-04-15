@@ -33,6 +33,7 @@ Use this checklist to track overall feature completion status.
 - [ ] **F-185** Profile bulk import / export — download and restore all presets as a JSON file
 - [ ] **F-190** What's New dialog — surface release notes when a new PWA version installs
 - [ ] **F-200** PWA update alert — notify the user when a new version is available and prompt reload
+- [ ] **F-210** App version display in the keyboard shortcuts help dialog footer
 
 ---
 
@@ -616,6 +617,23 @@ Inform the user when a new version of the PWA has been downloaded in the backgro
 **Testing:**
 - Unit tests must cover: `needRefresh` true triggers visible notification, dismiss hides notification, reload calls `skipWaiting` and `window.location.reload`.
 - E2E scenario (optional / manual): install the PWA, deploy a new build, reopen the app, verify the update toast appears and reloading switches to the new version.
+
+---
+
+### F-210 — App Version in Help Dialog Footer
+
+**Priority:** Low  
+**Status:** Not started
+
+Display the current application version at the bottom of the keyboard shortcuts help dialog (F-170) so users and support staff can quickly verify which build is running without opening developer tools.
+
+**Requirements:**
+- The `package.json` `version` field is injected at build time as a Vite define constant (e.g., `import.meta.env.VITE_APP_VERSION`), populated via `define: { 'import.meta.env.VITE_APP_VERSION': JSON.stringify(process.env.npm_package_version) }` in `vite.config.ts`.
+- The keyboard shortcuts help dialog footer renders the version string in the format `v<semver>` (e.g., `v1.2.0`).
+- The version text is visually de-emphasised (e.g., muted colour, small type) so it does not compete with the shortcut content.
+- The value is sourced exclusively from the build-time constant — no runtime `fetch`, no `package.json` import.
+- Unit tests must cover: the version string renders correctly given a mocked `import.meta.env.VITE_APP_VERSION` value.
+- No E2E scenario required beyond the existing F-170 smoke coverage.
 
 ---
 
