@@ -13,14 +13,20 @@ GlowFrame is hosted on **GitHub Pages** and served directly from the `docs/` fol
 - `npm run build` — compiles to `dist/` (local dev and testing only, does **not** touch `docs/`).
 - `npm run build:prod` — production release build. Automatically runs `npm run build` first (via `prebuild:prod`), then copies `dist/` to `docs/` and creates `docs/.nojekyll`.
 
-1. **Build for release:** `npm run build:prod`  
+1. **Bump the version:** Use npm to increment `package.json` version before building.  
+   ```bash
+   npm version patch   # or: minor | major | <explicit semver>
+   ```
+   This updates `package.json` (and `package-lock.json`) and creates a git version tag automatically.
+
+2. **Build for release:** `npm run build:prod`  
    This compiles the app to `dist/`, copies it to `docs/`, and creates `docs/.nojekyll` to prevent GitHub Pages from running Jekyll.
 
-2. **Commit:** Stage and commit the updated `docs/` folder.  
+3. **Commit:** Stage and commit the updated `docs/` folder together with the version bump.  
    ```bash
-   git add docs/
+   git add docs/ package.json package-lock.json
    git commit -m "chore: release build"
-   git push
+   git push && git push --tags
    ```
 
 3. **Configure GitHub Pages** (one-time setup):  
