@@ -1,42 +1,40 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import LightSurface from '@/components/LightSurface'
 import GearButton from '@/components/GearButton'
 import FullscreenButton from '@/components/FullscreenButton'
 import SettingsModal from '@/components/SettingsModal'
+import HelpButton from '@/components/HelpButton'
+import HelpDialog from '@/components/HelpDialog'
+import GlobalShortcuts from '@/components/shortcuts/GlobalShortcuts'
+import ActiveModeShortcuts from '@/components/shortcuts/ActiveModeShortcuts'
 import { useFullscreen } from '@/hooks/useFullscreen'
+import { useAppStore } from '@/store'
 
 export default function LightPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const { isAvailable, toggle } = useFullscreen()
-
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent): void {
-      if (e.key.toLowerCase() !== 'f') return
-      if (!isAvailable) return
-      const el = document.activeElement
-      if (
-        el instanceof HTMLInputElement ||
-        el instanceof HTMLTextAreaElement ||
-        (el instanceof HTMLElement && el.isContentEditable)
-      ) {
-        return
-      }
-      toggle()
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [isAvailable, toggle])
+  const [isHelpOpen, setIsHelpOpen] = useState(false)
+  const { toggle } = useFullscreen()
+  const profiles = useAppStore((s) => s.profiles)
+  const setActiveProfile = useAppStore((s) => s.setActiveProfile)
 
   return (
     <>
       <LightSurface />
+      <GlobalShortcuts
+        onToggleFullscreen={toggle}
+        onToggleSettings={() => setIsSettingsOpen((v) => !v)}
+        onToggleHelp={() => setIsHelpOpen((v) => !v)}
+        profiles={profiles}
+        setActiveProfile={setActiveProfile}
+      />
+      <ActiveModeShortcuts />
       <FullscreenButton />
+      <HelpButton onClick={() => setIsHelpOpen(true)} />
       <GearButton onClick={() => setIsSettingsOpen(true)} />
       <SettingsModal open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
+      <HelpDialog open={isHelpOpen} onOpenChange={setIsHelpOpen} />
     </>
   )
 }
+
 
