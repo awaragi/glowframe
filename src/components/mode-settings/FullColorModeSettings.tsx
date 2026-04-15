@@ -25,8 +25,7 @@ export default function FullColorModeSettings({ profile, updateProfile }: Props)
 
   useEffect(() => {
     reset({ lightColor: profile.lightColor })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile.id, reset])
+  }, [profile.id, profile.lightColor, reset])
 
   return (
     <section>

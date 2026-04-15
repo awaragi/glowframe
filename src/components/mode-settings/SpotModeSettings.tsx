@@ -42,8 +42,7 @@ export default function SpotModeSettings({ profile, updateProfile }: Props) {
       backgroundLightTemperature: profile.backgroundLightTemperature,
       backgroundLightBrightness: profile.backgroundLightBrightness,
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile.id, reset])
+  }, [profile.id, profile.lightTemperature, profile.lightBrightness, profile.radius, profile.backgroundLightTemperature, profile.backgroundLightBrightness, reset])
 
   function patch<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValue(key, value as never)

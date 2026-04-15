@@ -33,8 +33,7 @@ export default function FullModeSettings({ profile, updateProfile }: Props) {
       lightTemperature: profile.lightTemperature,
       lightBrightness: profile.lightBrightness,
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile.id, reset])
+  }, [profile.id, profile.lightTemperature, profile.lightBrightness, reset])
 
   function patch<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValue(key, value as never)

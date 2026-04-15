@@ -36,8 +36,7 @@ export default function SpotColorModeSettings({ profile, updateProfile }: Props)
       radius: profile.radius,
       backgroundColor: profile.backgroundColor,
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile.id, reset])
+  }, [profile.id, profile.lightColor, profile.radius, profile.backgroundColor, reset])
 
   function patch<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValue(key, value as never)

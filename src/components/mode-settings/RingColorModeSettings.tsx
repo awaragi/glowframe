@@ -39,8 +39,7 @@ export default function RingColorModeSettings({ profile, updateProfile }: Props)
       outerRadius: profile.outerRadius,
       backgroundColor: profile.backgroundColor,
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile.id, reset])
+  }, [profile.id, profile.lightColor, profile.innerRadius, profile.outerRadius, profile.backgroundColor, reset])
 
   function patch<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValue(key, value as never)
