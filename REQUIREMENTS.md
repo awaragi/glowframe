@@ -32,6 +32,7 @@ Use this checklist to track overall feature completion status.
 - [ ] **F-180** Touch gestures — swipe left/right cycles presets, swipe up/down changes brightness
 - [ ] **F-185** Profile bulk import / export — download and restore all presets as a JSON file
 - [ ] **F-190** What's New dialog — surface release notes when a new PWA version installs
+- [ ] **F-200** PWA update alert — notify the user when a new version is available and prompt reload
 
 ---
 
@@ -580,6 +581,41 @@ Inform users of meaningful changes when a new version of the PWA silently update
 **Testing:**
 - Unit tests must cover: version-bump triggers dialog, same-version suppresses dialog, genuine first-install suppression, dismissal writes version to storage, manual open from settings ignores version state.
 - E2E scenario: load the app with a mocked previous version in `localStorage`, verify the dialog appears automatically, dismiss it, reload, verify it does not reappear.
+
+---
+
+### F-200 — PWA Update Alert
+
+**Priority:** Medium  
+**Status:** Not started
+
+Inform the user when a new version of the PWA has been downloaded in the background and is ready to activate, so they are never silently running stale code.
+
+**Requirements:**
+
+**Detection:**
+- The service worker lifecycle is monitored via the `vite-plugin-pwa` `useRegisterSW` hook (or equivalent `workbox-window` API).
+- When the service worker signals that a new version is waiting (`needRefresh` / `waiting` state), the update UI is triggered.
+
+**Alert UI:**
+- A non-blocking toast or banner notification appears at the bottom of the screen informing the user: *"A new version is available."*
+- The notification includes a **Reload** (or **Update**) action button and a **Dismiss** button.
+- Uses a shadcn/ui `Toast` (via `useToast` / Sonner) or a fixed banner built from Radix UI primitives — no custom low-level DOM manipulation.
+- The notification must not obscure the light surface controls; it should be visually unobtrusive.
+
+**Reload behaviour:**
+- Clicking **Reload** calls `skipWaiting()` on the waiting service worker and then reloads the page (`window.location.reload()`) so the new version activates immediately.
+- Clicking **Dismiss** hides the notification for the remainder of the session. The waiting worker remains in place and activates on the next natural page load.
+- If the user dismisses and later opens the settings modal, a subtle "Update available" indicator with a **Reload now** link is visible in the modal footer as a persistent reminder.
+
+**Constraints:**
+- The alert must never appear on a fresh install (no waiting worker scenario).
+- The alert must not loop or re-trigger if the user dismisses it without reloading.
+- All service worker interaction must be mediated through `vite-plugin-pwa`'s provided hooks — do not register a custom service worker.
+
+**Testing:**
+- Unit tests must cover: `needRefresh` true triggers visible notification, dismiss hides notification, reload calls `skipWaiting` and `window.location.reload`.
+- E2E scenario (optional / manual): install the PWA, deploy a new build, reopen the app, verify the update toast appears and reloading switches to the new version.
 
 ---
 
