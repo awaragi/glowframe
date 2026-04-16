@@ -3,7 +3,7 @@
   "description": "Full-screen fill light for video calls and selfies",
   "license": "MIT",
   "private": false,
-  "version": "0.1.1",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
