@@ -48,4 +48,11 @@ describe('HelpDialog', () => {
     expect(onOpenChange).toHaveBeenCalled()
     expect(onOpenChange.mock.calls[0][0]).toBe(false)
   })
+
+  it('renders the app version in the footer', () => {
+    vi.stubEnv('VITE_APP_VERSION', '1.2.0')
+    render(<HelpDialog open={true} onOpenChange={vi.fn()} />)
+    expect(screen.getByText('v1.2.0')).toBeInTheDocument()
+    vi.unstubAllEnvs()
+  })
 })

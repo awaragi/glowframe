@@ -102,6 +102,7 @@ export default function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
             </table>
           </section>
         </div>
+        <p className="mt-4 text-center text-xs text-muted-foreground">v{import.meta.env.VITE_APP_VERSION}</p>
       </DialogContent>
     </Dialog>
   )

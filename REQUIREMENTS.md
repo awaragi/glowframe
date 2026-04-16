@@ -27,13 +27,13 @@ Use this checklist to track overall feature completion status.
 - [x] **F-150** E2E demo mode (headed, slowed, sequential)
 - [ ] **F-160** Ring radius cross-validation (enforce innerRadius < outerRadius)
 - [ ] **F-165** Preset reordering with visible sequence numbers
-- [ ] **F-170** Keyboard shortcuts help dialog (`?` icon, grouped modal)
-- [ ] **F-175** Keyboard shortcuts for params + number keys to switch presets
+- [x] **F-170** Keyboard shortcuts help dialog (`?` icon, grouped modal)
+- [x] **F-175** Keyboard shortcuts for params + number keys to switch presets
 - [ ] **F-180** Touch gestures — swipe left/right cycles presets, swipe up/down changes brightness
 - [ ] **F-185** Profile bulk import / export — download and restore all presets as a JSON file
 - [ ] **F-190** What's New dialog — surface release notes when a new PWA version installs
 - [ ] **F-200** PWA update alert — notify the user when a new version is available and prompt reload
-- [ ] **F-210** App version display in the keyboard shortcuts help dialog footer
+- [x] **F-210** App version display in the keyboard shortcuts help dialog footer
 
 ---
 

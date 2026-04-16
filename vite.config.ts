@@ -6,6 +6,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 // https://vite.dev/config/
 export default defineConfig({
   base: '/glowframe/',
+  define: {
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(process.env.npm_package_version ?? 'unknown'),
+  },
   build: {
     outDir: 'dist',
     chunkSizeWarningLimit: 1000,

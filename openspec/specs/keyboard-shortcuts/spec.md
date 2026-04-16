@@ -267,6 +267,8 @@ The dialog SHALL present shortcuts in four named groups:
 |---|---|
 | `Escape` | Close settings |
 
+The dialog SHALL display a footer below the shortcut groups that shows the current application version in the format `v<semver>` (e.g., `v1.2.0`), sourced from `import.meta.env.VITE_APP_VERSION`. The version text SHALL be visually de-emphasised (muted colour, small type) so it does not compete with the shortcut content.
+
 #### Scenario: Help dialog opens when HelpButton is clicked
 - **WHEN** the help button is clicked
 - **THEN** the dialog becomes visible with a title or accessible label
@@ -288,3 +290,12 @@ The dialog SHALL present shortcuts in four named groups:
 #### Scenario: kbd elements are used for key display
 - **WHEN** the help dialog is open
 - **THEN** shortcut keys are rendered inside `<kbd>` elements
+
+#### Scenario: Version string is rendered in the dialog footer
+- **WHEN** the help dialog is open
+- **WHEN** `import.meta.env.VITE_APP_VERSION` is `"1.2.0"`
+- **THEN** the dialog footer contains the text `v1.2.0`
+
+#### Scenario: Version text is visually de-emphasised
+- **WHEN** the help dialog is open
+- **THEN** the version string is rendered with muted colour and small typography, distinct from the shortcut content
