@@ -7,6 +7,22 @@ agent: "agent"
 
 You are performing a release of GlowFrame. Follow these steps exactly and in order. Do not skip any step.
 
+## Step 0 — Validate working tree is clean
+
+Run the following command to check for any uncommitted changes:
+
+```
+git status --porcelain
+```
+
+If the output is **non-empty**, stop immediately and inform the user:
+
+> "There are uncommitted changes in the working tree. Please commit or stash all changes before running a release."
+
+List the files reported by `git status --porcelain` so the user knows what needs attention. Do not proceed further.
+
+Only continue to Step 1 if the output is completely empty (clean working tree).
+
 ## Step 1 — Summarise changes since the last release
 
 Run the following command and capture the output:
