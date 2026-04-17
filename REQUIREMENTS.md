@@ -26,7 +26,7 @@ Use this checklist to track overall feature completion status.
 - [ ] **F-140** Profile share button (URL parameter, auto-clean)
 - [x] **F-150** E2E demo mode (headed, slowed, sequential)
 - [ ] **F-160** Ring radius cross-validation (enforce innerRadius < outerRadius)
-- [ ] **F-165** Preset reordering with visible sequence numbers
+- [x] **F-165** Preset reordering with visible sequence numbers
 - [x] **F-170** Keyboard shortcuts help dialog (`?` icon, grouped modal)
 - [x] **F-175** Keyboard shortcuts for params + number keys to switch presets
 - [ ] **F-180** Touch gestures — swipe left/right cycles presets, swipe up/down changes brightness

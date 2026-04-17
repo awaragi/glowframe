@@ -25,7 +25,7 @@ export class SettingsPage {
   }
 
   get newProfileButton() {
-    return this.page.getByRole('button', { name: 'New profile' })
+    return this.page.getByRole('button', { name: 'New profile', exact: true })
   }
 
   get modeSelector() {

@@ -11,12 +11,16 @@ export interface KeyBinding {
 export function useKeyboardShortcuts(bindings: KeyBinding[]): void {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent): void {
+      if (document.body.hasAttribute('data-dnd-active')) {
+        return
+      }
       const el = document.activeElement
       if (
         el instanceof HTMLInputElement ||
         el instanceof HTMLSelectElement ||
         el instanceof HTMLTextAreaElement ||
-        (el instanceof HTMLElement && el.contentEditable === 'true')
+        (el instanceof HTMLElement && el.contentEditable === 'true') ||
+        (el instanceof HTMLElement && el.hasAttribute('data-drag-handle'))
       ) {
         return
       }

@@ -111,4 +111,36 @@ describe('useKeyboardShortcuts', () => {
     fireKeydown('a')
     expect(handler).not.toHaveBeenCalled()
   })
+
+  it('is silent when a drag handle (data-drag-handle) has focus', () => {
+    const handler = vi.fn()
+    renderHook(() => useKeyboardShortcuts([{ key: 'ArrowUp', handler }]))
+    const btn = document.createElement('button')
+    btn.setAttribute('data-drag-handle', '')
+    document.body.appendChild(btn)
+    btn.focus()
+    fireKeydown('ArrowUp')
+    expect(handler).not.toHaveBeenCalled()
+    btn.blur()
+    document.body.removeChild(btn)
+  })
+
+  it('is silent when a dnd drag is active (data-dnd-active on body)', () => {
+    const handler = vi.fn()
+    renderHook(() => useKeyboardShortcuts([{ key: 'ArrowUp', handler }]))
+    document.body.setAttribute('data-dnd-active', '')
+    fireKeydown('ArrowUp')
+    expect(handler).not.toHaveBeenCalled()
+    document.body.removeAttribute('data-dnd-active')
+  })
+
+  it('fires again after data-dnd-active is removed', () => {
+    const handler = vi.fn()
+    renderHook(() => useKeyboardShortcuts([{ key: 'ArrowUp', handler }]))
+    document.body.setAttribute('data-dnd-active', '')
+    fireKeydown('ArrowUp')
+    document.body.removeAttribute('data-dnd-active')
+    fireKeydown('ArrowUp')
+    expect(handler).toHaveBeenCalledOnce()
+  })
 })

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { arrayMove } from '@dnd-kit/sortable'
 import { MODE_DEFAULTS } from '@/lib/modeDefaults'
 import type {
   ProfileMode,
@@ -35,6 +36,7 @@ interface AppState {
   setActiveProfile: (id: string) => void
   updateProfile: (id: string, patch: AllModeFields) => void
   switchMode: (id: string, newMode: ProfileMode['mode']) => void
+  reorderProfiles: (fromIndex: number, toIndex: number) => void
 }
 
 export function selectActiveProfile(state: AppState): Profile {
@@ -107,6 +109,11 @@ export const useAppStore = create<AppState>()(
               ? ({ id: p.id, name: p.name, ...MODE_DEFAULTS[newMode] } as Profile)
               : p,
           ),
+        }))
+      },
+      reorderProfiles(fromIndex, toIndex) {
+        set((state) => ({
+          profiles: arrayMove(state.profiles, fromIndex, toIndex),
         }))
       },
     }),

@@ -270,4 +270,48 @@ describe('useAppStore', () => {
   it('no migrate function is registered (no migration from prior versions)', () => {
     expect(useAppStore.persist.getOptions().migrate).toBeUndefined()
   })
+
+  describe('reorderProfiles', () => {
+    function makeProfiles() {
+      const a = makeFullProfile({ id: 'a', name: 'A' })
+      const b = makeFullProfile({ id: 'b', name: 'B' })
+      const c = makeFullProfile({ id: 'c', name: 'C' })
+      useAppStore.setState({ _version: 4, profiles: [a, b, c], activeProfileId: 'a' })
+      return { a, b, c }
+    }
+
+    it('moves a profile to an earlier index', () => {
+      makeProfiles()
+      useAppStore.getState().reorderProfiles(2, 0)
+      const ids = useAppStore.getState().profiles.map((p) => p.id)
+      expect(ids).toEqual(['c', 'a', 'b'])
+    })
+
+    it('moves a profile to a later index', () => {
+      makeProfiles()
+      useAppStore.getState().reorderProfiles(0, 2)
+      const ids = useAppStore.getState().profiles.map((p) => p.id)
+      expect(ids).toEqual(['b', 'c', 'a'])
+    })
+
+    it('is a no-op when fromIndex equals toIndex', () => {
+      makeProfiles()
+      useAppStore.getState().reorderProfiles(1, 1)
+      const ids = useAppStore.getState().profiles.map((p) => p.id)
+      expect(ids).toEqual(['a', 'b', 'c'])
+    })
+
+    it('does not change profile data fields after reorder', () => {
+      const { a } = makeProfiles()
+      useAppStore.getState().reorderProfiles(0, 2)
+      const movedProfile = useAppStore.getState().profiles.find((p) => p.id === 'a')!
+      expect(movedProfile.id).toBe(a.id)
+      expect(movedProfile.name).toBe(a.name)
+      expect(movedProfile.mode).toBe(a.mode)
+      if (movedProfile.mode === 'full' && a.mode === 'full') {
+        expect(movedProfile.lightTemperature).toBe(a.lightTemperature)
+        expect(movedProfile.lightBrightness).toBe(a.lightBrightness)
+      }
+    })
+  })
 })

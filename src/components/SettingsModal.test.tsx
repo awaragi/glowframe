@@ -184,4 +184,40 @@ describe('SettingsModal', () => {
       expect(screen.getByLabelText('Light color picker')).toBeInTheDocument()
     })
   })
+
+  describe('sequence number badges', () => {
+    it('renders a sequence badge for each profile', () => {
+      const p1 = makeFullProfile({ id: 'p1', name: 'Profile A' })
+      const p2 = makeFullProfile({ id: 'p2', name: 'Profile B' })
+      const p3 = makeFullProfile({ id: 'p3', name: 'Profile C' })
+      useAppStore.setState({ profiles: [p1, p2, p3], activeProfileId: 'p1' })
+      render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      expect(screen.getByText('1')).toBeInTheDocument()
+      expect(screen.getByText('2')).toBeInTheDocument()
+      expect(screen.getByText('3')).toBeInTheDocument()
+    })
+
+    it('badge shows position 1 for the single profile', () => {
+      resetStore()
+      render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      expect(screen.getByText('1')).toBeInTheDocument()
+    })
+  })
+
+  describe('drag handle', () => {
+    it('renders a drag handle with aria-label="Drag to reorder" for each profile', () => {
+      const p1 = makeFullProfile({ id: 'p1', name: 'Profile A' })
+      const p2 = makeFullProfile({ id: 'p2', name: 'Profile B' })
+      useAppStore.setState({ profiles: [p1, p2], activeProfileId: 'p1' })
+      render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      const handles = screen.getAllByRole('button', { name: 'Drag to reorder' })
+      expect(handles).toHaveLength(2)
+    })
+
+    it('renders a drag handle even for a single profile', () => {
+      resetStore()
+      render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      expect(screen.getByRole('button', { name: 'Drag to reorder' })).toBeInTheDocument()
+    })
+  })
 })
