@@ -31,6 +31,7 @@ interface AppState {
   profiles: Profile[]
   activeProfileId: string
   createProfile: (name: string) => void
+  importProfile: (data: Omit<Profile, 'id'>) => string
   renameProfile: (id: string, newName: string) => void
   deleteProfile: (id: string) => void
   setActiveProfile: (id: string) => void
@@ -66,6 +67,12 @@ export const useAppStore = create<AppState>()(
           profiles: [...state.profiles, newProfile],
           activeProfileId: newProfile.id,
         }))
+      },
+      importProfile(data) {
+        const id = crypto.randomUUID()
+        const newProfile = { ...data, id } as unknown as Profile
+        set((state) => ({ profiles: [...state.profiles, newProfile] }))
+        return id
       },
       renameProfile(id, newName) {
         set((state) => ({

@@ -23,7 +23,7 @@ Use this checklist to track overall feature completion status.
 - [x] **F-110** Profile settings — light color, brightness, ring format, radii
 - [x] **F-120** Live settings modal (gear icon, top-right)
 - [x] **F-130** Fullscreen toggle button
-- [ ] **F-140** Profile share button (URL parameter, auto-clean)
+- [x] **F-140** Profile share button (URL parameter, auto-clean)
 - [x] **F-150** E2E demo mode (headed, slowed, sequential)
 - [x] **F-160** Ring radius cross-validation (enforce innerRadius < outerRadius)
 - [x] **F-165** Preset reordering with visible sequence numbers

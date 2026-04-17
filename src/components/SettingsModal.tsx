@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus, Trash2, GripVertical } from 'lucide-react'
+import { Plus, Trash2, GripVertical, Share2 } from 'lucide-react'
 import {
   DndContext,
   PointerSensor,
@@ -19,6 +19,8 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { useAppStore, selectActiveProfile } from '@/store/index'
 import type { Profile, ProfileMode } from '@/store/index'
+import { encodeProfile } from '@/lib/profileShare'
+import { toast } from 'sonner'
 import {
   Sheet,
   SheetContent,
@@ -204,6 +206,16 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     }
   }
 
+  async function handleCopyShareLink() {
+    const url =
+      window.location.origin +
+      window.location.pathname +
+      '?profile=' +
+      encodeProfile(activeProfile)
+    await navigator.clipboard.writeText(url)
+    toast.success('Link copied!')
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -299,6 +311,18 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
           {/* Mode-specific settings */}
           {renderModeSettings()}
+
+          {/* Share */}
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleCopyShareLink}
+            aria-label="Copy share link for active profile"
+            data-testid="copy-share-link"
+          >
+            <Share2 className="mr-2 size-4" />
+            Copy share link
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
