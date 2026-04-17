@@ -6,14 +6,24 @@ import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
 import type { RingProfile } from '@/store'
 
-const schema = z.object({
-  lightTemperature: z.number().min(1000).max(10000),
-  lightBrightness: z.number().min(0).max(100),
-  innerRadius: z.number().min(0).max(100),
-  outerRadius: z.number().min(0).max(100),
-  backgroundLightTemperature: z.number().min(0).max(10000),
-  backgroundLightBrightness: z.number().min(0).max(100),
-})
+const schema = z
+  .object({
+    lightTemperature: z.number().min(1000).max(10000),
+    lightBrightness: z.number().min(0).max(100),
+    innerRadius: z.number().min(0).max(100),
+    outerRadius: z.number().min(0).max(100),
+    backgroundLightTemperature: z.number().min(0).max(10000),
+    backgroundLightBrightness: z.number().min(0).max(100),
+  })
+  .superRefine((data, ctx) => {
+    if (data.innerRadius >= data.outerRadius) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Inner radius must be less than outer radius.',
+        path: ['innerRadius'],
+      })
+    }
+  })
 
 type FormValues = z.infer<typeof schema>
 
@@ -23,7 +33,7 @@ interface Props {
 }
 
 export default function RingModeSettings({ profile, updateProfile }: Props) {
-  const { setValue, watch, reset } = useForm<FormValues>({
+  const { setValue, watch, reset, trigger, formState } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       lightTemperature: profile.lightTemperature,
@@ -47,9 +57,12 @@ export default function RingModeSettings({ profile, updateProfile }: Props) {
     })
   }, [profile.id, profile.lightTemperature, profile.lightBrightness, profile.innerRadius, profile.outerRadius, profile.backgroundLightTemperature, profile.backgroundLightBrightness, reset])
 
-  function patch<K extends keyof FormValues>(key: K, value: FormValues[K]) {
+  async function patch<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValue(key, value as never)
-    updateProfile({ [key]: value })
+    const valid = await trigger()
+    if (valid) {
+      updateProfile({ [key]: value })
+    }
   }
 
   return (
@@ -102,6 +115,11 @@ export default function RingModeSettings({ profile, updateProfile }: Props) {
           aria-label="Outer radius"
         />
       </section>
+      {formState.errors.innerRadius && (
+        <p className="text-sm text-destructive" role="alert">
+          {formState.errors.innerRadius.message}
+        </p>
+      )}
       <section>
         <Label>Background Light Temperature ({watch('backgroundLightTemperature')}K)</Label>
         <Slider

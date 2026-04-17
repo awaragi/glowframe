@@ -6,12 +6,22 @@ import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
 import type { RingColorProfile } from '@/store'
 
-const schema = z.object({
-  lightColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-  innerRadius: z.number().min(0).max(100),
-  outerRadius: z.number().min(0).max(100),
-  backgroundColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-})
+const schema = z
+  .object({
+    lightColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+    innerRadius: z.number().min(0).max(100),
+    outerRadius: z.number().min(0).max(100),
+    backgroundColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  })
+  .superRefine((data, ctx) => {
+    if (data.innerRadius >= data.outerRadius) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Inner radius must be less than outer radius.',
+        path: ['innerRadius'],
+      })
+    }
+  })
 
 type FormValues = z.infer<typeof schema>
 
@@ -21,7 +31,7 @@ interface Props {
 }
 
 export default function RingColorModeSettings({ profile, updateProfile }: Props) {
-  const { register, setValue, watch, reset } = useForm<FormValues>({
+  const { register, setValue, watch, reset, trigger, formState } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       lightColor: profile.lightColor,
@@ -41,9 +51,12 @@ export default function RingColorModeSettings({ profile, updateProfile }: Props)
     })
   }, [profile.id, profile.lightColor, profile.innerRadius, profile.outerRadius, profile.backgroundColor, reset])
 
-  function patch<K extends keyof FormValues>(key: K, value: FormValues[K]) {
+  async function patch<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValue(key, value as never)
-    updateProfile({ [key]: value })
+    const valid = await trigger()
+    if (valid) {
+      updateProfile({ [key]: value })
+    }
   }
 
   return (
@@ -83,6 +96,11 @@ export default function RingColorModeSettings({ profile, updateProfile }: Props)
           aria-label="Outer radius"
         />
       </section>
+      {formState.errors.innerRadius && (
+        <p className="text-sm text-destructive" role="alert">
+          {formState.errors.innerRadius.message}
+        </p>
+      )}
       <section>
         <Label htmlFor="ring-color-bg-color">Background Color</Label>
         <input
