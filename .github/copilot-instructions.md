@@ -4,6 +4,17 @@ These instructions apply to every Copilot interaction in this repository. Follow
 
 ---
 
+## Think Before Coding
+
+Before implementing, surface uncertainty rather than hiding it.
+
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple valid interpretations exist, present them — do not pick silently.
+- If a simpler approach exists, say so and push back when warranted.
+- If something is ambiguous, name what is confusing. Do not guess.
+
+---
+
 ## Language & Framework
 
 This project uses **TypeScript strict mode**, **React 19 functional components** (no class components), **Tailwind CSS** for all styling, and **shadcn/ui + Radix UI** for all interactive primitives.
