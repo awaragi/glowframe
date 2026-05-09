@@ -34,6 +34,8 @@ Use this checklist to track overall feature completion status.
 - [ ] **F-190** What's New dialog — surface release notes when a new PWA version installs
 - [ ] **F-200** PWA update alert — notify the user when a new version is available and prompt reload
 - [x] **F-210** App version display in the keyboard shortcuts help dialog footer
+- [ ] **F-215** Corner clock display with dedicated clock settings button
+- [ ] **F-220** "Forget Me" data reset — clear all configuration and data from settings
 
 ---
 
@@ -102,7 +104,7 @@ Provide a way to run the Playwright end-to-end suite in a visible, slowed-down m
 ### F-020 — Code Quality (ESLint + Prettier)
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 Establish linting and formatting rules immediately after scaffolding so every subsequent commit is clean from the start.
 
@@ -118,7 +120,7 @@ Establish linting and formatting rules immediately after scaffolding so every su
 ### F-025 — Guiding Principles for AI (GitHub Copilot)
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 Establish explicit conventions and guardrails so that GitHub Copilot (and any other AI-assisted tooling) produces code that is consistent, secure, and aligned with this project's standards from the first prompt onward.
 
@@ -143,7 +145,7 @@ Establish explicit conventions and guardrails so that GitHub Copilot (and any ot
 ### F-030 — Unit & Component Tests
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 Establish the unit testing infrastructure early to enable a TDD workflow from the first feature.
 
@@ -162,7 +164,7 @@ Establish the unit testing infrastructure early to enable a TDD workflow from th
 ### F-040 — End-to-End Tests (Playwright)
 
 **Priority:** High  
-**Status:** Not started
+**Status:** Complete
 
 Establish the E2E testing infrastructure early to enable an ATDD workflow from the first feature.
 
@@ -181,7 +183,7 @@ Establish the E2E testing infrastructure early to enable an ATDD workflow from t
 ### F-050 — Committed `docs/` Build for GitHub Pages
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 The compiled production build lives inside the repository so GitHub Pages can serve it directly from the `docs/` folder without a separate CI deployment pipeline.
 
@@ -201,7 +203,7 @@ The compiled production build lives inside the repository so GitHub Pages can se
 ### F-055 — E2E Test Targeting (Local Dev and GitHub Pages)
 
 **Priority:** High  
-**Status:** Not started
+**Status:** Complete
 
 Playwright tests must be runnable against both the local dev server and the deployed GitHub Pages instance so that regressions can be caught before and after release.
 
@@ -220,7 +222,7 @@ Playwright tests must be runnable against both the local dev server and the depl
 ### F-060 — Core Light Display
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 Render a full-viewport light surface whose color and brightness are driven by the active profile's settings.
 
@@ -363,7 +365,7 @@ Users can enter and exit native fullscreen mode with a single button press.
 ### F-140 — Profile Share via URL
 
 **Priority:** Medium  
-**Status:** Not started
+**Status:** Complete
 
 Users can share a specific profile configuration via a URL that any recipient can load.
 
@@ -382,7 +384,7 @@ Users can share a specific profile configuration via a URL that any recipient ca
 ### F-160 — Ring Radius Cross-Validation
 
 **Priority:** Medium  
-**Status:** Not started
+**Status:** Complete
 
 Prevent invalid ring geometry by ensuring `innerRadius` is always strictly less than `outerRadius` whenever a ring format is active.
 
@@ -399,7 +401,7 @@ Prevent invalid ring geometry by ensuring `innerRadius` is always strictly less 
 ### F-165 — Preset Reordering and Sequence Numbers
 
 **Priority:** Low  
-**Status:** Not started
+**Status:** Complete
 
 Allow users to reorder their saved presets and display a persistent sequence number beside each preset so the order is visible and aligns with keyboard shortcuts (`1`–`9`) and touch-swipe navigation.
 
@@ -420,7 +422,7 @@ Allow users to reorder their saved presets and display a persistent sequence num
 ### F-170 — Keyboard Shortcuts Help Dialog
 
 **Priority:** Low  
-**Status:** Not started
+**Status:** Complete
 
 Provide a discoverable help dialog that lists all available keyboard shortcuts, grouped by context, rather than cluttering individual controls with per-button hints.
 
@@ -444,7 +446,7 @@ Provide a discoverable help dialog that lists all available keyboard shortcuts, 
 ### F-175 — Keyboard Shortcuts for Parameter Adjustment and Preset Switching
 
 **Priority:** Low  
-**Status:** Not started
+**Status:** Complete
 
 Provide keyboard shortcuts for switching between saved presets (profiles) by their sequence number, and for incrementally adjusting the active profile's parameters without opening the settings modal.
 
@@ -623,7 +625,7 @@ Inform the user when a new version of the PWA has been downloaded in the backgro
 ### F-210 — App Version in Help Dialog Footer
 
 **Priority:** Low  
-**Status:** Not started
+**Status:** Complete
 
 Display the current application version at the bottom of the keyboard shortcuts help dialog (F-170) so users and support staff can quickly verify which build is running without opening developer tools.
 
@@ -634,6 +636,80 @@ Display the current application version at the bottom of the keyboard shortcuts 
 - The value is sourced exclusively from the build-time constant — no runtime `fetch`, no `package.json` import.
 - Unit tests must cover: the version string renders correctly given a mocked `import.meta.env.VITE_APP_VERSION` value.
 - No E2E scenario required beyond the existing F-170 smoke coverage.
+
+---
+
+### F-215 — Corner Clock Display
+
+**Priority:** Low  
+**Status:** Not started
+
+Show the current time in a configurable corner of the light surface, so users can monitor the time without breaking the fill-light effect, with all clock appearance options accessible via a dedicated clock settings button.
+
+**Requirements:**
+
+**Clock display:**
+- A digital clock (HH:MM or HH:MM:SS) is rendered as an overlay in one corner of the light surface.
+- The clock updates in real time (1-second tick).
+- The clock is hidden by default; users must explicitly enable it.
+- When enabled, the clock is visible in all light-surface states (full, circle, border) and during fullscreen mode.
+- The clock colour, size, and opacity must adapt so it remains legible against any light surface colour without obscuring the fill-light effect (e.g., user-selectable contrasting colour or auto-contrast mode).
+- The clock must not interfere with any other overlay button (gear, fullscreen, help).
+
+**Configuration:**
+- A dedicated clock icon button is fixed in the top-right corner alongside the gear, fullscreen, and `?` buttons.
+- Clicking the clock button opens a compact popover or sheet (Radix UI `Popover` or shadcn/ui `Sheet`) containing:
+  - Toggle to enable / disable the clock overlay.
+  - Corner selector: top-left, top-right, bottom-left, bottom-right (default: bottom-right).
+  - Format selector: 12-hour vs. 24-hour.
+  - Show / hide seconds toggle.
+  - Font size slider (small / medium / large or a numeric px/rem range).
+  - Colour picker for the clock text.
+  - Opacity slider (10–100 %).
+- All settings apply live (no save button).
+- Clock settings are persisted per-profile in Zustand / `localStorage` as an optional sub-object on each profile (with sensible defaults so existing profiles are unaffected).
+
+**Accessibility:**
+- The clock element has `aria-live="off"` (or is excluded from the accessibility tree) to avoid announcing time changes to screen readers every second.
+- The clock button has `aria-label="Clock settings"`.
+
+**Testing:**
+- Unit tests must cover: clock tick updates displayed time, format switching (12h/24h, seconds on/off), corner placement classes, default settings applied when field is absent.
+- E2E scenario: open clock settings, enable the clock, change corner to top-left, verify the clock appears in the correct position and updates; disable the clock and verify it disappears.
+
+---
+
+### F-220 — "Forget Me" Data Reset
+
+**Priority:** Medium  
+**Status:** Not started
+
+Allow users to irreversibly wipe all GlowFrame configuration and persisted data from their browser in a single deliberate action, ensuring no personal data remains after they decide to stop using the app.
+
+**Requirements:**
+
+**Trigger:**
+- A **Forget me** button is placed in the settings modal footer (or in a dedicated "Danger zone" section at the bottom of the modal).
+- The button is visually distinct (destructive styling, e.g., red/outlined) to signal its irreversible nature.
+
+**Confirmation:**
+- Clicking **Forget me** opens a confirmation dialog (Radix UI `AlertDialog`) with:
+  - A clear warning: *"This will permanently delete all your presets and settings. This action cannot be undone."*
+  - A **Confirm** (destructive) button and a **Cancel** button.
+  - No countdown or additional friction beyond this single confirmation step.
+
+**Reset behaviour:**
+- On confirmation:
+  1. Clear the Zustand profile store (reset to initial state with one default profile).
+  2. Remove all GlowFrame-specific `localStorage` keys (profile store, version key from F-190, any other persisted keys used by the app).
+  3. Close the confirmation dialog and the settings modal.
+  4. Reload the app to a clean initial state (equivalent to a fresh install).
+- The reset must not affect `localStorage` keys belonging to other apps or browser extensions (only keys written by GlowFrame are touched).
+- On any error during the reset (e.g., `localStorage.clear()` throws), a toast must inform the user that the reset could not be completed and the store must remain unchanged.
+
+**Testing:**
+- Unit tests must cover: confirmation triggers full store reset, all GlowFrame `localStorage` keys are removed, non-GlowFrame keys are untouched, error path keeps store intact.
+- E2E scenario: create two custom presets, open settings, click **Forget me**, confirm, verify the app reloads with a single default preset and all custom data is gone.
 
 ---
 
@@ -657,3 +733,5 @@ Display the current application version at the bottom of the keyboard shortcuts 
 - Video capture / recording.
 - Backend API of any kind.
 - Analytics or telemetry.
+
+
