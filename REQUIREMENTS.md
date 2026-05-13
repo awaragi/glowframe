@@ -35,6 +35,7 @@ Use this checklist to track overall feature completion status.
 - [ ] **F-200** PWA update alert — notify the user when a new version is available and prompt reload
 - [x] **F-210** App version display in the keyboard shortcuts help dialog footer
 - [ ] **F-220** Digital clock overlay — corner-pinned clock with configurable display, position, size, and format
+- [ ] **F-230** "Forget Me" data reset — clear all configuration and data from settings
 
 ---
 
@@ -103,7 +104,7 @@ Provide a way to run the Playwright end-to-end suite in a visible, slowed-down m
 ### F-020 — Code Quality (ESLint + Prettier)
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 Establish linting and formatting rules immediately after scaffolding so every subsequent commit is clean from the start.
 
@@ -119,7 +120,7 @@ Establish linting and formatting rules immediately after scaffolding so every su
 ### F-025 — Guiding Principles for AI (GitHub Copilot)
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 Establish explicit conventions and guardrails so that GitHub Copilot (and any other AI-assisted tooling) produces code that is consistent, secure, and aligned with this project's standards from the first prompt onward.
 
@@ -144,7 +145,7 @@ Establish explicit conventions and guardrails so that GitHub Copilot (and any ot
 ### F-030 — Unit & Component Tests
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 Establish the unit testing infrastructure early to enable a TDD workflow from the first feature.
 
@@ -163,7 +164,7 @@ Establish the unit testing infrastructure early to enable a TDD workflow from th
 ### F-040 — End-to-End Tests (Playwright)
 
 **Priority:** High  
-**Status:** Not started
+**Status:** Complete
 
 Establish the E2E testing infrastructure early to enable an ATDD workflow from the first feature.
 
@@ -182,7 +183,7 @@ Establish the E2E testing infrastructure early to enable an ATDD workflow from t
 ### F-050 — Committed `docs/` Build for GitHub Pages
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 The compiled production build lives inside the repository so GitHub Pages can serve it directly from the `docs/` folder without a separate CI deployment pipeline.
 
@@ -202,7 +203,7 @@ The compiled production build lives inside the repository so GitHub Pages can se
 ### F-055 — E2E Test Targeting (Local Dev and GitHub Pages)
 
 **Priority:** High  
-**Status:** Not started
+**Status:** Complete
 
 Playwright tests must be runnable against both the local dev server and the deployed GitHub Pages instance so that regressions can be caught before and after release.
 
@@ -221,7 +222,7 @@ Playwright tests must be runnable against both the local dev server and the depl
 ### F-060 — Core Light Display
 
 **Priority:** Critical  
-**Status:** Not started
+**Status:** Complete
 
 Render a full-viewport light surface whose color and brightness are driven by the active profile's settings.
 
@@ -364,7 +365,7 @@ Users can enter and exit native fullscreen mode with a single button press.
 ### F-140 — Profile Share via URL
 
 **Priority:** Medium  
-**Status:** Not started
+**Status:** Complete
 
 Users can share a specific profile configuration via a URL that any recipient can load.
 
@@ -383,7 +384,7 @@ Users can share a specific profile configuration via a URL that any recipient ca
 ### F-160 — Ring Radius Cross-Validation
 
 **Priority:** Medium  
-**Status:** Not started
+**Status:** Complete
 
 Prevent invalid ring geometry by ensuring `innerRadius` is always strictly less than `outerRadius` whenever a ring format is active.
 
@@ -400,7 +401,7 @@ Prevent invalid ring geometry by ensuring `innerRadius` is always strictly less 
 ### F-165 — Preset Reordering and Sequence Numbers
 
 **Priority:** Low  
-**Status:** Not started
+**Status:** Complete
 
 Allow users to reorder their saved presets and display a persistent sequence number beside each preset so the order is visible and aligns with keyboard shortcuts (`1`–`9`) and touch-swipe navigation.
 
@@ -421,7 +422,7 @@ Allow users to reorder their saved presets and display a persistent sequence num
 ### F-170 — Keyboard Shortcuts Help Dialog
 
 **Priority:** Low  
-**Status:** Not started
+**Status:** Complete
 
 Provide a discoverable help dialog that lists all available keyboard shortcuts, grouped by context, rather than cluttering individual controls with per-button hints.
 
@@ -445,7 +446,7 @@ Provide a discoverable help dialog that lists all available keyboard shortcuts, 
 ### F-175 — Keyboard Shortcuts for Parameter Adjustment and Preset Switching
 
 **Priority:** Low  
-**Status:** Not started
+**Status:** Complete
 
 Provide keyboard shortcuts for switching between saved presets (profiles) by their sequence number, and for incrementally adjusting the active profile's parameters without opening the settings modal.
 
@@ -624,7 +625,7 @@ Inform the user when a new version of the PWA has been downloaded in the backgro
 ### F-210 — App Version in Help Dialog Footer
 
 **Priority:** Low  
-**Status:** Not started
+**Status:** Complete
 
 Display the current application version at the bottom of the keyboard shortcuts help dialog (F-170) so users and support staff can quickly verify which build is running without opening developer tools.
 
@@ -639,7 +640,6 @@ Display the current application version at the bottom of the keyboard shortcuts 
 ---
 
 ### F-220 — Digital Clock Overlay
-
 **Priority:** Low  
 **Status:** Not started
 
@@ -692,6 +692,38 @@ Display a simple digital clock pinned to a configurable corner of the screen. Th
   - Changing position and confirming the clock moves to the correct corner.
   - Changing format and confirming the displayed string matches the selected pattern.
 
+### F-230 — "Forget Me" Data Reset
+
+**Priority:** Medium  
+**Status:** Not started
+
+Allow users to irreversibly wipe all GlowFrame configuration and persisted data from their browser in a single deliberate action, ensuring no personal data remains after they decide to stop using the app.
+
+**Requirements:**
+
+**Trigger:**
+- A **Forget me** button is placed in the settings modal footer (or in a dedicated "Danger zone" section at the bottom of the modal).
+- The button is visually distinct (destructive styling, e.g., red/outlined) to signal its irreversible nature.
+
+**Confirmation:**
+- Clicking **Forget me** opens a confirmation dialog (Radix UI `AlertDialog`) with:
+  - A clear warning: *"This will permanently delete all your presets and settings. This action cannot be undone."*
+  - A **Confirm** (destructive) button and a **Cancel** button.
+  - No countdown or additional friction beyond this single confirmation step.
+
+**Reset behaviour:**
+- On confirmation:
+  1. Clear the Zustand profile store (reset to initial state with one default profile).
+  2. Remove all GlowFrame-specific `localStorage` keys (profile store, version key from F-190, any other persisted keys used by the app).
+  3. Close the confirmation dialog and the settings modal.
+  4. Reload the app to a clean initial state (equivalent to a fresh install).
+- The reset must not affect `localStorage` keys belonging to other apps or browser extensions (only keys written by GlowFrame are touched).
+- On any error during the reset (e.g., `localStorage.clear()` throws), a toast must inform the user that the reset could not be completed and the store must remain unchanged.
+
+**Testing:**
+- Unit tests must cover: confirmation triggers full store reset, all GlowFrame `localStorage` keys are removed, non-GlowFrame keys are untouched, error path keeps store intact.
+- E2E scenario: create two custom presets, open settings, click **Forget me**, confirm, verify the app reloads with a single default preset and all custom data is gone.
+
 ---
 
 ## Non-Functional Requirements
@@ -714,3 +746,5 @@ Display a simple digital clock pinned to a configurable corner of the screen. Th
 - Video capture / recording.
 - Backend API of any kind.
 - Analytics or telemetry.
+
+
