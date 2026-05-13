@@ -34,6 +34,7 @@ Use this checklist to track overall feature completion status.
 - [ ] **F-190** What's New dialog — surface release notes when a new PWA version installs
 - [ ] **F-200** PWA update alert — notify the user when a new version is available and prompt reload
 - [x] **F-210** App version display in the keyboard shortcuts help dialog footer
+- [ ] **F-220** Digital clock overlay — corner-pinned clock with configurable display, position, size, and format
 
 ---
 
@@ -520,7 +521,7 @@ Allow users to back up their entire preset library and restore it on another dev
 **Requirements:**
 
 **Export:**
-- An **Export all presets** button is available in the settings modal (e.g., in the profile manager section footer).
+- An **Export all presets** button is available in the bottom of the profile manager section/panel.
 - Clicking it triggers a browser file download of `glowframe-profiles.json`.
 - The file contains a versioned envelope:
   ```json
@@ -530,7 +531,7 @@ Allow users to back up their entire preset library and restore it on another dev
 - The exported `version` field matches the Zustand store schema version (F-090) so future migrations can handle old files.
 
 **Import:**
-- An **Import presets** button opens a native `<input type="file" accept=".json">` file picker (no drag-and-drop required in this version).
+- An **Import presets** button positioned next to the export button opens a native `<input type="file" accept=".json">` file picker (no drag-and-drop required in this version).
 - The selected file is read fully in-browser using the `FileReader` API — no network upload ever occurs.
 - Validation pipeline (all steps run before mutating state):
   1. Parse as JSON; reject with "Not a valid JSON file" on parse failure.
@@ -634,6 +635,62 @@ Display the current application version at the bottom of the keyboard shortcuts 
 - The value is sourced exclusively from the build-time constant — no runtime `fetch`, no `package.json` import.
 - Unit tests must cover: the version string renders correctly given a mocked `import.meta.env.VITE_APP_VERSION` value.
 - No E2E scenario required beyond the existing F-170 smoke coverage.
+
+---
+
+### F-220 — Digital Clock Overlay
+
+**Priority:** Low  
+**Status:** Not started
+
+Display a simple digital clock pinned to a configurable corner of the screen. The clock must remain legible regardless of the background colour, brightness, or ring mode active on the light surface.
+
+**Requirements:**
+
+#### Clock Display
+- Render a live digital clock that updates every second.
+- The clock is rendered as an overlay on top of the light surface — it must never obscure the gear, fullscreen, share, or help buttons in their default positions.
+- The clock text must always be visible: use a combination of a contrasting text colour and a subtle semi-transparent backdrop (e.g., a blurred pill or rounded rectangle behind the digits) so it remains legible against any background colour or brightness level.
+
+#### Settings Modal — Tab Structure
+- The settings modal layout is, top to bottom: profile management/selection panel → tab bar → tab content panel.
+- The tab bar (Tab 1 — Light, Tab 2 — Clock) sits directly below the profile management and selection panel, so profile context is always visible when switching tabs.
+- The existing settings modal (F-120) gains a two-tab layout:
+  - **Tab 1 — Light**: all existing light-surface settings (colour, brightness, ring format, radii, etc.) moved verbatim into this tab. No settings are removed or altered.
+  - **Tab 2 — Clock**: all clock-specific controls described below.
+- The default active tab on modal open is Tab 1 (Light).
+- Tab switching must be keyboard-accessible (arrow keys or explicit tab focus).
+
+#### Clock Settings (Tab 2)
+- All clock settings belong to the currently active profile. Switching profiles updates the clock overlay and all Clock tab controls to reflect the new profile's saved values — identical behaviour to how light settings already respond to profile changes.
+- **Show / Hide toggle** — enables or disables the clock overlay. Default: hidden.
+- **Position selector** — chooses which corner the clock is pinned to: Top-left, Bottom-left, Bottom-right. Top-right is reserved for the application buttons (gear, fullscreen, share, help) and is not available. Default: Bottom-right.
+- **Size selector** — three options: Small, Medium, Large. Default: Medium.
+- **Format selector** — two options:
+  - `HH:mm` — 24-hour, no seconds.
+  - `HH:mm:ss` — 24-hour with seconds.
+  - `hh:mm a` — 12-hour with AM/PM, no seconds.
+  - `hh:mm:ss a` — 12-hour with AM/PM with seconds.
+  - Default: `HH:mm`.
+
+#### Persistence
+- All clock settings (show/hide, position, size, format) are persisted in `localStorage` via the existing Zustand store as part of each profile's data. Each profile maintains its own independent clock configuration, and the active clock state updates whenever the selected profile changes.
+
+#### Accessibility
+- The clock element must have `aria-live="off"` to prevent screen readers from announcing every second update.
+- The clock must have a descriptive `aria-label` (e.g., `"Digital clock"`).
+
+#### Testing
+- Unit tests must cover:
+  - Clock renders the correct formatted time given a mocked `Date`.
+  - Clock is not rendered when the show/hide setting is `false`.
+  - Each position value maps to the correct Tailwind positioning class.
+  - Each size value maps to the correct Tailwind text-size class.
+  - Each format value produces the expected output string for a known date/time.
+- E2E scenario must cover:
+  - Opening settings, switching to the Clock tab, enabling the clock, and verifying it appears on the light surface.
+  - Changing position and confirming the clock moves to the correct corner.
+  - Changing format and confirming the displayed string matches the selected pattern.
 
 ---
 
