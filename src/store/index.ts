@@ -25,7 +25,7 @@ export interface ClockConfig {
 
 export const CLOCK_DEFAULTS: ClockConfig = {
   enabled: true,
-  position: 'bottom-right',
+  position: 'bottom-left',
   size: 'medium',
   format: 'HH:mm',
 }
