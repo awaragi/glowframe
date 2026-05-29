@@ -59,15 +59,15 @@ The settings modal gains a two-tab layout using `@base-ui/react/tabs` (already i
 
 **Rationale:** `@base-ui/react/tabs` provides WAI-ARIA `role="tablist"` / `role="tab"` / `role="tabpanel"` semantics and arrow-key navigation with no extra code. It is already available in the installed package.
 
-### Decision 5 — Clock fields added directly to the `Profile` union type
+### Decision 5 — Clock fields grouped into a nested `clock` object on the `Profile` union type
 
-The four clock fields (`clockEnabled`, `clockPosition`, `clockSize`, `clockFormat`) are appended directly to the `Profile` base type (the `{ id, name } & ProfileMode` union), not to individual mode sub-types. This means all six modes share the same clock configuration shape without duplication.
+A single `clock: { enabled, position, size, format }` object is appended to the `Profile` base type (the `{ id, name } & ProfileMode` union), not to individual mode sub-types. This means all six modes share the same clock configuration shape without duplication.
 
-**Rationale:** Clock settings are orthogonal to light mode — they behave identically across `full`, `full-color`, `ring`, etc. Putting them in the base makes the migration straightforward: one default value set applies to all profiles uniformly.
+**Rationale:** Clock settings are orthogonal to light mode — they behave identically across `full`, `full-color`, `ring`, etc. Grouping them into a dedicated `clock` object keeps the profile namespace clean and makes clock-related access (`profile.clock.enabled`) self-documenting. Putting them in the base makes the default straightforward: one `clock` default object applies to all profiles uniformly.
 
-### Decision 6 — Clock fields added to the profile schema with defaults; no migration
+### Decision 6 — `clock` object added to the profile schema with defaults; no migration
 
-The four clock fields are added to the `Profile` type and the `_defaultProfile` constant with their defaults (`clockEnabled: false`, `clockPosition: 'bottom-right'`, `clockSize: 'medium'`, `clockFormat: 'HH:mm'`). The store schema version is **not** bumped; no `migrate` function is added. Any existing `localStorage` data from before this change is treated as a clean install.
+The `clock` object is added to the `Profile` type and the `_defaultProfile` constant with its defaults (`clock: { enabled: false, position: 'bottom-right', size: 'medium', format: 'HH:mm' }`). The store schema version is **not** bumped; no `migrate` function is added. Any existing `localStorage` data from before this change is treated as a clean install.
 
 **Rationale:** Simplest approach. Migration complexity is not justified when the clock is a purely additive, off-by-default feature.
 

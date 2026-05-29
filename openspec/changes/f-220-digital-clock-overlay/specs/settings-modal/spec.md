@@ -25,12 +25,12 @@ The **Light** tab panel SHALL contain all existing light-surface settings contro
 ### Requirement: Clock tab content
 The **Clock** tab panel SHALL contain the following controls, each bound to the active profile's clock fields via React Hook Form and Zustand, applying changes live:
 
-- **Show clock toggle** — a labelled toggle switch bound to `clockEnabled`. Label: `"Show clock"`.
-- **Position selector** — a select/segmented control bound to `clockPosition`. Options: `Top-left`, `Bottom-left`, `Bottom-right`. Label: `"Position"`.
-- **Size selector** — a select/segmented control bound to `clockSize`. Options: `Small`, `Medium`, `Large`. Label: `"Size"`.
-- **Format selector** — a select control bound to `clockFormat`. Options: `HH:mm`, `HH:mm:ss`, `hh:mm a`, `hh:mm:ss a`. Label: `"Format"`.
+- **Show clock toggle** — a labelled toggle switch bound to `clock.enabled`. Label: `"Show clock"`.
+- **Position selector** — a select/segmented control bound to `clock.position`. Options: `Top-left`, `Bottom-left`, `Bottom-right`. Label: `"Position"`.
+- **Size selector** — a select/segmented control bound to `clock.size`. Options: `Small`, `Medium`, `Large`. Label: `"Size"`.
+- **Format selector** — a select control bound to `clock.format`. Options: `HH:mm`, `HH:mm:ss`, `hh:mm a`, `hh:mm:ss a`. Label: `"Format"`.
 
-All controls SHALL be disabled or hidden when `clockEnabled` is `false` (except the Show clock toggle itself). Changes SHALL be reflected on the clock overlay immediately.
+All controls SHALL be disabled or hidden when `clock.enabled` is `false` (except the Show clock toggle itself). Changes SHALL be reflected on the clock overlay immediately.
 
 #### Scenario: Clock tab is reachable via click
 - **WHEN** the user clicks the Clock tab

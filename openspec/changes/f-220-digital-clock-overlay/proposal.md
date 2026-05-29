@@ -7,8 +7,8 @@ GlowFrame is used during video calls and recordings where time awareness matters
 - A new `ClockOverlay` component renders a live digital clock as a fixed overlay on the light surface.
 - The clock position, size, format, and visibility are all per-profile settings, persisted in `localStorage` via Zustand.
 - The settings modal gains a two-tab layout: **Tab 1 — Light** (existing controls, unchanged) and **Tab 2 — Clock** (new clock controls).
-- The profile settings schema is extended with four new clock fields: `clockEnabled`, `clockPosition`, `clockSize`, `clockFormat`.
-- The profile schema is extended with four new clock fields; defaults are applied to new profiles only (no migration of existing data).
+- The profile settings schema is extended with a new `clock` object containing four fields: `enabled`, `position`, `size`, `format`.
+- The profile schema is extended with the `clock` object; defaults are applied to new profiles only (no migration of existing data).
 - Top-right corner is excluded from available clock positions to avoid conflict with the application button cluster (gear, fullscreen, share, help).
 
 ## Capabilities
@@ -19,7 +19,7 @@ GlowFrame is used during video calls and recordings where time awareness matters
 
 ### Modified Capabilities
 
-- `profile-settings`: Profile type gains four new fields — `clockEnabled: boolean`, `clockPosition: 'top-left' | 'bottom-left' | 'bottom-right'`, `clockSize: 'small' | 'medium' | 'large'`, `clockFormat: 'HH:mm' | 'HH:mm:ss' | 'hh:mm a' | 'hh:mm:ss a'`. Defaults are applied to new profiles only; no store schema version bump or migration.
+- `profile-settings`: Profile type gains a new `clock` object — `clock: { enabled: boolean, position: 'top-left' | 'bottom-left' | 'bottom-right', size: 'small' | 'medium' | 'large', format: 'HH:mm' | 'HH:mm:ss' | 'hh:mm a' | 'hh:mm:ss a' }`. Defaults are applied to new profiles only; no store schema version bump or migration.
 - `settings-modal`: The modal content area gains a Radix UI `Tabs` structure. Existing light controls move verbatim into Tab 1 (Light). Tab 2 (Clock) hosts the new clock controls. Profile management panel remains above the tab bar, always visible.
 
 ## Impact
@@ -27,4 +27,4 @@ GlowFrame is used during video calls and recordings where time awareness matters
 - **New files**: `src/components/ClockOverlay.tsx`, `src/components/ClockOverlay.test.tsx`, `src/hooks/useClockTime.ts`, `src/hooks/useClockTime.test.ts`, `e2e/clock-overlay.spec.ts`
 - **Modified files**: `src/store/` (profile type, `_defaultProfile`), `src/components/SettingsModal.tsx` (tab layout), `src/components/SettingsModal.test.tsx`
 - **Dependencies**: `@base-ui/react/tabs` (already installed); no new packages required
-- **No migration**: Clock fields are additive and default to off; existing stored data is not upgraded
+- **No migration**: The `clock` object is additive and defaults to off; existing stored data is not upgraded

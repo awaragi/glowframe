@@ -31,70 +31,70 @@ The system SHALL provide a `useClockTime(format: ClockFormat): string` hook that
 - **THEN** no further state updates occur after unmount (no leaked intervals)
 
 ### Requirement: ClockOverlay component renders when enabled
-The system SHALL render a `ClockOverlay` component as a fixed-position element on the light surface when the active profile's `clockEnabled` is `true`. When `clockEnabled` is `false`, the component SHALL render nothing.
+The system SHALL render a `ClockOverlay` component as a fixed-position element on the light surface when the active profile's `clock.enabled` is `true`. When `clock.enabled` is `false`, the component SHALL render nothing.
 
 #### Scenario: Clock is visible when enabled
-- **WHEN** the active profile has `clockEnabled: true`
+- **WHEN** the active profile has `clock.enabled: true`
 - **THEN** an element with `aria-label="Digital clock"` is present in the DOM
 
 #### Scenario: Clock is absent when disabled
-- **WHEN** the active profile has `clockEnabled: false`
+- **WHEN** the active profile has `clock.enabled: false`
 - **THEN** no element with `aria-label="Digital clock"` is present in the DOM
 
 ### Requirement: ClockOverlay position
-The `ClockOverlay` SHALL be pinned to the corner specified by the active profile's `clockPosition` value. The top-right corner is NOT a valid position. The mapping is:
+The `ClockOverlay` SHALL be pinned to the corner specified by the active profile's `clock.position` value. The top-right corner is NOT a valid position. The mapping is:
 
-| `clockPosition` | Tailwind classes applied |
+| `clock.position` | Tailwind classes applied |
 |---|---|
 | `'top-left'` | `top-4 left-4` |
 | `'bottom-left'` | `bottom-4 left-4` |
 | `'bottom-right'` | `bottom-4 right-4` |
 
 #### Scenario: Top-left position
-- **WHEN** the active profile has `clockPosition: 'top-left'`
+- **WHEN** the active profile has `clock.position: 'top-left'`
 - **THEN** the clock element has Tailwind classes `top-4` and `left-4`
 
 #### Scenario: Bottom-left position
-- **WHEN** the active profile has `clockPosition: 'bottom-left'`
+- **WHEN** the active profile has `clock.position: 'bottom-left'`
 - **THEN** the clock element has Tailwind classes `bottom-4` and `left-4`
 
 #### Scenario: Bottom-right position
-- **WHEN** the active profile has `clockPosition: 'bottom-right'`
+- **WHEN** the active profile has `clock.position: 'bottom-right'`
 - **THEN** the clock element has Tailwind classes `bottom-4` and `right-4`
 
 ### Requirement: ClockOverlay size
-The `ClockOverlay` text size SHALL reflect the active profile's `clockSize` value. The mapping is:
+The `ClockOverlay` text size SHALL reflect the active profile's `clock.size` value. The mapping is:
 
-| `clockSize` | Tailwind text class |
+| `clock.size` | Tailwind text class |
 |---|---|
 | `'small'` | `text-2xl` |
 | `'medium'` | `text-4xl` |
 | `'large'` | `text-6xl` |
 
 #### Scenario: Small size
-- **WHEN** the active profile has `clockSize: 'small'`
+- **WHEN** the active profile has `clock.size: 'small'`
 - **THEN** the clock element has Tailwind class `text-2xl`
 
 #### Scenario: Medium size
-- **WHEN** the active profile has `clockSize: 'medium'`
+- **WHEN** the active profile has `clock.size: 'medium'`
 - **THEN** the clock element has Tailwind class `text-4xl`
 
 #### Scenario: Large size
-- **WHEN** the active profile has `clockSize: 'large'`
+- **WHEN** the active profile has `clock.size: 'large'`
 - **THEN** the clock element has Tailwind class `text-6xl`
 
 ### Requirement: ClockOverlay legibility backdrop
 The `ClockOverlay` SHALL render the time text inside a container with a semi-transparent dark backdrop (e.g., `bg-black/40 backdrop-blur-sm rounded-lg px-3 py-1`) so the digits remain legible against any light surface colour or brightness level.
 
 #### Scenario: Backdrop is present on the clock element
-- **WHEN** the clock is rendered with `clockEnabled: true`
+- **WHEN** the clock is rendered with `clock.enabled: true`
 - **THEN** the clock's container element has a background opacity class (e.g., `bg-black/40`)
 
 ### Requirement: ClockOverlay accessibility
 The `ClockOverlay` root element SHALL have `aria-label="Digital clock"` and `aria-live="off"` to prevent screen readers from announcing each second update.
 
 #### Scenario: Accessibility attributes are present
-- **WHEN** the clock is rendered with `clockEnabled: true`
+- **WHEN** the clock is rendered with `clock.enabled: true`
 - **THEN** the element has `aria-label="Digital clock"` and `aria-live="off"`
 
 ### Requirement: ClockOverlay does not obscure application buttons

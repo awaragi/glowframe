@@ -1,36 +1,36 @@
 ## ADDED Requirements
 
-### Requirement: Clock fields on the Profile type
-The `Profile` type SHALL include four clock configuration fields shared across all light modes:
+### Requirement: Clock object on the Profile type
+The `Profile` type SHALL include a `clock` object shared across all light modes with the following shape:
 
 | Field | Type | Default |
 |---|---|---|
-| `clockEnabled` | `boolean` | `false` |
-| `clockPosition` | `'top-left' \| 'bottom-left' \| 'bottom-right'` | `'bottom-right'` |
-| `clockSize` | `'small' \| 'medium' \| 'large'` | `'medium'` |
-| `clockFormat` | `'HH:mm' \| 'HH:mm:ss' \| 'hh:mm a' \| 'hh:mm:ss a'` | `'HH:mm'` |
+| `clock.enabled` | `boolean` | `false` |
+| `clock.position` | `'top-left' \| 'bottom-left' \| 'bottom-right'` | `'bottom-right'` |
+| `clock.size` | `'small' \| 'medium' \| 'large'` | `'medium'` |
+| `clock.format` | `'HH:mm' \| 'HH:mm:ss' \| 'hh:mm a' \| 'hh:mm:ss a'` | `'HH:mm'` |
 
-These fields SHALL be present on every newly created profile with their default values. `top-right` is NOT a valid `clockPosition` value.
+The `clock` object SHALL be present on every newly created profile with its default values. `top-right` is NOT a valid `clock.position` value.
 
 #### Scenario: New profile includes clock defaults
 - **WHEN** `createProfile('My Light')` is called
-- **THEN** the new profile has `clockEnabled: false`, `clockPosition: 'bottom-right'`, `clockSize: 'medium'`, and `clockFormat: 'HH:mm'`
+- **THEN** the new profile has `clock: { enabled: false, position: 'bottom-right', size: 'medium', format: 'HH:mm' }`
 
 #### Scenario: Default profile includes clock defaults
 - **WHEN** the app initialises with no stored state
-- **THEN** the default profile has `clockEnabled: false`, `clockPosition: 'bottom-right'`, `clockSize: 'medium'`, and `clockFormat: 'HH:mm'`
+- **THEN** the default profile has `clock: { enabled: false, position: 'bottom-right', size: 'medium', format: 'HH:mm' }`
 
-### Requirement: Clock fields updated via updateProfile
-The existing `updateProfile(id, patch)` action SHALL accept patches containing any combination of `clockEnabled`, `clockPosition`, `clockSize`, and `clockFormat`. Changes SHALL be reflected immediately in the store and persisted to `localStorage`.
+### Requirement: Clock object updated via updateProfile
+The existing `updateProfile(id, patch)` action SHALL accept a patch containing a partial `clock` object (e.g. `{ clock: { enabled: true } }`). The patch SHALL be merged with the existing `clock` object so only the specified sub-fields are changed. Changes SHALL be reflected immediately in the store and persisted to `localStorage`.
 
-#### Scenario: clockEnabled update applies live
-- **WHEN** `updateProfile(activeId, { clockEnabled: true })` is called
-- **THEN** the active profile's `clockEnabled` is `true` without a page reload
+#### Scenario: clock.enabled update applies live
+- **WHEN** `updateProfile(activeId, { clock: { enabled: true } })` is called
+- **THEN** the active profile's `clock.enabled` is `true` without a page reload
 
-#### Scenario: clockFormat update applies live
-- **WHEN** `updateProfile(activeId, { clockFormat: 'HH:mm:ss' })` is called
-- **THEN** the active profile's `clockFormat` is `'HH:mm:ss'`
+#### Scenario: clock.format update applies live
+- **WHEN** `updateProfile(activeId, { clock: { format: 'HH:mm:ss' } })` is called
+- **THEN** the active profile's `clock.format` is `'HH:mm:ss'`
 
-#### Scenario: clockPosition update applies live
-- **WHEN** `updateProfile(activeId, { clockPosition: 'top-left' })` is called
-- **THEN** the active profile's `clockPosition` is `'top-left'`
+#### Scenario: clock.position update applies live
+- **WHEN** `updateProfile(activeId, { clock: { position: 'top-left' } })` is called
+- **THEN** the active profile's `clock.position` is `'top-left'`
