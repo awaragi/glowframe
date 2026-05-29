@@ -29,6 +29,20 @@ describe('HelpDialog', () => {
     expect(screen.getByRole('region', { name: 'Ring and Spot radius shortcuts' })).toBeInTheDocument()
   })
 
+  it('renders the Clock shortcuts group', () => {
+    render(<HelpDialog open={true} onOpenChange={vi.fn()} />)
+    expect(screen.getByRole('region', { name: 'Clock shortcuts' })).toBeInTheDocument()
+  })
+
+  it('renders T and Shift+T entries in the Clock group', () => {
+    render(<HelpDialog open={true} onOpenChange={vi.fn()} />)
+    const clockSection = screen.getByRole('region', { name: 'Clock shortcuts' })
+    const kbdElements = clockSection.querySelectorAll('kbd')
+    const kbdTexts = Array.from(kbdElements).map((k) => k.textContent)
+    expect(kbdTexts).toContain('T')
+    expect(kbdTexts).toContain('Shift')
+  })
+
   it('renders the Settings modal shortcuts group', () => {
     render(<HelpDialog open={true} onOpenChange={vi.fn()} />)
     expect(screen.getByRole('region', { name: 'Settings modal shortcuts' })).toBeInTheDocument()

@@ -90,6 +90,26 @@ export default function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
             </table>
           </section>
 
+          <section aria-label="Clock shortcuts">
+            <h3 className="mb-2 font-medium text-foreground">Clock</h3>
+            <table className="w-full border-collapse">
+              <tbody>
+                <tr>
+                  <td className="py-1 pr-4 text-muted-foreground">Cycle clock position / off</td>
+                  <td className="py-1 text-right"><kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">T</kbd></td>
+                </tr>
+                <tr>
+                  <td className="py-1 pr-4 text-muted-foreground">Cycle clock size</td>
+                  <td className="py-1 text-right">
+                    <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">Shift</kbd>
+                    {'+'}
+                    <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">T</kbd>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
           <section aria-label="Settings modal shortcuts">
             <h3 className="mb-2 font-medium text-foreground">Settings modal</h3>
             <table className="w-full border-collapse">

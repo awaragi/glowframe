@@ -36,6 +36,7 @@ Use this checklist to track overall feature completion status.
 - [x] **F-210** App version display in the keyboard shortcuts help dialog footer
 - [x] **F-220** Digital clock overlay — corner-pinned clock with configurable display, position, size, and format
 - [ ] **F-230** "Forget Me" data reset — clear all configuration and data from settings
+- [ ] **F-240** Clock keyboard shortcuts — `T` toggles clock visibility, `Shift+T` cycles clock position; both listed in the help dialog
 
 ---
 
@@ -691,6 +692,31 @@ Display a simple digital clock pinned to a configurable corner of the screen. Th
   - Opening settings, switching to the Clock tab, enabling the clock, and verifying it appears on the light surface.
   - Changing position and confirming the clock moves to the correct corner.
   - Changing format and confirming the displayed string matches the selected pattern.
+
+### F-240 — Clock Keyboard Shortcuts
+
+**Priority:** Low  
+**Status:** Not started
+
+Provide keyboard shortcuts to show/hide the digital clock overlay and to cycle it through its available corner positions, without opening the settings modal.
+
+**Requirements:**
+
+| Key | Action |
+|---|---|
+| `T` | Toggle the clock overlay on/off (show/hide) for the active profile |
+| `Shift+T` | Cycle the clock position through the available corners in order: Bottom-right → Bottom-left → Top-left → Bottom-right (Top-right is reserved for app buttons and is skipped) |
+
+- Both shortcuts are active when focus is not in a form control and the settings modal is not open (same guard as all other light-surface shortcuts).
+- `T` toggles the active profile's `clockShow` setting; the change is persisted immediately via Zustand (identical behaviour to toggling the show/hide control in the Clock tab of the settings modal).
+- `Shift+T` advances the active profile's `clockPosition` to the next value in the cycle; the change is persisted immediately via Zustand.
+- If the clock is hidden when `Shift+T` is pressed, the position is updated in the store but the clock remains hidden until `T` is pressed.
+- Both shortcuts must be registered in the centralised `useKeyboardShortcuts` hook (introduced in F-170) under the **Light surface** group.
+- Both shortcuts must appear in the F-170 keyboard shortcuts help dialog under the **Light surface** group.
+- Unit tests must cover: `T` toggles `clockShow` from false to true and true to false; `Shift+T` advances position through the full cycle and wraps correctly; neither shortcut fires when focus is in a form control.
+- No E2E scenario required beyond the existing F-220 clock coverage.
+
+---
 
 ### F-230 — "Forget Me" Data Reset
 

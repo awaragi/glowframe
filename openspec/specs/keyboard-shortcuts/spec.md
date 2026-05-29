@@ -240,7 +240,7 @@ The system SHALL render a `HelpButton` component — a `<button>` fixed at `top-
 ### Requirement: Keyboard shortcuts help dialog
 The system SHALL provide a `HelpDialog` component built on the shadcn/ui `Dialog` primitive that displays a hardcoded, grouped reference of all keyboard shortcuts. The dialog SHALL be closeable via the × button, `Escape`, or clicking outside. Keys SHALL be rendered using `<kbd>` elements.
 
-The dialog SHALL present shortcuts in four named groups:
+The dialog SHALL present shortcuts in five named groups:
 
 **Global** (always active):
 | Key | Action |
@@ -261,6 +261,12 @@ The dialog SHALL present shortcuts in four named groups:
 |---|---|
 | `]` / `[` | Outer radius (ring) or radius (spot) +2% / −2% |
 | `}` / `{` | Inner radius (ring only) +2% / −2% |
+
+**Clock** (always active):
+| Key | Action |
+|---|---|
+| `T` | Cycle clock: off → top-left → bottom-left → bottom-right → off |
+| `Shift+T` | Cycle clock size: small → medium → large |
 
 **Settings modal**:
 | Key | Action |
@@ -283,9 +289,13 @@ The dialog SHALL display a footer below the shortcut groups that shows the curre
 - **WHEN** the user clicks outside the dialog
 - **THEN** the dialog closes
 
-#### Scenario: All four shortcut groups are rendered
+#### Scenario: All five shortcut groups are rendered
 - **WHEN** the help dialog is open
-- **THEN** the dialog contains sections for Global, Light surface, Ring & Spot radius, and Settings modal shortcuts
+- **THEN** the dialog contains sections for Global, Light surface, Ring & Spot radius, Clock, and Settings modal shortcuts
+
+#### Scenario: Clock group lists T and Shift+T
+- **WHEN** the help dialog is open
+- **THEN** the Clock section contains a row for `T` (cycle clock visibility+position) and a row for `Shift+T` (cycle clock size)
 
 #### Scenario: kbd elements are used for key display
 - **WHEN** the help dialog is open

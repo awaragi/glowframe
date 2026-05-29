@@ -8,6 +8,7 @@ import HelpButton from '@/components/HelpButton'
 import HelpDialog from '@/components/HelpDialog'
 import GlobalShortcuts from '@/components/shortcuts/GlobalShortcuts'
 import ActiveModeShortcuts from '@/components/shortcuts/ActiveModeShortcuts'
+import ClockShortcuts from '@/components/shortcuts/ClockShortcuts'
 import ImportProfileDialog from '@/components/ImportProfileDialog'
 import { useFullscreen } from '@/hooks/useFullscreen'
 import { useAppStore } from '@/store'
@@ -60,6 +61,7 @@ export default function LightPage() {
         setActiveProfile={setActiveProfile}
       />
       <ActiveModeShortcuts />
+      <ClockShortcuts />
       <FullscreenButton />
       <HelpButton onClick={() => setIsHelpOpen(true)} />
       <GearButton onClick={() => setIsSettingsOpen(true)} />
