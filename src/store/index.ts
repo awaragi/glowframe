@@ -12,6 +12,7 @@ import type {
   SpotProfile,
   SpotColorProfile,
 } from '@/lib/modeDefaults'
+import type { BackupProfile } from '@/lib/profileBackup'
 
 export type { ProfileMode, FullProfile, FullColorProfile, RingProfile, RingColorProfile, SpotProfile, SpotColorProfile } from '@/lib/modeDefaults'
 export type { ClockFormat } from '@/lib/clockFormat'
@@ -54,6 +55,7 @@ interface AppState {
   updateProfile: (id: string, patch: AllModeFields) => void
   switchMode: (id: string, newMode: ProfileMode['mode']) => void
   reorderProfiles: (fromIndex: number, toIndex: number) => void
+  restoreProfiles: (profiles: BackupProfile[]) => void
 }
 
 export function selectActiveProfile(state: AppState): Profile {
@@ -143,6 +145,17 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           profiles: arrayMove(state.profiles, fromIndex, toIndex),
         }))
+      },
+      restoreProfiles(backupProfiles) {
+        const restored: Profile[] = backupProfiles.map((entry) => ({
+          ...entry,
+          id: crypto.randomUUID(),
+          clock: entry.clock ?? CLOCK_DEFAULTS,
+        }) as Profile)
+        set({
+          profiles: restored,
+          activeProfileId: restored[0].id,
+        })
       },
     }),
     {

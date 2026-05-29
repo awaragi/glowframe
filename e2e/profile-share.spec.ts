@@ -150,4 +150,39 @@ test.describe('profile share URL', () => {
     // URL should remain dirty (unchanged)
     expect(page.url()).toContain('?profile=')
   })
+
+  test('imported profile preserves clock settings from share link', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    const home = new HomePage(page)
+    const settings = new SettingsPage(page)
+
+    await home.goto()
+    await settings.open()
+
+    // Navigate to Clock tab and disable the clock so we have a non-default value to assert on
+    await page.getByRole('tab', { name: 'Clock' }).click()
+    const clockSwitch = page.getByRole('switch', { name: 'Show clock' })
+    await expect(clockSwitch).toBeVisible()
+    await clockSwitch.click()
+    await expect(clockSwitch).toHaveAttribute('aria-checked', 'false')
+
+    // Copy share link from the Light tab
+    await page.getByRole('tab', { name: 'Light' }).click()
+    const shareButton = page.getByTestId('copy-share-link')
+    await shareButton.click()
+
+    const shareUrl = await page.evaluate(() => navigator.clipboard.readText())
+
+    await page.goto(shareUrl)
+
+    const dialog = page.getByTestId('import-profile-dialog')
+    await expect(dialog).toBeVisible()
+    await dialog.getByRole('button', { name: /import/i }).click()
+    await expect(dialog).not.toBeVisible()
+
+    // The imported profile is now active — verify its clock.enabled = false was preserved
+    await settings.open()
+    await page.getByRole('tab', { name: 'Clock' }).click()
+    await expect(page.getByRole('switch', { name: 'Show clock' })).toHaveAttribute('aria-checked', 'false')
+  })
 })

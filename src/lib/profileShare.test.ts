@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { encodeProfile, decodeProfile } from './profileShare'
 import type { Profile } from '@/store/index'
+import { CLOCK_DEFAULTS } from '@/store/index'
+
+const clock = { ...CLOCK_DEFAULTS }
 
 const fullProfile: Profile = {
   id: 'test-id-1',
@@ -8,6 +11,7 @@ const fullProfile: Profile = {
   mode: 'full',
   lightTemperature: 6500,
   lightBrightness: 80,
+  clock,
 }
 
 const fullColorProfile: Profile = {
@@ -15,6 +19,7 @@ const fullColorProfile: Profile = {
   name: 'Test Full Color',
   mode: 'full-color',
   lightColor: '#ff8800',
+  clock,
 }
 
 const ringProfile: Profile = {
@@ -27,6 +32,7 @@ const ringProfile: Profile = {
   outerRadius: 80,
   backgroundLightTemperature: 3000,
   backgroundLightBrightness: 30,
+  clock,
 }
 
 const ringColorProfile: Profile = {
@@ -37,6 +43,7 @@ const ringColorProfile: Profile = {
   innerRadius: 15,
   outerRadius: 75,
   backgroundColor: '#000000',
+  clock,
 }
 
 const spotProfile: Profile = {
@@ -48,6 +55,7 @@ const spotProfile: Profile = {
   radius: 40,
   backgroundLightTemperature: 2000,
   backgroundLightBrightness: 20,
+  clock,
 }
 
 const spotColorProfile: Profile = {
@@ -57,6 +65,7 @@ const spotColorProfile: Profile = {
   lightColor: '#aabbcc',
   radius: 35,
   backgroundColor: '#111111',
+  clock,
 }
 
 describe('encodeProfile', () => {
@@ -70,6 +79,27 @@ describe('encodeProfile', () => {
     const encoded = encodeProfile(ringColorProfile)
     const decoded = JSON.parse(decodeURIComponent(encoded)) as Record<string, unknown>
     expect(decoded).not.toHaveProperty('id')
+  })
+
+  it('includes clock object in encoded output for full mode', () => {
+    const encoded = encodeProfile(fullProfile)
+    const decoded = JSON.parse(decodeURIComponent(encoded)) as Record<string, unknown>
+    expect(decoded).toHaveProperty('clock')
+    expect(decoded.clock).toMatchObject(clock)
+  })
+
+  it('normalizes missing clock to CLOCK_DEFAULTS when encoding', () => {
+    const profileWithoutClock: Profile = {
+      id: 'no-clock',
+      name: 'No Clock',
+      mode: 'full',
+      lightTemperature: 6500,
+      lightBrightness: 80,
+    }
+    const encoded = encodeProfile(profileWithoutClock)
+    const decoded = JSON.parse(decodeURIComponent(encoded)) as Record<string, unknown>
+    expect(decoded).toHaveProperty('clock')
+    expect(decoded.clock).toMatchObject(CLOCK_DEFAULTS)
   })
 })
 
@@ -90,6 +120,13 @@ describe('decodeProfile — round-trip for all 6 modes', () => {
       expect(result).not.toBeNull()
       expect(result!.mode).toBe(profile.mode)
       expect(result!.name).toBe(profile.name)
+    })
+
+    it(`round-trips clock for ${profile.mode} profile`, () => {
+      const encoded = encodeProfile(profile)
+      const result = decodeProfile(encoded)
+      expect(result).not.toBeNull()
+      expect(result!.clock).toMatchObject(clock)
     })
   }
 })
@@ -136,5 +173,25 @@ describe('decodeProfile — invalid inputs return null', () => {
 
   it('returns null for empty string', () => {
     expect(decodeProfile('')).toBeNull()
+  })
+
+  it('returns null when clock has an invalid position value', () => {
+    const obj = {
+      mode: 'full',
+      name: 'Test',
+      lightTemperature: 6500,
+      lightBrightness: 80,
+      clock: { enabled: true, position: 'invalid-position', size: 'medium', format: 'HH:mm' },
+    }
+    expect(decodeProfile(encodeURIComponent(JSON.stringify(obj)))).toBeNull()
+  })
+})
+
+describe('decodeProfile — payloads without clock', () => {
+  it('accepts a share payload without clock (backward compat — clock is optional)', () => {
+    const { id: _id, clock: _clock, ...rest } = fullProfile
+    const result = decodeProfile(encodeURIComponent(JSON.stringify(rest)))
+    expect(result).not.toBeNull()
+    expect(result!.clock).toBeUndefined()
   })
 })

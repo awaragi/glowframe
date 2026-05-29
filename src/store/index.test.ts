@@ -315,3 +315,75 @@ describe('useAppStore', () => {
     })
   })
 })
+
+
+describe('restoreProfiles', () => {
+  const backupProfiles = [
+    {
+      mode: 'full' as const,
+      name: 'Restored A',
+      lightTemperature: 6500,
+      lightBrightness: 80,
+      clock: { enabled: true, position: 'bottom-left' as const, size: 'medium' as const, format: 'HH:mm' as const },
+    },
+    {
+      mode: 'full-color' as const,
+      name: 'Restored B',
+      lightColor: '#ff0000',
+      clock: { enabled: false, position: 'top-left' as const, size: 'small' as const, format: 'hh:mm a' as const },
+    },
+    {
+      mode: 'ring' as const,
+      name: 'Restored C',
+      lightTemperature: 5000,
+      lightBrightness: 70,
+      innerRadius: 20,
+      outerRadius: 80,
+      backgroundLightTemperature: 3000,
+      backgroundLightBrightness: 30,
+      clock: { enabled: true, position: 'bottom-right' as const, size: 'large' as const, format: 'HH:mm:ss' as const },
+    },
+  ]
+
+  it('replaces all existing profiles', () => {
+    const initial = makeFullProfile({ name: 'Old Profile' })
+    resetStore(initial)
+    useAppStore.getState().restoreProfiles(backupProfiles)
+    const state = useAppStore.getState()
+    expect(state.profiles).toHaveLength(3)
+    expect(state.profiles.every((p) => p.name !== 'Old Profile')).toBe(true)
+  })
+
+  it('assigns new IDs (not serialized ones)', () => {
+    resetStore()
+    useAppStore.getState().restoreProfiles(backupProfiles)
+    const state = useAppStore.getState()
+    const ids = state.profiles.map((p) => p.id)
+    expect(ids.every((id) => typeof id === 'string' && id.length > 0)).toBe(true)
+  })
+
+  it('sets activeProfileId to the first restored profile', () => {
+    resetStore()
+    useAppStore.getState().restoreProfiles(backupProfiles)
+    const state = useAppStore.getState()
+    expect(state.activeProfileId).toBe(state.profiles[0].id)
+    expect(state.profiles[0].name).toBe('Restored A')
+  })
+
+  it('normalizes missing clock to CLOCK_DEFAULTS', () => {
+    resetStore()
+    const withoutClock = [{ mode: 'full' as const, name: 'No Clock', lightTemperature: 6500, lightBrightness: 80 }]
+    useAppStore.getState().restoreProfiles(withoutClock)
+    const restored = useAppStore.getState().profiles[0]
+    expect(restored.clock).toBeDefined()
+    expect(restored.clock!.position).toBe('bottom-left')
+  })
+
+  it('preserves clock settings from backup', () => {
+    resetStore()
+    useAppStore.getState().restoreProfiles(backupProfiles)
+    const second = useAppStore.getState().profiles[1]
+    expect(second.clock!.enabled).toBe(false)
+    expect(second.clock!.position).toBe('top-left')
+  })
+})

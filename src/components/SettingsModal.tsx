@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus, Trash2, GripVertical, Share2 } from 'lucide-react'
+import { Plus, Trash2, GripVertical, Share2, Download, Upload } from 'lucide-react'
 import {
   DndContext,
   PointerSensor,
@@ -22,6 +22,8 @@ import { Switch } from '@base-ui/react/switch'
 import { useAppStore, selectActiveProfile, CLOCK_DEFAULTS } from '@/store/index'
 import type { Profile, ProfileMode, ClockConfig } from '@/store/index'
 import { encodeProfile } from '@/lib/profileShare'
+import { exportBackup, importBackup } from '@/lib/profileBackup'
+import type { BackupPayload } from '@/lib/profileBackup'
 import { toast } from 'sonner'
 import {
   Sheet,
@@ -44,6 +46,7 @@ import RingModeSettings from '@/components/mode-settings/RingModeSettings'
 import RingColorModeSettings from '@/components/mode-settings/RingColorModeSettings'
 import SpotModeSettings from '@/components/mode-settings/SpotModeSettings'
 import SpotColorModeSettings from '@/components/mode-settings/SpotColorModeSettings'
+import RestoreBackupDialog from '@/components/RestoreBackupDialog'
 
 const nameSchema = z.object({
   name: z.string().min(1).max(64),
@@ -163,6 +166,11 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const storeUpdateProfile = useAppStore((s) => s.updateProfile)
   const switchMode = useAppStore((s) => s.switchMode)
   const reorderProfiles = useAppStore((s) => s.reorderProfiles)
+  const restoreProfiles = useAppStore((s) => s.restoreProfiles)
+
+  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false)
+  const [pendingBackup, setPendingBackup] = useState<BackupPayload | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -250,8 +258,54 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     toast.success('Link copied!')
   }
 
+  function handleExportBackup() {
+    const json = exportBackup(profiles)
+    const blob = new Blob([json], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = 'glowframe-backup.json'
+    anchor.click()
+    URL.revokeObjectURL(url)
+    toast.success('Presets exported!')
+  }
+
+  function handleRestoreFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string
+      const backup = importBackup(text)
+      if (!backup) {
+        toast.error('Invalid backup file')
+        if (fileInputRef.current) fileInputRef.current.value = ''
+        return
+      }
+      setPendingBackup(backup)
+      setRestoreDialogOpen(true)
+    }
+    reader.readAsText(file)
+  }
+
+  function handleRestoreConfirm() {
+    if (!pendingBackup) return
+    restoreProfiles(pendingBackup.profiles)
+    toast.success(`${pendingBackup.profiles.length} preset${pendingBackup.profiles.length !== 1 ? 's' : ''} restored!`)
+    setPendingBackup(null)
+    setRestoreDialogOpen(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  function handleRestoreCancel() {
+    setPendingBackup(null)
+    setRestoreDialogOpen(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <>
+      <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
         className="overflow-y-auto bg-background/90 backdrop-blur-sm"
@@ -265,7 +319,39 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
           {/* Profile list */}
           <section aria-label="Profiles">
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-medium">Profiles</h3>
+              <div className="flex items-center gap-1">
+                <h3 className="text-sm font-medium">Profiles</h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={handleExportBackup}
+                  aria-label="Export presets as backup file"
+                  data-testid="export-presets-button"
+                >
+                  <Download className="size-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => fileInputRef.current?.click()}
+                  aria-label="Restore presets from backup file"
+                  data-testid="restore-presets-button"
+                >
+                  <Upload className="size-3.5" />
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json"
+                  className="sr-only"
+                  aria-hidden="true"
+                  tabIndex={-1}
+                  onChange={handleRestoreFileChange}
+                  data-testid="restore-file-input"
+                />
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -368,17 +454,6 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
               {/* Mode-specific settings */}
               {renderModeSettings()}
 
-              {/* Share */}
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleCopyShareLink}
-                aria-label="Copy share link for active profile"
-                data-testid="copy-share-link"
-              >
-                <Share2 className="mr-2 size-4" />
-                Copy share link
-              </Button>
             </Tabs.Panel>
 
             {/* Clock tab */}
@@ -455,8 +530,28 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
               </section>
             </Tabs.Panel>
           </Tabs.Root>
+
+          {/* Share — always visible below tabs */}
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleCopyShareLink}
+            aria-label="Copy share link for active profile"
+            data-testid="copy-share-link"
+          >
+            <Share2 className="mr-2 size-4" />
+            Copy share link
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
+
+    <RestoreBackupDialog
+      open={restoreDialogOpen}
+      profileCount={pendingBackup?.profiles.length ?? 0}
+      onConfirm={handleRestoreConfirm}
+      onCancel={handleRestoreCancel}
+    />
+    </>
   )
 }

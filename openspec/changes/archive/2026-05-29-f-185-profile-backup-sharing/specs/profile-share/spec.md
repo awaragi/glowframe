@@ -1,12 +1,4 @@
-# Spec: Profile Share URL
-
-## Purpose
-
-Enable users to share a GlowFrame lighting profile via a URL. The active profile's settings are encoded into a `?profile=` query parameter that can be copied to the clipboard and shared. On app load, an incoming `?profile=` parameter triggers a validation and import confirmation flow.
-
----
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Encode active profile to shareable URL
 The system SHALL serialize the active profile's settings, including `clock` and excluding `id`, into a URL query parameter `?profile=` using `JSON.stringify` + `encodeURIComponent`. The resulting URL SHALL be the current page URL with the parameter appended.
@@ -44,18 +36,3 @@ The system SHALL present a Radix UI Dialog asking the user to confirm or dismiss
 #### Scenario: User dismisses import dialog
 - **WHEN** the user clicks "Dismiss" (or presses Escape, or clicks outside) in the import dialog
 - **THEN** the profile is NOT added to the store, the `?profile=` parameter is removed from the URL via `history.replaceState`, and no toast is shown
-
-### Requirement: URL auto-clean on action
-The system SHALL remove the `?profile=` parameter from the URL using `history.replaceState` only after the user takes an explicit action (import or dismiss). On validation failure, the URL SHALL remain unchanged.
-
-#### Scenario: URL is clean after import
-- **WHEN** the user confirms the import
-- **THEN** the browser address bar no longer shows the `?profile=` parameter
-
-#### Scenario: URL is clean after dismiss
-- **WHEN** the user dismisses the import dialog
-- **THEN** the browser address bar no longer shows the `?profile=` parameter
-
-#### Scenario: URL remains dirty on invalid param
-- **WHEN** the app loads with a `?profile=` parameter that fails Zod validation
-- **THEN** the URL parameter is still present in the address bar after the error toast is shown
