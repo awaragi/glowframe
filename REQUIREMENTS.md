@@ -36,7 +36,8 @@ Use this checklist to track overall feature completion status.
 - [x] **F-210** App version display in the keyboard shortcuts help dialog footer
 - [x] **F-220** Digital clock overlay — corner-pinned clock with configurable display, position, size, and format
 - [ ] **F-230** "Forget Me" data reset — clear all configuration and data from settings
-- [ ] **F-240** Clock keyboard shortcuts — `T` toggles clock visibility, `Shift+T` cycles clock position; both listed in the help dialog
+- [x] **F-240** Clock keyboard shortcuts — `T` toggles clock visibility, `Shift+T` cycles clock position; both listed in the help dialog
+- [ ] **F-250** Profile schema refactor — restructure profile data as `Profile: { glow, clock }`, moving all current light settings into a `glow` sub-object
 
 ---
 
@@ -715,6 +716,61 @@ Provide keyboard shortcuts to show/hide the digital clock overlay and to cycle i
 - Both shortcuts must appear in the F-170 keyboard shortcuts help dialog under the **Light surface** group.
 - Unit tests must cover: `T` toggles `clockShow` from false to true and true to false; `Shift+T` advances position through the full cycle and wraps correctly; neither shortcut fires when focus is in a form control.
 - No E2E scenario required beyond the existing F-220 clock coverage.
+
+---
+
+### F-250 — Profile Schema Refactor (`glow` + `clock` sub-objects)
+
+**Priority:** Medium  
+**Status:** Not started
+
+Restructure the persisted profile data model so that light settings and clock settings are cleanly separated into two named sub-objects, making the schema more maintainable and extensible as new feature groups are added.
+
+**Requirements:**
+
+#### New Schema Shape
+
+The top-level profile object is restructured as follows:
+
+```ts
+Profile {
+  id: string          // UUID — unchanged
+  name: string        // Human-readable name — unchanged
+  glow: GlowSettings  // All current light-surface settings (previously flat on Profile)
+  clock: ClockSettings // All clock settings (previously flat on Profile, introduced in F-220)
+}
+```
+
+- **`GlowSettings`** contains every field currently defined directly on the profile in F-110:
+  `lightColor`, `brightness`, `colorTemperature`, `ringFormat`, `innerRadius`, `outerRadius`.
+- **`ClockSettings`** contains every clock field introduced in F-220:
+  `clockShow`, `clockPosition`, `clockSize`, `clockFormat` (field names may be simplified to `show`, `position`, `size`, `format` now that they live under `clock`).
+- `id` and `name` remain at the top level of `Profile` — they are not moved into any sub-object.
+
+#### Zod Schema
+
+- Define `GlowSettingsSchema` and `ClockSettingsSchema` as separate named Zod objects.
+- Compose them into `ProfileSchema` using `z.object({ id, name, glow: GlowSettingsSchema, clock: ClockSettingsSchema })`.
+- All existing Zod refinements (e.g., `innerRadius < outerRadius` from F-160) are preserved inside `GlowSettingsSchema`.
+
+#### Zustand Store
+
+- All store actions that currently read or write flat profile fields must be updated to target the correct sub-object (e.g., `updateGlow(partial: Partial<GlowSettings>)`, `updateClock(partial: Partial<ClockSettings>)`).
+- The store schema version (F-090) must be incremented and a `migrate` function added to convert any existing flat profile records in `localStorage` into the new nested shape, so existing user data is not lost on upgrade.
+
+#### Consumer Updates
+
+- Every component, hook, and utility that accesses profile fields must be updated to use the new paths (e.g., `profile.glow.brightness` instead of `profile.brightness`).
+- The F-140 share URL serialisation / deserialisation must be updated to encode and decode the new nested structure; the Zod validation step must use the updated `ProfileSchema`.
+- The F-185 bulk import/export envelope must handle both the old flat schema (via migration) and the new nested schema.
+
+#### Testing
+
+- Unit tests must cover:
+  - `GlowSettingsSchema` and `ClockSettingsSchema` validate correct inputs and reject invalid ones.
+  - The Zustand migration function correctly converts a flat v1 profile record to the new nested v2 shape.
+  - `updateGlow` and `updateClock` actions write only to their respective sub-objects without affecting the other.
+- Existing unit and E2E tests must continue to pass after the refactor (no behaviour change, only structural).
 
 ---
 
