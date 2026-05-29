@@ -34,7 +34,7 @@ Use this checklist to track overall feature completion status.
 - [ ] **F-190** What's New dialog — surface release notes when a new PWA version installs
 - [ ] **F-200** PWA update alert — notify the user when a new version is available and prompt reload
 - [x] **F-210** App version display in the keyboard shortcuts help dialog footer
-- [ ] **F-220** Digital clock overlay — corner-pinned clock with configurable display, position, size, and format
+- [x] **F-220** Digital clock overlay — corner-pinned clock with configurable display, position, size, and format
 - [ ] **F-230** "Forget Me" data reset — clear all configuration and data from settings
 
 ---

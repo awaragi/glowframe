@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { arrayMove } from '@dnd-kit/sortable'
 import { MODE_DEFAULTS } from '@/lib/modeDefaults'
+import type { ClockFormat } from '@/lib/clockFormat'
 import type {
   ProfileMode,
   FullProfile,
@@ -13,8 +14,23 @@ import type {
 } from '@/lib/modeDefaults'
 
 export type { ProfileMode, FullProfile, FullColorProfile, RingProfile, RingColorProfile, SpotProfile, SpotColorProfile } from '@/lib/modeDefaults'
+export type { ClockFormat } from '@/lib/clockFormat'
 
-export type Profile = { id: string; name: string } & ProfileMode
+export interface ClockConfig {
+  enabled: boolean
+  position: 'top-left' | 'bottom-left' | 'bottom-right'
+  size: 'small' | 'medium' | 'large'
+  format: ClockFormat
+}
+
+export const CLOCK_DEFAULTS: ClockConfig = {
+  enabled: true,
+  position: 'bottom-right',
+  size: 'medium',
+  format: 'HH:mm',
+}
+
+export type Profile = { id: string; name: string; clock?: ClockConfig } & ProfileMode
 
 // All mode-specific fields combined (mode discriminant stripped first to avoid never collapse)
 type AllModeFields = Partial<
@@ -24,7 +40,7 @@ type AllModeFields = Partial<
   Omit<RingColorProfile, 'mode'> &
   Omit<SpotProfile, 'mode'> &
   Omit<SpotColorProfile, 'mode'>
->
+> & { clock?: Partial<ClockConfig> }
 
 interface AppState {
   _version: number
@@ -48,6 +64,7 @@ const _defaultProfile: Profile = {
   id: crypto.randomUUID(),
   name: 'Default',
   ...MODE_DEFAULTS['full'],
+  clock: { ...CLOCK_DEFAULTS },
 }
 
 export const useAppStore = create<AppState>()(
@@ -62,6 +79,7 @@ export const useAppStore = create<AppState>()(
           ...active,
           id: crypto.randomUUID(),
           name,
+          clock: { ...CLOCK_DEFAULTS },
         }
         set((state) => ({
           profiles: [...state.profiles, newProfile],
@@ -87,6 +105,7 @@ export const useAppStore = create<AppState>()(
               id: crypto.randomUUID(),
               name: 'Default',
               ...MODE_DEFAULTS['full'],
+              clock: { ...CLOCK_DEFAULTS },
             }
             return { profiles: [fresh], activeProfileId: fresh.id }
           }
@@ -105,7 +124,9 @@ export const useAppStore = create<AppState>()(
       updateProfile(id, patch) {
         set((state) => ({
           profiles: state.profiles.map((p) =>
-            p.id === id ? ({ ...p, ...patch } as Profile) : p,
+            p.id === id
+              ? ({ ...p, ...patch, clock: { ...(p.clock ?? CLOCK_DEFAULTS), ...patch.clock } } as Profile)
+              : p,
           ),
         }))
       },
@@ -113,7 +134,7 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           profiles: state.profiles.map((p) =>
             p.id === id
-              ? ({ id: p.id, name: p.name, ...MODE_DEFAULTS[newMode] } as Profile)
+              ? ({ id: p.id, name: p.name, clock: p.clock ?? CLOCK_DEFAULTS, ...MODE_DEFAULTS[newMode] } as Profile)
               : p,
           ),
         }))

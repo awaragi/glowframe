@@ -47,6 +47,7 @@ test('full mode brightness persists across reload', async ({ page }) => {
   const settings = new SettingsPage(page)
   await home.goto()
   await settings.open()
+  await page.getByRole('tab', { name: 'Light' }).click()
 
   // Default mode is full — lower lightBrightness slider by 50
   const brightnessSlider = page.getByRole('slider', { name: 'Light brightness' })
@@ -71,6 +72,7 @@ test('ring-color mode innerRadius persists across reload', async ({ page }) => {
   const settings = new SettingsPage(page)
   await home.goto()
   await settings.open()
+  await page.getByRole('tab', { name: 'Light' }).click()
 
   await settings.selectMode('ring-color')
 
@@ -93,6 +95,7 @@ test('mode selection persists across reload', async ({ page }) => {
   const settings = new SettingsPage(page)
   await home.goto()
   await settings.open()
+  await page.getByRole('tab', { name: 'Light' }).click()
 
   await settings.selectMode('spot-color')
   await expect(settings.lightSurface).toHaveAttribute('data-mode', 'spot-color')

@@ -17,8 +17,10 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useAppStore, selectActiveProfile } from '@/store/index'
-import type { Profile, ProfileMode } from '@/store/index'
+import { Tabs } from '@base-ui/react/tabs'
+import { Switch } from '@base-ui/react/switch'
+import { useAppStore, selectActiveProfile, CLOCK_DEFAULTS } from '@/store/index'
+import type { Profile, ProfileMode, ClockConfig } from '@/store/index'
 import { encodeProfile } from '@/lib/profileShare'
 import { toast } from 'sonner'
 import {
@@ -48,6 +50,15 @@ const nameSchema = z.object({
 })
 
 type NameFormValues = z.infer<typeof nameSchema>
+
+const clockSchema = z.object({
+  enabled: z.boolean(),
+  position: z.enum(['top-left', 'bottom-left', 'bottom-right']),
+  size: z.enum(['small', 'medium', 'large']),
+  format: z.enum(['HH:mm', 'HH:mm:ss', 'hh:mm a', 'hh:mm:ss a']),
+})
+
+type ClockFormValues = z.infer<typeof clockSchema>
 
 interface SortableProfileItemProps {
   profile: Profile
@@ -189,6 +200,29 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProfileId, reset])
 
+  const activeClock = activeProfile.clock ?? CLOCK_DEFAULTS
+  const { setValue: setClockField, watch: watchClock, reset: resetClock } = useForm<ClockFormValues>({
+    resolver: zodResolver(clockSchema),
+    defaultValues: {
+      enabled: activeClock.enabled,
+      position: activeClock.position,
+      size: activeClock.size,
+      format: activeClock.format,
+    },
+    mode: 'onChange',
+  })
+
+  useEffect(() => {
+    const c = activeProfile.clock ?? CLOCK_DEFAULTS
+    resetClock({ enabled: c.enabled, position: c.position, size: c.size, format: c.format })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProfileId, resetClock])
+
+  function patchClock<K extends keyof ClockFormValues>(key: K, value: ClockFormValues[K]) {
+    setClockField(key, value as never)
+    updateProfile({ clock: { [key]: value } as Partial<ClockConfig> })
+  }
+
   function renderModeSettings() {
     switch (activeProfile.mode) {
       case 'full':
@@ -287,42 +321,140 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
             />
           </section>
 
-          {/* Mode selector */}
-          <section>
-            <Label>Mode</Label>
-            <Select
-              value={activeProfile.mode}
-              onValueChange={(value) => switchMode(activeProfileId, value as ProfileMode['mode'])}
+          {/* Tabs: Light / Clock */}
+          <Tabs.Root defaultValue="light" className="flex flex-col gap-0">
+            <Tabs.List
+              activateOnFocus
+              className="flex border-b border-border"
             >
-              <SelectTrigger
-                className="mt-1 w-full"
-                aria-label="Mode selector"
-                data-testid="mode-selector"
+              <Tabs.Tab
+                value="light"
+                className="flex-1 px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground aria-selected:border-b-2 aria-selected:border-primary aria-selected:text-foreground"
               >
-                {MODE_LABELS[activeProfile.mode]}
-              </SelectTrigger>
-              <SelectContent>
-                {(Object.entries(MODE_LABELS) as [ProfileMode['mode'], string][]).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>{label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </section>
+                Light
+              </Tabs.Tab>
+              <Tabs.Tab
+                value="clock"
+                className="flex-1 px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground aria-selected:border-b-2 aria-selected:border-primary aria-selected:text-foreground"
+              >
+                Clock
+              </Tabs.Tab>
+            </Tabs.List>
 
-          {/* Mode-specific settings */}
-          {renderModeSettings()}
+            {/* Light tab */}
+            <Tabs.Panel value="light" className="flex flex-col gap-6 pt-4">
+              {/* Mode selector */}
+              <section>
+                <Label>Mode</Label>
+                <Select
+                  value={activeProfile.mode}
+                  onValueChange={(value) => switchMode(activeProfileId, value as ProfileMode['mode'])}
+                >
+                  <SelectTrigger
+                    className="mt-1 w-full"
+                    aria-label="Mode selector"
+                    data-testid="mode-selector"
+                  >
+                    {MODE_LABELS[activeProfile.mode]}
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(Object.entries(MODE_LABELS) as [ProfileMode['mode'], string][]).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </section>
 
-          {/* Share */}
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleCopyShareLink}
-            aria-label="Copy share link for active profile"
-            data-testid="copy-share-link"
-          >
-            <Share2 className="mr-2 size-4" />
-            Copy share link
-          </Button>
+              {/* Mode-specific settings */}
+              {renderModeSettings()}
+
+              {/* Share */}
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleCopyShareLink}
+                aria-label="Copy share link for active profile"
+                data-testid="copy-share-link"
+              >
+                <Share2 className="mr-2 size-4" />
+                Copy share link
+              </Button>
+            </Tabs.Panel>
+
+            {/* Clock tab */}
+            <Tabs.Panel value="clock" className="flex flex-col gap-4 pt-4">
+              {/* Show clock toggle */}
+              <section className="flex items-center justify-between">
+                <Label>Show clock</Label>
+                <Switch.Root
+                  aria-label="Show clock"
+                  checked={watchClock('enabled')}
+                  onCheckedChange={(checked) => patchClock('enabled', checked)}
+                  className="relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent bg-input transition-colors data-[checked]:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <Switch.Thumb className="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[checked]:translate-x-5" />
+                </Switch.Root>
+              </section>
+
+              {/* Position selector */}
+              <section>
+                <Label>Position</Label>
+                <Select
+                  value={watchClock('position')}
+                  onValueChange={(v) => patchClock('position', v as ClockFormValues['position'])}
+                  disabled={!watchClock('enabled')}
+                >
+                  <SelectTrigger className="mt-1 w-full" aria-label="Position">
+                    {{ 'top-left': 'Top-left', 'bottom-left': 'Bottom-left', 'bottom-right': 'Bottom-right' }[watchClock('position')]}
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="top-left">Top-left</SelectItem>
+                    <SelectItem value="bottom-left">Bottom-left</SelectItem>
+                    <SelectItem value="bottom-right">Bottom-right</SelectItem>
+                  </SelectContent>
+                </Select>
+              </section>
+
+              {/* Size selector */}
+              <section>
+                <Label>Size</Label>
+                <Select
+                  value={watchClock('size')}
+                  onValueChange={(v) => patchClock('size', v as ClockFormValues['size'])}
+                  disabled={!watchClock('enabled')}
+                >
+                  <SelectTrigger className="mt-1 w-full" aria-label="Size">
+                    {{ small: 'Small', medium: 'Medium', large: 'Large' }[watchClock('size')]}
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Small</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="large">Large</SelectItem>
+                  </SelectContent>
+                </Select>
+              </section>
+
+              {/* Format selector */}
+              <section>
+                <Label>Format</Label>
+                <Select
+                  value={watchClock('format')}
+                  onValueChange={(v) => patchClock('format', v as ClockFormValues['format'])}
+                  disabled={!watchClock('enabled')}
+                >
+                  <SelectTrigger className="mt-1 w-full" aria-label="Format">
+                    {watchClock('format')}
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="HH:mm">HH:mm</SelectItem>
+                    <SelectItem value="HH:mm:ss">HH:mm:ss</SelectItem>
+                    <SelectItem value="hh:mm a">hh:mm a</SelectItem>
+                    <SelectItem value="hh:mm:ss a">hh:mm:ss a</SelectItem>
+                  </SelectContent>
+                </Select>
+              </section>
+            </Tabs.Panel>
+          </Tabs.Root>
         </div>
       </SheetContent>
     </Sheet>

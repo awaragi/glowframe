@@ -41,6 +41,7 @@ export class SettingsPage {
   }
 
   async selectMode(mode: string) {
+    await this.page.getByRole('tab', { name: 'Light' }).click()
     await this.modeSelector.click()
     const label = MODE_LABELS[mode] ?? mode
     await this.page.getByRole('option', { name: label, exact: true }).click()

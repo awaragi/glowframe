@@ -144,3 +144,5 @@ vite.config.ts.timestamp-*
 test-results/
 playwright-report/
 .playwright-mcp/
+/.idea/
+/.junie/

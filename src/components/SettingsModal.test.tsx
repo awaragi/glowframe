@@ -94,62 +94,80 @@ describe('SettingsModal', () => {
   })
 
   describe('mode selector', () => {
-    it('renders the mode selector trigger', () => {
+    it('renders the mode selector trigger', async () => {
+      const user = userEvent.setup()
       render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      await user.click(screen.getByRole('tab', { name: 'Light' }))
       expect(screen.getByTestId('mode-selector')).toBeInTheDocument()
     })
 
-    it('shows the current mode in the selector', () => {
+    it('shows the current mode in the selector', async () => {
+      const user = userEvent.setup()
       resetStore(makeFullProfile())
       render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      await user.click(screen.getByRole('tab', { name: 'Light' }))
       // The trigger shows the current mode label
       expect(screen.getByTestId('mode-selector')).toHaveTextContent(/Full/i)
     })
   })
 
   describe('mode-specific settings sections', () => {
-    it('shows Light Temperature and Light Brightness sliders in full mode', () => {
+    it('shows Light Temperature and Light Brightness sliders in full mode', async () => {
+      const user = userEvent.setup()
       resetStore(makeFullProfile())
       render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      await user.click(screen.getByRole('tab', { name: 'Light' }))
       expect(screen.getByText(/Light Temperature/i)).toBeInTheDocument()
       expect(screen.getByText(/Light Brightness/i)).toBeInTheDocument()
     })
 
-    it('does not show Inner Radius in full mode', () => {
+    it('does not show Inner Radius in full mode', async () => {
+      const user = userEvent.setup()
       resetStore(makeFullProfile())
       render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      await user.click(screen.getByRole('tab', { name: 'Light' }))
       expect(screen.queryByText(/Inner Radius/i)).not.toBeInTheDocument()
     })
 
-    it('shows Light Color picker in full-color mode', () => {
+    it('shows Light Color picker in full-color mode', async () => {
+      const user = userEvent.setup()
       resetStore({ id: 'p1', name: 'Test', mode: 'full-color', lightColor: '#ffffff' })
       render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      await user.click(screen.getByRole('tab', { name: 'Light' }))
       expect(screen.getByLabelText('Light color picker')).toBeInTheDocument()
     })
 
-    it('does not show temperature or brightness sliders in full-color mode', () => {
+    it('does not show temperature or brightness sliders in full-color mode', async () => {
+      const user = userEvent.setup()
       resetStore({ id: 'p1', name: 'Test', mode: 'full-color', lightColor: '#ffffff' })
       render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      await user.click(screen.getByRole('tab', { name: 'Light' }))
       expect(screen.queryByText(/Light Temperature/i)).not.toBeInTheDocument()
       expect(screen.queryByText(/Light Brightness/i)).not.toBeInTheDocument()
     })
 
-    it('shows Inner Radius and Outer Radius sliders in ring mode', () => {
+    it('shows Inner Radius and Outer Radius sliders in ring mode', async () => {
+      const user = userEvent.setup()
       resetStore({ id: 'p1', name: 'Test', mode: 'ring', lightTemperature: 6500, lightBrightness: 100, innerRadius: 20, outerRadius: 80, backgroundLightTemperature: 0, backgroundLightBrightness: 0 })
       render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      await user.click(screen.getByRole('tab', { name: 'Light' }))
       expect(screen.getByText(/Inner Radius/i)).toBeInTheDocument()
       expect(screen.getByText(/Outer Radius/i)).toBeInTheDocument()
     })
 
-    it('shows Radius slider in spot mode', () => {
+    it('shows Radius slider in spot mode', async () => {
+      const user = userEvent.setup()
       resetStore({ id: 'p1', name: 'Test', mode: 'spot', lightTemperature: 6500, lightBrightness: 100, radius: 40, backgroundLightTemperature: 0, backgroundLightBrightness: 0 })
       render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      await user.click(screen.getByRole('tab', { name: 'Light' }))
       expect(screen.getByText(/\bRadius \(/i)).toBeInTheDocument()
     })
 
-    it('shows Radius and Background Color in spot-color mode', () => {
+    it('shows Radius and Background Color in spot-color mode', async () => {
+      const user = userEvent.setup()
       resetStore({ id: 'p1', name: 'Test', mode: 'spot-color', lightColor: '#ffffff', radius: 40, backgroundColor: '#000000' })
       render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      await user.click(screen.getByRole('tab', { name: 'Light' }))
       expect(screen.getByText(/\bRadius \(/i)).toBeInTheDocument()
       expect(screen.getByLabelText('Background color picker')).toBeInTheDocument()
     })
@@ -161,7 +179,8 @@ describe('SettingsModal', () => {
       const user = userEvent.setup()
       render(<SettingsModal open={true} onOpenChange={() => {}} />)
 
-      // Open the mode selector
+      // Navigate to Light tab, then open the mode selector
+      await user.click(screen.getByRole('tab', { name: 'Light' }))
       await user.click(screen.getByTestId('mode-selector'))
       // Click "Full Color" option
       await user.click(screen.getByRole('option', { name: 'Full Color' }))
@@ -176,12 +195,44 @@ describe('SettingsModal', () => {
       const user = userEvent.setup()
       render(<SettingsModal open={true} onOpenChange={() => {}} />)
 
+      await user.click(screen.getByRole('tab', { name: 'Light' }))
       await user.click(screen.getByTestId('mode-selector'))
       await user.click(screen.getByRole('option', { name: 'Full Color' }))
 
       // Should now show Light Color picker, not temperature/brightness sliders
       expect(screen.queryByText(/Light Temperature/i)).not.toBeInTheDocument()
       expect(screen.getByLabelText('Light color picker')).toBeInTheDocument()
+    })
+  })
+
+  describe('Clock tab', () => {
+    it('renders Show clock toggle when Clock tab is active', async () => {
+      const user = userEvent.setup()
+      resetStore(makeFullProfile())
+      render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      await user.click(screen.getByRole('tab', { name: 'Clock' }))
+      expect(screen.getByRole('switch', { name: 'Show clock' })).toBeInTheDocument()
+    })
+
+    it('renders Position, Size, and Format selectors in Clock tab', async () => {
+      const user = userEvent.setup()
+      resetStore(makeFullProfile())
+      render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      await user.click(screen.getByRole('tab', { name: 'Clock' }))
+      expect(screen.getByLabelText('Position')).toBeInTheDocument()
+      expect(screen.getByLabelText('Size')).toBeInTheDocument()
+      expect(screen.getByLabelText('Format')).toBeInTheDocument()
+    })
+
+    it('enabling the clock updates profile.clock.enabled in the store', async () => {
+      const user = userEvent.setup()
+      const profile = makeFullProfile({ id: 'p1' })
+      resetStore(profile)
+      render(<SettingsModal open={true} onOpenChange={() => {}} />)
+      await user.click(screen.getByRole('tab', { name: 'Clock' }))
+      await user.click(screen.getByRole('switch', { name: 'Show clock' }))
+      const updated = useAppStore.getState().profiles.find((p) => p.id === 'p1')!
+      expect(updated.clock?.enabled).toBe(true)
     })
   })
 
