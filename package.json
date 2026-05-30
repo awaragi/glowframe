@@ -6,6 +6,7 @@
   "version": "1.4.0",
   "type": "module",
   "scripts": {
+    "start": "npm run dev",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "prebuild:prod": "npm run build",
@@ -14,6 +15,7 @@
     "lint": "eslint . --ext ts,tsx,js",
     "format": "prettier --write 'src/**/*.{ts,tsx,js,json}' '*.{ts,js,json}'",
     "preview": "vite preview",
+    "test:e2e:setup": "playwright install chromium",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",

@@ -4,7 +4,7 @@ import { arrayMove } from '@dnd-kit/sortable'
 import { MODE_DEFAULTS } from '@/lib/modeDefaults'
 import type { ClockFormat } from '@/lib/clockFormat'
 import type {
-  ProfileMode,
+  LightConfig,
   FullProfile,
   FullColorProfile,
   RingProfile,
@@ -14,7 +14,7 @@ import type {
 } from '@/lib/modeDefaults'
 import type { BackupProfile } from '@/lib/profileBackup'
 
-export type { ProfileMode, FullProfile, FullColorProfile, RingProfile, RingColorProfile, SpotProfile, SpotColorProfile } from '@/lib/modeDefaults'
+export type { LightConfig, FullProfile, FullColorProfile, RingProfile, RingColorProfile, SpotProfile, SpotColorProfile } from '@/lib/modeDefaults'
 export type { ClockFormat } from '@/lib/clockFormat'
 
 export interface ClockConfig {
@@ -31,17 +31,17 @@ export const CLOCK_DEFAULTS: ClockConfig = {
   format: 'HH:mm',
 }
 
-export type Profile = { id: string; name: string; clock?: ClockConfig } & ProfileMode
+export type Profile = { id: string; name: string; light: LightConfig; clock: ClockConfig }
 
-// All mode-specific fields combined (mode discriminant stripped first to avoid never collapse)
-type AllModeFields = Partial<
+// All light-specific fields combined (mode discriminant stripped first to avoid never collapse)
+type AllLightFields = Partial<
   Omit<FullProfile, 'mode'> &
   Omit<FullColorProfile, 'mode'> &
   Omit<RingProfile, 'mode'> &
   Omit<RingColorProfile, 'mode'> &
   Omit<SpotProfile, 'mode'> &
   Omit<SpotColorProfile, 'mode'>
-> & { clock?: Partial<ClockConfig> }
+>
 
 interface AppState {
   _version: number
@@ -52,8 +52,9 @@ interface AppState {
   renameProfile: (id: string, newName: string) => void
   deleteProfile: (id: string) => void
   setActiveProfile: (id: string) => void
-  updateProfile: (id: string, patch: AllModeFields) => void
-  switchMode: (id: string, newMode: ProfileMode['mode']) => void
+  updateLight: (id: string, patch: AllLightFields) => void
+  updateClock: (id: string, patch: Partial<ClockConfig>) => void
+  switchMode: (id: string, newMode: LightConfig['mode']) => void
   reorderProfiles: (fromIndex: number, toIndex: number) => void
   restoreProfiles: (profiles: BackupProfile[]) => void
 }
@@ -65,23 +66,23 @@ export function selectActiveProfile(state: AppState): Profile {
 const _defaultProfile: Profile = {
   id: crypto.randomUUID(),
   name: 'Default',
-  ...MODE_DEFAULTS['full'],
+  light: { ...MODE_DEFAULTS['full'] },
   clock: { ...CLOCK_DEFAULTS },
 }
 
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
-      _version: 4,
+      _version: 5,
       profiles: [_defaultProfile],
       activeProfileId: _defaultProfile.id,
       createProfile(name) {
         const active = selectActiveProfile(get())
         const newProfile: Profile = {
-          ...active,
           id: crypto.randomUUID(),
           name,
-          clock: { ...CLOCK_DEFAULTS },
+          light: { ...active.light },
+          clock: { ...active.clock },
         }
         set((state) => ({
           profiles: [...state.profiles, newProfile],
@@ -90,7 +91,7 @@ export const useAppStore = create<AppState>()(
       },
       importProfile(data) {
         const id = crypto.randomUUID()
-        const newProfile = { ...data, id } as unknown as Profile
+        const newProfile = { ...data, id }
         set((state) => ({ profiles: [...state.profiles, newProfile] }))
         return id
       },
@@ -106,7 +107,7 @@ export const useAppStore = create<AppState>()(
             const fresh: Profile = {
               id: crypto.randomUUID(),
               name: 'Default',
-              ...MODE_DEFAULTS['full'],
+              light: { ...MODE_DEFAULTS['full'] },
               clock: { ...CLOCK_DEFAULTS },
             }
             return { profiles: [fresh], activeProfileId: fresh.id }
@@ -123,11 +124,20 @@ export const useAppStore = create<AppState>()(
       setActiveProfile(id) {
         set({ activeProfileId: id })
       },
-      updateProfile(id, patch) {
+      updateLight(id, patch) {
         set((state) => ({
           profiles: state.profiles.map((p) =>
             p.id === id
-              ? ({ ...p, ...patch, clock: { ...(p.clock ?? CLOCK_DEFAULTS), ...patch.clock } } as Profile)
+              ? { ...p, light: { ...p.light, ...patch } as LightConfig }
+              : p,
+          ),
+        }))
+      },
+      updateClock(id, patch) {
+        set((state) => ({
+          profiles: state.profiles.map((p) =>
+            p.id === id
+              ? { ...p, clock: { ...p.clock, ...patch } }
               : p,
           ),
         }))
@@ -136,7 +146,7 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           profiles: state.profiles.map((p) =>
             p.id === id
-              ? ({ id: p.id, name: p.name, clock: p.clock ?? CLOCK_DEFAULTS, ...MODE_DEFAULTS[newMode] } as Profile)
+              ? { id: p.id, name: p.name, light: { ...MODE_DEFAULTS[newMode] }, clock: p.clock }
               : p,
           ),
         }))
@@ -148,10 +158,11 @@ export const useAppStore = create<AppState>()(
       },
       restoreProfiles(backupProfiles) {
         const restored: Profile[] = backupProfiles.map((entry) => ({
-          ...entry,
           id: crypto.randomUUID(),
-          clock: entry.clock ?? CLOCK_DEFAULTS,
-        }) as Profile)
+          name: entry.name,
+          light: entry.light,
+          clock: entry.clock,
+        }))
         set({
           profiles: restored,
           activeProfileId: restored[0].id,
@@ -160,7 +171,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'glowframe-store',
-      version: 4,
+      version: 5,
       partialize: (state) => ({
         profiles: state.profiles,
         activeProfileId: state.activeProfileId,

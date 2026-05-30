@@ -1,5 +1,5 @@
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { useAppStore, selectActiveProfile, CLOCK_DEFAULTS } from '@/store'
+import { useAppStore, selectActiveProfile } from '@/store'
 import type { ClockConfig } from '@/store'
 
 const POSITION_CYCLE: ClockConfig['position'][] = ['top-left', 'bottom-left', 'bottom-right']
@@ -7,9 +7,9 @@ const SIZE_CYCLE: ClockConfig['size'][] = ['small', 'medium', 'large']
 
 export default function ClockShortcuts() {
   const activeProfile = useAppStore(selectActiveProfile)
-  const updateProfile = useAppStore((s) => s.updateProfile)
+  const updateClock = useAppStore((s) => s.updateClock)
 
-  const clock = activeProfile.clock ?? CLOCK_DEFAULTS
+  const clock = activeProfile.clock
 
   const bindings = [
     // Shift+T must be listed BEFORE plain t so the shift variant is matched first.
@@ -19,21 +19,21 @@ export default function ClockShortcuts() {
       handler() {
         const idx = SIZE_CYCLE.indexOf(clock.size)
         const nextIdx = (idx + 1) % SIZE_CYCLE.length
-        updateProfile(activeProfile.id, { clock: { size: SIZE_CYCLE[nextIdx] } })
+        updateClock(activeProfile.id, { size: SIZE_CYCLE[nextIdx] })
       },
     },
     {
       key: 't',
       handler() {
         if (!clock.enabled) {
-          updateProfile(activeProfile.id, { clock: { enabled: true, position: 'top-left' } })
+          updateClock(activeProfile.id, { enabled: true, position: 'top-left' })
         } else {
           const idx = POSITION_CYCLE.indexOf(clock.position)
           const isLast = idx === POSITION_CYCLE.length - 1
           if (isLast) {
-            updateProfile(activeProfile.id, { clock: { enabled: false } })
+            updateClock(activeProfile.id, { enabled: false })
           } else {
-            updateProfile(activeProfile.id, { clock: { position: POSITION_CYCLE[idx + 1] } })
+            updateClock(activeProfile.id, { position: POSITION_CYCLE[idx + 1] })
           }
         }
       },

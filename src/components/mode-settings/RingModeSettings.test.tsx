@@ -23,17 +23,19 @@ const ringSchema = z
     }
   })
 
-function makeRingProfile(overrides: Partial<RingProfile> = {}): { id: string } & RingProfile {
+function makeRingProfile(overrides: Partial<RingProfile> = {}): { id: string; light: RingProfile } {
   return {
     id: 'test-ring',
-    mode: 'ring',
-    lightTemperature: 6500,
-    lightBrightness: 100,
-    innerRadius: 20,
-    outerRadius: 80,
-    backgroundLightTemperature: 0,
-    backgroundLightBrightness: 0,
-    ...overrides,
+    light: {
+      mode: 'ring',
+      lightTemperature: 6500,
+      lightBrightness: 100,
+      innerRadius: 20,
+      outerRadius: 80,
+      backgroundLightTemperature: 0,
+      backgroundLightBrightness: 0,
+      ...overrides,
+    },
   }
 }
 
@@ -71,14 +73,14 @@ describe('RingModeSettings — Zod schema cross-validation', () => {
 
 describe('RingModeSettings — component', () => {
   it('does not show error message when radii are initially valid', () => {
-    render(<RingModeSettings profile={makeRingProfile()} updateProfile={() => {}} />)
+    render(<RingModeSettings profile={makeRingProfile()} updateLight={() => {}} />)
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
-  it('calls updateProfile when slider changes to a valid value', async () => {
-    const updateProfile = vi.fn()
+  it('calls updateLight when slider changes to a valid value', async () => {
+    const updateLight = vi.fn()
     // innerRadius: 20, outerRadius: 80 — pressing ArrowRight on inner gives 21 (still valid)
-    render(<RingModeSettings profile={makeRingProfile()} updateProfile={updateProfile} />)
+    render(<RingModeSettings profile={makeRingProfile()} updateLight={updateLight} />)
 
     const innerLabel = screen.getByText(/Inner Radius/i)
     const section = innerLabel.closest('section')!
@@ -87,17 +89,17 @@ describe('RingModeSettings — component', () => {
     fireEvent.keyDown(input, { key: 'ArrowRight', code: 'ArrowRight' })
 
     await waitFor(() => {
-      expect(updateProfile).toHaveBeenCalled()
+      expect(updateLight).toHaveBeenCalled()
     })
   })
 
-  it('does not call updateProfile when innerRadius meets outerRadius', async () => {
-    const updateProfile = vi.fn()
+  it('does not call updateLight when innerRadius meets outerRadius', async () => {
+    const updateLight = vi.fn()
     // innerRadius: 79, outerRadius: 80 — one ArrowRight makes them equal (invalid)
     render(
       <RingModeSettings
         profile={makeRingProfile({ innerRadius: 79, outerRadius: 80 })}
-        updateProfile={updateProfile}
+        updateLight={updateLight}
       />,
     )
 
@@ -112,6 +114,6 @@ describe('RingModeSettings — component', () => {
         'Inner radius must be less than outer radius.',
       )
     })
-    expect(updateProfile).not.toHaveBeenCalled()
+    expect(updateLight).not.toHaveBeenCalled()
   })
 })

@@ -15,32 +15,32 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 interface Props {
-  profile: { id: string } & SpotColorProfile
-  updateProfile: (patch: Partial<FormValues>) => void
+  profile: { id: string; light: SpotColorProfile }
+  updateLight: (patch: Partial<FormValues>) => void
 }
 
-export default function SpotColorModeSettings({ profile, updateProfile }: Props) {
+export default function SpotColorModeSettings({ profile, updateLight }: Props) {
   const { register, setValue, watch, reset } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      lightColor: profile.lightColor,
-      radius: profile.radius,
-      backgroundColor: profile.backgroundColor,
+      lightColor: profile.light.lightColor,
+      radius: profile.light.radius,
+      backgroundColor: profile.light.backgroundColor,
     },
     mode: 'onChange',
   })
 
   useEffect(() => {
     reset({
-      lightColor: profile.lightColor,
-      radius: profile.radius,
-      backgroundColor: profile.backgroundColor,
+      lightColor: profile.light.lightColor,
+      radius: profile.light.radius,
+      backgroundColor: profile.light.backgroundColor,
     })
-  }, [profile.id, profile.lightColor, profile.radius, profile.backgroundColor, reset])
+  }, [profile.id, profile.light.lightColor, profile.light.radius, profile.light.backgroundColor, reset])
 
   function patch<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValue(key, value as never)
-    updateProfile({ [key]: value })
+    updateLight({ [key]: value })
   }
 
   return (

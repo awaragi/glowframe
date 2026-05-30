@@ -28,40 +28,40 @@ const schema = z
 type FormValues = z.infer<typeof schema>
 
 interface Props {
-  profile: { id: string } & RingProfile
-  updateProfile: (patch: Partial<FormValues>) => void
+  profile: { id: string; light: RingProfile }
+  updateLight: (patch: Partial<FormValues>) => void
 }
 
-export default function RingModeSettings({ profile, updateProfile }: Props) {
+export default function RingModeSettings({ profile, updateLight }: Props) {
   const { setValue, watch, reset, trigger, formState } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      lightTemperature: profile.lightTemperature,
-      lightBrightness: profile.lightBrightness,
-      innerRadius: profile.innerRadius,
-      outerRadius: profile.outerRadius,
-      backgroundLightTemperature: profile.backgroundLightTemperature,
-      backgroundLightBrightness: profile.backgroundLightBrightness,
+      lightTemperature: profile.light.lightTemperature,
+      lightBrightness: profile.light.lightBrightness,
+      innerRadius: profile.light.innerRadius,
+      outerRadius: profile.light.outerRadius,
+      backgroundLightTemperature: profile.light.backgroundLightTemperature,
+      backgroundLightBrightness: profile.light.backgroundLightBrightness,
     },
     mode: 'onChange',
   })
 
   useEffect(() => {
     reset({
-      lightTemperature: profile.lightTemperature,
-      lightBrightness: profile.lightBrightness,
-      innerRadius: profile.innerRadius,
-      outerRadius: profile.outerRadius,
-      backgroundLightTemperature: profile.backgroundLightTemperature,
-      backgroundLightBrightness: profile.backgroundLightBrightness,
+      lightTemperature: profile.light.lightTemperature,
+      lightBrightness: profile.light.lightBrightness,
+      innerRadius: profile.light.innerRadius,
+      outerRadius: profile.light.outerRadius,
+      backgroundLightTemperature: profile.light.backgroundLightTemperature,
+      backgroundLightBrightness: profile.light.backgroundLightBrightness,
     })
-  }, [profile.id, profile.lightTemperature, profile.lightBrightness, profile.innerRadius, profile.outerRadius, profile.backgroundLightTemperature, profile.backgroundLightBrightness, reset])
+  }, [profile.id, profile.light.lightTemperature, profile.light.lightBrightness, profile.light.innerRadius, profile.light.outerRadius, profile.light.backgroundLightTemperature, profile.light.backgroundLightBrightness, reset])
 
   async function patch<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValue(key, value as never)
     const valid = await trigger()
     if (valid) {
-      updateProfile({ [key]: value })
+      updateLight({ [key]: value })
     }
   }
 

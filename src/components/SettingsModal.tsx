@@ -19,8 +19,8 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Tabs } from '@base-ui/react/tabs'
 import { Switch } from '@base-ui/react/switch'
-import { useAppStore, selectActiveProfile, CLOCK_DEFAULTS } from '@/store/index'
-import type { Profile, ProfileMode, ClockConfig } from '@/store/index'
+import { useAppStore, selectActiveProfile } from '@/store/index'
+import type { Profile, LightConfig, ClockConfig } from '@/store/index'
 import { encodeProfile } from '@/lib/profileShare'
 import { exportBackup, importBackup } from '@/lib/profileBackup'
 import type { BackupPayload } from '@/lib/profileBackup'
@@ -146,7 +146,7 @@ interface SettingsModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-const MODE_LABELS: Record<ProfileMode['mode'], string> = {
+const MODE_LABELS: Record<LightConfig['mode'], string> = {
   'full': 'Full',
   'full-color': 'Full Color',
   'ring': 'Ring',
@@ -163,7 +163,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const renameProfile = useAppStore((s) => s.renameProfile)
   const deleteProfile = useAppStore((s) => s.deleteProfile)
   const setActiveProfile = useAppStore((s) => s.setActiveProfile)
-  const storeUpdateProfile = useAppStore((s) => s.updateProfile)
+  const storeUpdateLight = useAppStore((s) => s.updateLight)
+  const storeUpdateClock = useAppStore((s) => s.updateClock)
   const switchMode = useAppStore((s) => s.switchMode)
   const reorderProfiles = useAppStore((s) => s.reorderProfiles)
   const restoreProfiles = useAppStore((s) => s.restoreProfiles)
@@ -195,8 +196,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     document.body.removeAttribute('data-dnd-active')
   }
 
-  const updateProfile = (patch: Parameters<typeof storeUpdateProfile>[1]) =>
-    storeUpdateProfile(activeProfileId, patch)
+  const updateLight = (patch: Parameters<typeof storeUpdateLight>[1]) =>
+    storeUpdateLight(activeProfileId, patch)
 
   const { register, reset } = useForm<NameFormValues>({
     resolver: zodResolver(nameSchema),
@@ -208,7 +209,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProfileId, reset])
 
-  const activeClock = activeProfile.clock ?? CLOCK_DEFAULTS
+  const activeClock = activeProfile.clock
   const { setValue: setClockField, watch: watchClock, reset: resetClock } = useForm<ClockFormValues>({
     resolver: zodResolver(clockSchema),
     defaultValues: {
@@ -221,30 +222,42 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   })
 
   useEffect(() => {
-    const c = activeProfile.clock ?? CLOCK_DEFAULTS
+    const c = activeProfile.clock
     resetClock({ enabled: c.enabled, position: c.position, size: c.size, format: c.format })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProfileId, resetClock])
 
   function patchClock<K extends keyof ClockFormValues>(key: K, value: ClockFormValues[K]) {
     setClockField(key, value as never)
-    updateProfile({ clock: { [key]: value } as Partial<ClockConfig> })
+    storeUpdateClock(activeProfileId, { [key]: value } as Partial<ClockConfig>)
   }
 
   function renderModeSettings() {
-    switch (activeProfile.mode) {
-      case 'full':
-        return <FullModeSettings profile={activeProfile} updateProfile={updateProfile} />
-      case 'full-color':
-        return <FullColorModeSettings profile={activeProfile} updateProfile={updateProfile} />
-      case 'ring':
-        return <RingModeSettings profile={activeProfile} updateProfile={updateProfile} />
-      case 'ring-color':
-        return <RingColorModeSettings profile={activeProfile} updateProfile={updateProfile} />
-      case 'spot':
-        return <SpotModeSettings profile={activeProfile} updateProfile={updateProfile} />
-      case 'spot-color':
-        return <SpotColorModeSettings profile={activeProfile} updateProfile={updateProfile} />
+    switch (activeProfile.light.mode) {
+      case 'full': {
+        const p = { id: activeProfile.id, light: activeProfile.light }
+        return <FullModeSettings profile={p} updateLight={updateLight} />
+      }
+      case 'full-color': {
+        const p = { id: activeProfile.id, light: activeProfile.light }
+        return <FullColorModeSettings profile={p} updateLight={updateLight} />
+      }
+      case 'ring': {
+        const p = { id: activeProfile.id, light: activeProfile.light }
+        return <RingModeSettings profile={p} updateLight={updateLight} />
+      }
+      case 'ring-color': {
+        const p = { id: activeProfile.id, light: activeProfile.light }
+        return <RingColorModeSettings profile={p} updateLight={updateLight} />
+      }
+      case 'spot': {
+        const p = { id: activeProfile.id, light: activeProfile.light }
+        return <SpotModeSettings profile={p} updateLight={updateLight} />
+      }
+      case 'spot-color': {
+        const p = { id: activeProfile.id, light: activeProfile.light }
+        return <SpotColorModeSettings profile={p} updateLight={updateLight} />
+      }
     }
   }
 
@@ -433,18 +446,18 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
               <section>
                 <Label>Mode</Label>
                 <Select
-                  value={activeProfile.mode}
-                  onValueChange={(value) => switchMode(activeProfileId, value as ProfileMode['mode'])}
+                  value={activeProfile.light.mode}
+                  onValueChange={(value) => switchMode(activeProfileId, value as LightConfig['mode'])}
                 >
                   <SelectTrigger
                     className="mt-1 w-full"
                     aria-label="Mode selector"
                     data-testid="mode-selector"
                   >
-                    {MODE_LABELS[activeProfile.mode]}
+                    {MODE_LABELS[activeProfile.light.mode]}
                   </SelectTrigger>
                   <SelectContent>
-                    {(Object.entries(MODE_LABELS) as [ProfileMode['mode'], string][]).map(([value, label]) => (
+                    {(Object.entries(MODE_LABELS) as [LightConfig['mode'], string][]).map(([value, label]) => (
                       <SelectItem key={value} value={value}>{label}</SelectItem>
                     ))}
                   </SelectContent>

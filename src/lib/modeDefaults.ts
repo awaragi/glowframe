@@ -43,7 +43,7 @@ export type SpotColorProfile = {
   backgroundColor: string
 }
 
-export type ProfileMode =
+export type LightConfig =
   | FullProfile
   | FullColorProfile
   | RingProfile
@@ -58,4 +58,4 @@ export const MODE_DEFAULTS = {
   'ring-color': { mode: 'ring-color', lightColor: '#ffffff', innerRadius: 20, outerRadius: 80, backgroundColor: '#000000' },
   'spot':       { mode: 'spot',       lightTemperature: 6500, lightBrightness: 100, radius: 40, backgroundLightTemperature: 0, backgroundLightBrightness: 0 },
   'spot-color': { mode: 'spot-color', lightColor: '#ffffff', radius: 40, backgroundColor: '#000000' },
-} as const satisfies Record<ProfileMode['mode'], ProfileMode>
+} as const satisfies Record<LightConfig['mode'], LightConfig>

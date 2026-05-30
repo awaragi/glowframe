@@ -9,19 +9,19 @@ import SpotColorModeSurface from '@/components/light-modes/SpotColorModeSurface'
 import ClockOverlay from '@/components/ClockOverlay'
 
 function renderModeSurface(profile: Profile) {
-  switch (profile.mode) {
+  switch (profile.light.mode) {
     case 'full':
-      return <FullModeSurface profile={profile} />
+      return <FullModeSurface profile={{ id: profile.id, name: profile.name, ...profile.light }} />
     case 'full-color':
-      return <FullColorModeSurface profile={profile} />
+      return <FullColorModeSurface profile={{ id: profile.id, name: profile.name, ...profile.light }} />
     case 'ring':
-      return <RingModeSurface profile={profile} />
+      return <RingModeSurface profile={{ id: profile.id, name: profile.name, ...profile.light }} />
     case 'ring-color':
-      return <RingColorModeSurface profile={profile} />
+      return <RingColorModeSurface profile={{ id: profile.id, name: profile.name, ...profile.light }} />
     case 'spot':
-      return <SpotModeSurface profile={profile} />
+      return <SpotModeSurface profile={{ id: profile.id, name: profile.name, ...profile.light }} />
     case 'spot-color':
-      return <SpotColorModeSurface profile={profile} />
+      return <SpotColorModeSurface profile={{ id: profile.id, name: profile.name, ...profile.light }} />
   }
 }
 

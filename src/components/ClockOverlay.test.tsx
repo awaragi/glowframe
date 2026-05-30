@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { useAppStore } from '@/store'
+import { useAppStore, CLOCK_DEFAULTS } from '@/store'
 import type { Profile, ClockConfig } from '@/store'
 import ClockOverlay from './ClockOverlay'
 
@@ -7,14 +7,12 @@ function makeProfileWithClock(clock: Partial<ClockConfig> = {}): Profile {
   return {
     id: crypto.randomUUID(),
     name: 'Test',
-    mode: 'full',
-    lightTemperature: 6500,
-    lightBrightness: 100,
+    light: { mode: 'full', lightTemperature: 6500, lightBrightness: 100 },
     clock: {
+      ...CLOCK_DEFAULTS,
       enabled: false,
       position: 'bottom-right',
       size: 'medium',
-      format: 'HH:mm',
       ...clock,
     },
   }
@@ -22,7 +20,7 @@ function makeProfileWithClock(clock: Partial<ClockConfig> = {}): Profile {
 
 function resetStore(profile: Profile) {
   useAppStore.setState({
-    _version: 4,
+    _version: 5,
     profiles: [profile],
     activeProfileId: profile.id,
   })

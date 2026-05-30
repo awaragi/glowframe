@@ -17,36 +17,36 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 interface Props {
-  profile: { id: string } & SpotProfile
-  updateProfile: (patch: Partial<FormValues>) => void
+  profile: { id: string; light: SpotProfile }
+  updateLight: (patch: Partial<FormValues>) => void
 }
 
-export default function SpotModeSettings({ profile, updateProfile }: Props) {
+export default function SpotModeSettings({ profile, updateLight }: Props) {
   const { setValue, watch, reset } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      lightTemperature: profile.lightTemperature,
-      lightBrightness: profile.lightBrightness,
-      radius: profile.radius,
-      backgroundLightTemperature: profile.backgroundLightTemperature,
-      backgroundLightBrightness: profile.backgroundLightBrightness,
+      lightTemperature: profile.light.lightTemperature,
+      lightBrightness: profile.light.lightBrightness,
+      radius: profile.light.radius,
+      backgroundLightTemperature: profile.light.backgroundLightTemperature,
+      backgroundLightBrightness: profile.light.backgroundLightBrightness,
     },
     mode: 'onChange',
   })
 
   useEffect(() => {
     reset({
-      lightTemperature: profile.lightTemperature,
-      lightBrightness: profile.lightBrightness,
-      radius: profile.radius,
-      backgroundLightTemperature: profile.backgroundLightTemperature,
-      backgroundLightBrightness: profile.backgroundLightBrightness,
+      lightTemperature: profile.light.lightTemperature,
+      lightBrightness: profile.light.lightBrightness,
+      radius: profile.light.radius,
+      backgroundLightTemperature: profile.light.backgroundLightTemperature,
+      backgroundLightBrightness: profile.light.backgroundLightBrightness,
     })
-  }, [profile.id, profile.lightTemperature, profile.lightBrightness, profile.radius, profile.backgroundLightTemperature, profile.backgroundLightBrightness, reset])
+  }, [profile.id, profile.light.lightTemperature, profile.light.lightBrightness, profile.light.radius, profile.light.backgroundLightTemperature, profile.light.backgroundLightBrightness, reset])
 
   function patch<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValue(key, value as never)
-    updateProfile({ [key]: value })
+    updateLight({ [key]: value })
   }
 
   return (

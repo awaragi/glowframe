@@ -26,36 +26,36 @@ const schema = z
 type FormValues = z.infer<typeof schema>
 
 interface Props {
-  profile: { id: string } & RingColorProfile
-  updateProfile: (patch: Partial<FormValues>) => void
+  profile: { id: string; light: RingColorProfile }
+  updateLight: (patch: Partial<FormValues>) => void
 }
 
-export default function RingColorModeSettings({ profile, updateProfile }: Props) {
+export default function RingColorModeSettings({ profile, updateLight }: Props) {
   const { register, setValue, watch, reset, trigger, formState } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      lightColor: profile.lightColor,
-      innerRadius: profile.innerRadius,
-      outerRadius: profile.outerRadius,
-      backgroundColor: profile.backgroundColor,
+      lightColor: profile.light.lightColor,
+      innerRadius: profile.light.innerRadius,
+      outerRadius: profile.light.outerRadius,
+      backgroundColor: profile.light.backgroundColor,
     },
     mode: 'onChange',
   })
 
   useEffect(() => {
     reset({
-      lightColor: profile.lightColor,
-      innerRadius: profile.innerRadius,
-      outerRadius: profile.outerRadius,
-      backgroundColor: profile.backgroundColor,
+      lightColor: profile.light.lightColor,
+      innerRadius: profile.light.innerRadius,
+      outerRadius: profile.light.outerRadius,
+      backgroundColor: profile.light.backgroundColor,
     })
-  }, [profile.id, profile.lightColor, profile.innerRadius, profile.outerRadius, profile.backgroundColor, reset])
+  }, [profile.id, profile.light.lightColor, profile.light.innerRadius, profile.light.outerRadius, profile.light.backgroundColor, reset])
 
   async function patch<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValue(key, value as never)
     const valid = await trigger()
     if (valid) {
-      updateProfile({ [key]: value })
+      updateLight({ [key]: value })
     }
   }
 

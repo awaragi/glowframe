@@ -4,39 +4,40 @@ import { RADIUS_STEP } from '@/lib/keyboardShortcutConstants'
 import type { RingColorProfile } from '@/store'
 
 export default function RingColorModeShortcuts() {
-  const profile = useAppStore(selectActiveProfile) as { id: string } & RingColorProfile
-  const updateProfile = useAppStore((s) => s.updateProfile)
+  const profile = useAppStore(selectActiveProfile)
+  const light = profile.light as RingColorProfile
+  const updateLight = useAppStore((s) => s.updateLight)
 
   useKeyboardShortcuts([
     {
       key: ']',
       handler: () => {
-        updateProfile(profile.id, {
-          outerRadius: Math.min(100, profile.outerRadius + RADIUS_STEP),
+        updateLight(profile.id, {
+          outerRadius: Math.min(100, light.outerRadius + RADIUS_STEP),
         })
       },
     },
     {
       key: '[',
       handler: () => {
-        updateProfile(profile.id, {
-          outerRadius: Math.max(profile.innerRadius + 1, profile.outerRadius - RADIUS_STEP),
+        updateLight(profile.id, {
+          outerRadius: Math.max(light.innerRadius + 1, light.outerRadius - RADIUS_STEP),
         })
       },
     },
     {
       key: '{',
       handler: () => {
-        updateProfile(profile.id, {
-          innerRadius: Math.min(profile.outerRadius - 1, profile.innerRadius + RADIUS_STEP),
+        updateLight(profile.id, {
+          innerRadius: Math.min(light.outerRadius - 1, light.innerRadius + RADIUS_STEP),
         })
       },
     },
     {
       key: '}',
       handler: () => {
-        updateProfile(profile.id, {
-          innerRadius: Math.max(0, profile.innerRadius - RADIUS_STEP),
+        updateLight(profile.id, {
+          innerRadius: Math.max(0, light.innerRadius - RADIUS_STEP),
         })
       },
     },

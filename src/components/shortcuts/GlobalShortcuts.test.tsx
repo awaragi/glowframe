@@ -4,7 +4,7 @@ import GlobalShortcuts from './GlobalShortcuts'
 import type { Profile } from '@/store'
 
 function makeProfile(id: string): Profile {
-  return { id, name: `Profile ${id}`, mode: 'full', lightTemperature: 6500, lightBrightness: 100 }
+  return { id, name: `Profile ${id}`, light: { mode: 'full', lightTemperature: 6500, lightBrightness: 100 }, clock: { enabled: false, position: 'bottom-right', size: 'medium', format: 'HH:mm' } }
 }
 
 function fireKeydown(key: string, shiftKey = false) {

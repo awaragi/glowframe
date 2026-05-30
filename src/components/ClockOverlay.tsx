@@ -1,4 +1,4 @@
-import { useAppStore, selectActiveProfile, CLOCK_DEFAULTS } from '@/store'
+import { useAppStore, selectActiveProfile } from '@/store'
 import { useClockTime } from '@/hooks/useClockTime'
 
 const POSITION_CLASSES: Record<string, string> = {
@@ -15,7 +15,7 @@ const SIZE_CLASSES: Record<string, string> = {
 
 export default function ClockOverlay() {
   const profile = useAppStore(selectActiveProfile)
-  const clock = profile.clock ?? CLOCK_DEFAULTS
+  const clock = profile.clock
   const time = useClockTime(clock.format)
 
   if (!clock.enabled) return null

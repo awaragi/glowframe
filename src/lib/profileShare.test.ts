@@ -8,63 +8,42 @@ const clock = { ...CLOCK_DEFAULTS }
 const fullProfile: Profile = {
   id: 'test-id-1',
   name: 'Test Full',
-  mode: 'full',
-  lightTemperature: 6500,
-  lightBrightness: 80,
+  light: { mode: 'full', lightTemperature: 6500, lightBrightness: 80 },
   clock,
 }
 
 const fullColorProfile: Profile = {
   id: 'test-id-2',
   name: 'Test Full Color',
-  mode: 'full-color',
-  lightColor: '#ff8800',
+  light: { mode: 'full-color', lightColor: '#ff8800' },
   clock,
 }
 
 const ringProfile: Profile = {
   id: 'test-id-3',
   name: 'Test Ring',
-  mode: 'ring',
-  lightTemperature: 5000,
-  lightBrightness: 70,
-  innerRadius: 20,
-  outerRadius: 80,
-  backgroundLightTemperature: 3000,
-  backgroundLightBrightness: 30,
+  light: { mode: 'ring', lightTemperature: 5000, lightBrightness: 70, innerRadius: 20, outerRadius: 80, backgroundLightTemperature: 3000, backgroundLightBrightness: 30 },
   clock,
 }
 
 const ringColorProfile: Profile = {
   id: 'test-id-4',
   name: 'Test Ring Color',
-  mode: 'ring-color',
-  lightColor: '#ffffff',
-  innerRadius: 15,
-  outerRadius: 75,
-  backgroundColor: '#000000',
+  light: { mode: 'ring-color', lightColor: '#ffffff', innerRadius: 15, outerRadius: 75, backgroundColor: '#000000' },
   clock,
 }
 
 const spotProfile: Profile = {
   id: 'test-id-5',
   name: 'Test Spot',
-  mode: 'spot',
-  lightTemperature: 4000,
-  lightBrightness: 60,
-  radius: 40,
-  backgroundLightTemperature: 2000,
-  backgroundLightBrightness: 20,
+  light: { mode: 'spot', lightTemperature: 4000, lightBrightness: 60, radius: 40, backgroundLightTemperature: 2000, backgroundLightBrightness: 20 },
   clock,
 }
 
 const spotColorProfile: Profile = {
   id: 'test-id-6',
   name: 'Test Spot Color',
-  mode: 'spot-color',
-  lightColor: '#aabbcc',
-  radius: 35,
-  backgroundColor: '#111111',
+  light: { mode: 'spot-color', lightColor: '#aabbcc', radius: 35, backgroundColor: '#111111' },
   clock,
 }
 
@@ -87,20 +66,6 @@ describe('encodeProfile', () => {
     expect(decoded).toHaveProperty('clock')
     expect(decoded.clock).toMatchObject(clock)
   })
-
-  it('normalizes missing clock to CLOCK_DEFAULTS when encoding', () => {
-    const profileWithoutClock: Profile = {
-      id: 'no-clock',
-      name: 'No Clock',
-      mode: 'full',
-      lightTemperature: 6500,
-      lightBrightness: 80,
-    }
-    const encoded = encodeProfile(profileWithoutClock)
-    const decoded = JSON.parse(decodeURIComponent(encoded)) as Record<string, unknown>
-    expect(decoded).toHaveProperty('clock')
-    expect(decoded.clock).toMatchObject(CLOCK_DEFAULTS)
-  })
 })
 
 describe('decodeProfile — round-trip for all 6 modes', () => {
@@ -114,15 +79,15 @@ describe('decodeProfile — round-trip for all 6 modes', () => {
   ]
 
   for (const profile of profiles) {
-    it(`round-trips ${profile.mode} profile`, () => {
+    it(`round-trips ${profile.light.mode} profile`, () => {
       const encoded = encodeProfile(profile)
       const result = decodeProfile(encoded)
       expect(result).not.toBeNull()
-      expect(result!.mode).toBe(profile.mode)
+      expect(result!.light.mode).toBe(profile.light.mode)
       expect(result!.name).toBe(profile.name)
     })
 
-    it(`round-trips clock for ${profile.mode} profile`, () => {
+    it(`round-trips clock for ${profile.light.mode} profile`, () => {
       const encoded = encodeProfile(profile)
       const result = decodeProfile(encoded)
       expect(result).not.toBeNull()
@@ -143,55 +108,49 @@ describe('decodeProfile — invalid inputs return null', () => {
     expect(decodeProfile(encodeURIComponent(JSON.stringify(obj)))).toBeNull()
   })
 
+  it('returns null when clock has an invalid position value', () => {
+    const obj = {
+      name: 'Test',
+      light: { mode: 'full', lightTemperature: 6500, lightBrightness: 80 },
+      clock: { enabled: true, position: 'invalid-position', size: 'medium', format: 'HH:mm' },
+    }
+    expect(decodeProfile(encodeURIComponent(JSON.stringify(obj)))).toBeNull()
+  })
+
   it('returns null when mode discriminant is missing', () => {
-    const obj = { name: 'Test', lightTemperature: 6500, lightBrightness: 100 }
+    const obj = { name: 'Test', light: { lightTemperature: 6500, lightBrightness: 100 }, clock }
     expect(decodeProfile(encodeURIComponent(JSON.stringify(obj)))).toBeNull()
   })
 
   it('returns null when mode discriminant is unknown', () => {
-    const obj = { mode: 'unknown-mode', name: 'Test' }
+    const obj = { name: 'Test', light: { mode: 'unknown-mode' }, clock }
     expect(decodeProfile(encodeURIComponent(JSON.stringify(obj)))).toBeNull()
   })
 
   it('returns null when lightTemperature is out of range (too low)', () => {
-    const obj = { ...fullProfile, lightTemperature: 500 }
-    const { id: _id, ...rest } = obj
-    expect(decodeProfile(encodeURIComponent(JSON.stringify(rest)))).toBeNull()
+    const obj = { name: fullProfile.name, light: { ...fullProfile.light, lightTemperature: 500 }, clock }
+    expect(decodeProfile(encodeURIComponent(JSON.stringify(obj)))).toBeNull()
   })
 
   it('returns null when lightTemperature is out of range (too high)', () => {
-    const obj = { ...fullProfile, lightTemperature: 99999 }
-    const { id: _id, ...rest } = obj
-    expect(decodeProfile(encodeURIComponent(JSON.stringify(rest)))).toBeNull()
+    const obj = { name: fullProfile.name, light: { ...fullProfile.light, lightTemperature: 99999 }, clock }
+    expect(decodeProfile(encodeURIComponent(JSON.stringify(obj)))).toBeNull()
   })
 
   it('returns null when lightBrightness is out of range', () => {
-    const obj = { ...fullProfile, lightBrightness: 200 }
-    const { id: _id, ...rest } = obj
-    expect(decodeProfile(encodeURIComponent(JSON.stringify(rest)))).toBeNull()
+    const obj = { name: fullProfile.name, light: { ...fullProfile.light, lightBrightness: 200 }, clock }
+    expect(decodeProfile(encodeURIComponent(JSON.stringify(obj)))).toBeNull()
   })
 
   it('returns null for empty string', () => {
     expect(decodeProfile('')).toBeNull()
   })
-
-  it('returns null when clock has an invalid position value', () => {
-    const obj = {
-      mode: 'full',
-      name: 'Test',
-      lightTemperature: 6500,
-      lightBrightness: 80,
-      clock: { enabled: true, position: 'invalid-position', size: 'medium', format: 'HH:mm' },
-    }
-    expect(decodeProfile(encodeURIComponent(JSON.stringify(obj)))).toBeNull()
-  })
 })
 
 describe('decodeProfile — payloads without clock', () => {
-  it('accepts a share payload without clock (backward compat — clock is optional)', () => {
+  it('returns null for a share payload without clock (clock is now required)', () => {
     const { id: _id, clock: _clock, ...rest } = fullProfile
     const result = decodeProfile(encodeURIComponent(JSON.stringify(rest)))
-    expect(result).not.toBeNull()
-    expect(result!.clock).toBeUndefined()
+    expect(result).toBeNull()
   })
 })

@@ -11,15 +11,13 @@ function fireKeydown(key: string, shiftKey = false) {
 const baseProfile: Profile = {
   id: 'test-clock',
   name: 'Test',
-  mode: 'full',
-  lightTemperature: 5000,
-  lightBrightness: 50,
+  light: { mode: 'full', lightTemperature: 5000, lightBrightness: 50 },
   clock: { ...CLOCK_DEFAULTS, enabled: false, position: 'top-left', size: 'medium' },
 }
 
 function resetStore(clockOverrides: Partial<ClockConfig> = {}) {
   useAppStore.setState({
-    _version: 4,
+    _version: 5,
     profiles: [{ ...baseProfile, clock: { ...CLOCK_DEFAULTS, enabled: false, position: 'top-left', size: 'medium', ...clockOverrides } }],
     activeProfileId: baseProfile.id,
   })
@@ -27,7 +25,7 @@ function resetStore(clockOverrides: Partial<ClockConfig> = {}) {
 
 function getClock(): ClockConfig {
   const p = useAppStore.getState().profiles[0]
-  return p.clock ?? CLOCK_DEFAULTS
+  return p.clock
 }
 
 describe('ClockShortcuts — T key four-state cycle', () => {

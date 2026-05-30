@@ -9,7 +9,7 @@ import SpotColorModeShortcuts from '@/components/shortcuts/SpotColorModeShortcut
 export default function ActiveModeShortcuts() {
   const profile = useAppStore(selectActiveProfile)
 
-  switch (profile.mode) {
+  switch (profile.light.mode) {
     case 'full':
       return <FullModeShortcuts />
     case 'full-color':

@@ -12,20 +12,20 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 interface Props {
-  profile: { id: string } & FullColorProfile
-  updateProfile: (patch: Partial<FormValues>) => void
+  profile: { id: string; light: FullColorProfile }
+  updateLight: (patch: Partial<FormValues>) => void
 }
 
-export default function FullColorModeSettings({ profile, updateProfile }: Props) {
+export default function FullColorModeSettings({ profile, updateLight }: Props) {
   const { register, reset } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { lightColor: profile.lightColor },
+    defaultValues: { lightColor: profile.light.lightColor },
     mode: 'onChange',
   })
 
   useEffect(() => {
-    reset({ lightColor: profile.lightColor })
-  }, [profile.id, profile.lightColor, reset])
+    reset({ lightColor: profile.light.lightColor })
+  }, [profile.id, profile.light.lightColor, reset])
 
   return (
     <section>
@@ -34,7 +34,7 @@ export default function FullColorModeSettings({ profile, updateProfile }: Props)
         id="full-color-light-color"
         type="color"
         {...register('lightColor')}
-        onChange={(e) => updateProfile({ lightColor: e.target.value })}
+        onChange={(e) => updateLight({ lightColor: e.target.value })}
         className="mt-1 block h-10 w-full cursor-pointer rounded-md border border-input"
         aria-label="Light color picker"
       />

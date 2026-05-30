@@ -8,10 +8,10 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store/index'
-import type { Profile } from '@/store/index'
+import type { Profile, LightConfig } from '@/store/index'
 import type { SharedProfile } from '@/lib/profileShare'
 
-const MODE_LABELS: Record<SharedProfile['mode'], string> = {
+const MODE_LABELS: Record<LightConfig['mode'], string> = {
   'full': 'Full',
   'full-color': 'Full Color',
   'ring': 'Ring',
@@ -54,7 +54,7 @@ export default function ImportProfileDialog({
         <DialogHeader>
           <DialogTitle>Import Profile</DialogTitle>
           <DialogDescription>
-            Import &ldquo;{profile.name}&rdquo; ({MODE_LABELS[profile.mode]}) as a new preset?
+            Import &ldquo;{profile.name}&rdquo; ({MODE_LABELS[profile.light.mode]}) as a new preset?
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-end gap-2 pt-2">

@@ -14,30 +14,30 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 interface Props {
-  profile: { id: string } & FullProfile
-  updateProfile: (patch: Partial<FormValues>) => void
+  profile: { id: string; light: FullProfile }
+  updateLight: (patch: Partial<FormValues>) => void
 }
 
-export default function FullModeSettings({ profile, updateProfile }: Props) {
+export default function FullModeSettings({ profile, updateLight }: Props) {
   const { setValue, watch, reset } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      lightTemperature: profile.lightTemperature,
-      lightBrightness: profile.lightBrightness,
+      lightTemperature: profile.light.lightTemperature,
+      lightBrightness: profile.light.lightBrightness,
     },
     mode: 'onChange',
   })
 
   useEffect(() => {
     reset({
-      lightTemperature: profile.lightTemperature,
-      lightBrightness: profile.lightBrightness,
+      lightTemperature: profile.light.lightTemperature,
+      lightBrightness: profile.light.lightBrightness,
     })
-  }, [profile.id, profile.lightTemperature, profile.lightBrightness, reset])
+  }, [profile.id, profile.light.lightTemperature, profile.light.lightBrightness, reset])
 
   function patch<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValue(key, value as never)
-    updateProfile({ [key]: value })
+    updateLight({ [key]: value })
   }
 
   return (

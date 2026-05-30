@@ -4,39 +4,40 @@ import { BRIGHTNESS_STEP, TEMPERATURE_STEP } from '@/lib/keyboardShortcutConstan
 import type { FullProfile } from '@/store'
 
 export default function FullModeShortcuts() {
-  const profile = useAppStore(selectActiveProfile) as { id: string } & FullProfile
-  const updateProfile = useAppStore((s) => s.updateProfile)
+  const profile = useAppStore(selectActiveProfile)
+  const light = profile.light as FullProfile
+  const updateLight = useAppStore((s) => s.updateLight)
 
   useKeyboardShortcuts([
     {
       key: 'ArrowUp',
       handler: () => {
-        updateProfile(profile.id, {
-          lightBrightness: Math.min(100, profile.lightBrightness + BRIGHTNESS_STEP),
+        updateLight(profile.id, {
+          lightBrightness: Math.min(100, light.lightBrightness + BRIGHTNESS_STEP),
         })
       },
     },
     {
       key: 'ArrowDown',
       handler: () => {
-        updateProfile(profile.id, {
-          lightBrightness: Math.max(0, profile.lightBrightness - BRIGHTNESS_STEP),
+        updateLight(profile.id, {
+          lightBrightness: Math.max(0, light.lightBrightness - BRIGHTNESS_STEP),
         })
       },
     },
     {
       key: 'ArrowRight',
       handler: () => {
-        updateProfile(profile.id, {
-          lightTemperature: Math.min(10000, profile.lightTemperature + TEMPERATURE_STEP),
+        updateLight(profile.id, {
+          lightTemperature: Math.min(10000, light.lightTemperature + TEMPERATURE_STEP),
         })
       },
     },
     {
       key: 'ArrowLeft',
       handler: () => {
-        updateProfile(profile.id, {
-          lightTemperature: Math.max(1000, profile.lightTemperature - TEMPERATURE_STEP),
+        updateLight(profile.id, {
+          lightTemperature: Math.max(1000, light.lightTemperature - TEMPERATURE_STEP),
         })
       },
     },

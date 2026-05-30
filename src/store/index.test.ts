@@ -1,4 +1,4 @@
-import { useAppStore, selectActiveProfile } from '@/store'
+import { useAppStore, selectActiveProfile, CLOCK_DEFAULTS } from '@/store'
 import type { Profile } from '@/store'
 import { MODE_DEFAULTS } from '@/lib/modeDefaults'
 
@@ -6,16 +6,15 @@ function makeFullProfile(overrides: Partial<Profile> = {}): Profile {
   return {
     id: crypto.randomUUID(),
     name: 'Default',
-    mode: 'full',
-    lightTemperature: 6500,
-    lightBrightness: 100,
+    light: { mode: 'full', lightTemperature: 6500, lightBrightness: 100 },
+    clock: { ...CLOCK_DEFAULTS },
     ...overrides,
-  } as Profile
+  }
 }
 
 function resetStore(profile: Profile = makeFullProfile()) {
   useAppStore.setState({
-    _version: 4,
+    _version: 5,
     profiles: [profile],
     activeProfileId: profile.id,
   })
@@ -27,8 +26,8 @@ describe('useAppStore', () => {
     resetStore()
   })
 
-  it('initialises with _version 4', () => {
-    expect(useAppStore.getState()._version).toBe(4)
+  it('initialises with _version 5', () => {
+    expect(useAppStore.getState()._version).toBe(5)
   })
 
   it('initialises with a default profile named "Default"', () => {
@@ -39,10 +38,10 @@ describe('useAppStore', () => {
 
   it('default profile seeds from MODE_DEFAULTS full', () => {
     const active = selectActiveProfile(useAppStore.getState())
-    expect(active.mode).toBe('full')
-    if (active.mode === 'full') {
-      expect(active.lightTemperature).toBe(MODE_DEFAULTS['full'].lightTemperature)
-      expect(active.lightBrightness).toBe(MODE_DEFAULTS['full'].lightBrightness)
+    expect(active.light.mode).toBe('full')
+    if (active.light.mode === 'full') {
+      expect(active.light.lightTemperature).toBe(MODE_DEFAULTS['full'].lightTemperature)
+      expect(active.light.lightBrightness).toBe(MODE_DEFAULTS['full'].lightBrightness)
     }
   })
 
@@ -54,16 +53,16 @@ describe('useAppStore', () => {
 
   describe('createProfile', () => {
     it('clones active profile settings (including mode) into the new profile', () => {
-      const active = makeFullProfile({ id: 'a1', lightTemperature: 3000, lightBrightness: 80 })
+      const active = makeFullProfile({ id: 'a1', light: { mode: 'full', lightTemperature: 3000, lightBrightness: 80 } })
       resetStore(active)
       useAppStore.getState().createProfile('Warm')
       const newState = useAppStore.getState()
       const newProfile = newState.profiles.find((p) => p.name === 'Warm')
       expect(newProfile).toBeDefined()
-      expect(newProfile!.mode).toBe('full')
-      if (newProfile!.mode === 'full') {
-        expect(newProfile!.lightTemperature).toBe(3000)
-        expect(newProfile!.lightBrightness).toBe(80)
+      expect(newProfile!.light.mode).toBe('full')
+      if (newProfile!.light.mode === 'full') {
+        expect(newProfile!.light.lightTemperature).toBe(3000)
+        expect(newProfile!.light.lightBrightness).toBe(80)
       }
     })
 
@@ -71,21 +70,16 @@ describe('useAppStore', () => {
       const ringProfile: Profile = {
         id: 'r1',
         name: 'Ring',
-        mode: 'ring',
-        lightTemperature: 6500,
-        lightBrightness: 100,
-        innerRadius: 30,
-        outerRadius: 70,
-        backgroundLightTemperature: 0,
-        backgroundLightBrightness: 0,
+        light: { mode: 'ring', lightTemperature: 6500, lightBrightness: 100, innerRadius: 30, outerRadius: 70, backgroundLightTemperature: 0, backgroundLightBrightness: 0 },
+        clock: { ...CLOCK_DEFAULTS },
       }
       resetStore(ringProfile)
       useAppStore.getState().createProfile('Ring Copy')
       const newProfile = useAppStore.getState().profiles.find((p) => p.name === 'Ring Copy')!
-      expect(newProfile.mode).toBe('ring')
-      if (newProfile.mode === 'ring') {
-        expect(newProfile.innerRadius).toBe(30)
-        expect(newProfile.outerRadius).toBe(70)
+      expect(newProfile.light.mode).toBe('ring')
+      if (newProfile.light.mode === 'ring') {
+        expect(newProfile.light.innerRadius).toBe(30)
+        expect(newProfile.light.outerRadius).toBe(70)
       }
     })
 
@@ -159,13 +153,13 @@ describe('useAppStore', () => {
     })
   })
 
-  describe('updateProfile', () => {
-    it('merges a patch into the specified profile', () => {
+  describe('updateLight', () => {
+    it('merges a patch into the specified profile\'s light config', () => {
       const id = useAppStore.getState().activeProfileId
-      useAppStore.getState().updateProfile(id, { lightBrightness: 42 })
+      useAppStore.getState().updateLight(id, { lightBrightness: 42 })
       const profile = useAppStore.getState().profiles.find((p) => p.id === id)!
-      if (profile.mode === 'full') {
-        expect(profile.lightBrightness).toBe(42)
+      if (profile.light.mode === 'full') {
+        expect(profile.light.lightBrightness).toBe(42)
       }
     })
 
@@ -173,18 +167,36 @@ describe('useAppStore', () => {
       useAppStore.getState().createProfile('B')
       const bId = useAppStore.getState().activeProfileId
       const aId = useAppStore.getState().profiles[0].id
-      useAppStore.getState().updateProfile(bId, { lightBrightness: 10 })
+      useAppStore.getState().updateLight(bId, { lightBrightness: 10 })
       const a = useAppStore.getState().profiles.find((p) => p.id === aId)!
-      if (a.mode === 'full') {
-        expect(a.lightBrightness).toBe(100)
+      if (a.light.mode === 'full') {
+        expect(a.light.lightBrightness).toBe(100)
       }
     })
 
     it('does not change the mode when patching mode-specific fields', () => {
       const id = useAppStore.getState().activeProfileId
-      useAppStore.getState().updateProfile(id, { lightBrightness: 50 })
+      useAppStore.getState().updateLight(id, { lightBrightness: 50 })
       const profile = useAppStore.getState().profiles.find((p) => p.id === id)!
-      expect(profile.mode).toBe('full')
+      expect(profile.light.mode).toBe('full')
+    })
+  })
+
+  describe('updateClock', () => {
+    it('merges a patch into the specified profile\'s clock config', () => {
+      const id = useAppStore.getState().activeProfileId
+      useAppStore.getState().updateClock(id, { enabled: true })
+      const profile = useAppStore.getState().profiles.find((p) => p.id === id)!
+      expect(profile.clock.enabled).toBe(true)
+    })
+
+    it('does not affect other profiles\' clocks', () => {
+      useAppStore.getState().createProfile('B')
+      const bId = useAppStore.getState().activeProfileId
+      const aId = useAppStore.getState().profiles[0].id
+      useAppStore.getState().updateClock(bId, { enabled: false })
+      const a = useAppStore.getState().profiles.find((p) => p.id === aId)!
+      expect(a.clock.enabled).toBe(true)
     })
   })
 
@@ -193,11 +205,11 @@ describe('useAppStore', () => {
       const id = useAppStore.getState().activeProfileId
       useAppStore.getState().switchMode(id, 'ring')
       const profile = useAppStore.getState().profiles.find((p) => p.id === id)!
-      expect(profile.mode).toBe('ring')
-      if (profile.mode === 'ring') {
-        expect(profile.innerRadius).toBe(MODE_DEFAULTS['ring'].innerRadius)
-        expect(profile.outerRadius).toBe(MODE_DEFAULTS['ring'].outerRadius)
-        expect(profile.backgroundLightBrightness).toBe(MODE_DEFAULTS['ring'].backgroundLightBrightness)
+      expect(profile.light.mode).toBe('ring')
+      if (profile.light.mode === 'ring') {
+        expect(profile.light.innerRadius).toBe(MODE_DEFAULTS['ring'].innerRadius)
+        expect(profile.light.outerRadius).toBe(MODE_DEFAULTS['ring'].outerRadius)
+        expect(profile.light.backgroundLightBrightness).toBe(MODE_DEFAULTS['ring'].backgroundLightBrightness)
       }
     })
 
@@ -214,19 +226,14 @@ describe('useAppStore', () => {
       const ringProfile: Profile = {
         id: 'r1',
         name: 'Ring',
-        mode: 'ring',
-        lightTemperature: 6500,
-        lightBrightness: 100,
-        innerRadius: 30,
-        outerRadius: 70,
-        backgroundLightTemperature: 0,
-        backgroundLightBrightness: 0,
+        light: { mode: 'ring', lightTemperature: 6500, lightBrightness: 100, innerRadius: 30, outerRadius: 70, backgroundLightTemperature: 0, backgroundLightBrightness: 0 },
+        clock: { ...CLOCK_DEFAULTS },
       }
       resetStore(ringProfile)
       useAppStore.getState().switchMode('r1', 'full')
       const updated = useAppStore.getState().profiles.find((p) => p.id === 'r1')!
-      expect(updated.mode).toBe('full')
-      expect((updated as Record<string, unknown>)['innerRadius']).toBeUndefined()
+      expect(updated.light.mode).toBe('full')
+      expect((updated.light as Record<string, unknown>)['innerRadius']).toBeUndefined()
     })
 
     it('can switch through all six modes', () => {
@@ -234,7 +241,7 @@ describe('useAppStore', () => {
       const modes = ['full', 'full-color', 'ring', 'ring-color', 'spot', 'spot-color'] as const
       for (const mode of modes) {
         useAppStore.getState().switchMode(id, mode)
-        expect(useAppStore.getState().profiles.find((p) => p.id === id)!.mode).toBe(mode)
+        expect(useAppStore.getState().profiles.find((p) => p.id === id)!.light.mode).toBe(mode)
       }
     })
 
@@ -244,7 +251,7 @@ describe('useAppStore', () => {
       const secondId = useAppStore.getState().activeProfileId
       useAppStore.getState().switchMode(secondId, 'spot')
       const first = useAppStore.getState().profiles.find((p) => p.id === firstId)!
-      expect(first.mode).toBe('full')
+      expect(first.light.mode).toBe('full')
     })
   })
 
@@ -263,8 +270,8 @@ describe('useAppStore', () => {
     expect(hasFunctions).toBe(false)
   })
 
-  it('store version is 4', () => {
-    expect(useAppStore.persist.getOptions().version).toBe(4)
+  it('store version is 5', () => {
+    expect(useAppStore.persist.getOptions().version).toBe(5)
   })
 
   it('no migrate function is registered (no migration from prior versions)', () => {
@@ -276,7 +283,7 @@ describe('useAppStore', () => {
       const a = makeFullProfile({ id: 'a', name: 'A' })
       const b = makeFullProfile({ id: 'b', name: 'B' })
       const c = makeFullProfile({ id: 'c', name: 'C' })
-      useAppStore.setState({ _version: 4, profiles: [a, b, c], activeProfileId: 'a' })
+      useAppStore.setState({ _version: 5, profiles: [a, b, c], activeProfileId: 'a' })
       return { a, b, c }
     }
 
@@ -307,10 +314,10 @@ describe('useAppStore', () => {
       const movedProfile = useAppStore.getState().profiles.find((p) => p.id === 'a')!
       expect(movedProfile.id).toBe(a.id)
       expect(movedProfile.name).toBe(a.name)
-      expect(movedProfile.mode).toBe(a.mode)
-      if (movedProfile.mode === 'full' && a.mode === 'full') {
-        expect(movedProfile.lightTemperature).toBe(a.lightTemperature)
-        expect(movedProfile.lightBrightness).toBe(a.lightBrightness)
+      expect(movedProfile.light.mode).toBe(a.light.mode)
+      if (movedProfile.light.mode === 'full' && a.light.mode === 'full') {
+        expect(movedProfile.light.lightTemperature).toBe(a.light.lightTemperature)
+        expect(movedProfile.light.lightBrightness).toBe(a.light.lightBrightness)
       }
     })
   })
@@ -320,30 +327,36 @@ describe('useAppStore', () => {
 describe('restoreProfiles', () => {
   const backupProfiles = [
     {
-      mode: 'full' as const,
       name: 'Restored A',
-      lightTemperature: 6500,
-      lightBrightness: 80,
+      light: { mode: 'full' as const, lightTemperature: 6500, lightBrightness: 80 },
       clock: { enabled: true, position: 'bottom-left' as const, size: 'medium' as const, format: 'HH:mm' as const },
     },
     {
-      mode: 'full-color' as const,
       name: 'Restored B',
-      lightColor: '#ff0000',
+      light: { mode: 'full-color' as const, lightColor: '#ff0000' },
       clock: { enabled: false, position: 'top-left' as const, size: 'small' as const, format: 'hh:mm a' as const },
     },
     {
-      mode: 'ring' as const,
       name: 'Restored C',
-      lightTemperature: 5000,
-      lightBrightness: 70,
-      innerRadius: 20,
-      outerRadius: 80,
-      backgroundLightTemperature: 3000,
-      backgroundLightBrightness: 30,
+      light: { mode: 'ring' as const, lightTemperature: 5000, lightBrightness: 70, innerRadius: 20, outerRadius: 80, backgroundLightTemperature: 3000, backgroundLightBrightness: 30 },
       clock: { enabled: true, position: 'bottom-right' as const, size: 'large' as const, format: 'HH:mm:ss' as const },
     },
   ]
+
+  function makeFullProfile(overrides: Partial<Profile> = {}): Profile {
+    return {
+      id: crypto.randomUUID(),
+      name: 'Default',
+      light: { mode: 'full', lightTemperature: 6500, lightBrightness: 100 },
+      clock: { ...CLOCK_DEFAULTS },
+      ...overrides,
+    }
+  }
+
+  function resetStore(profile: Profile = makeFullProfile()) {
+    useAppStore.setState({ _version: 5, profiles: [profile], activeProfileId: profile.id })
+    return profile
+  }
 
   it('replaces all existing profiles', () => {
     const initial = makeFullProfile({ name: 'Old Profile' })
@@ -370,20 +383,11 @@ describe('restoreProfiles', () => {
     expect(state.profiles[0].name).toBe('Restored A')
   })
 
-  it('normalizes missing clock to CLOCK_DEFAULTS', () => {
-    resetStore()
-    const withoutClock = [{ mode: 'full' as const, name: 'No Clock', lightTemperature: 6500, lightBrightness: 80 }]
-    useAppStore.getState().restoreProfiles(withoutClock)
-    const restored = useAppStore.getState().profiles[0]
-    expect(restored.clock).toBeDefined()
-    expect(restored.clock!.position).toBe('bottom-left')
-  })
-
   it('preserves clock settings from backup', () => {
     resetStore()
     useAppStore.getState().restoreProfiles(backupProfiles)
     const second = useAppStore.getState().profiles[1]
-    expect(second.clock!.enabled).toBe(false)
-    expect(second.clock!.position).toBe('top-left')
+    expect(second.clock.enabled).toBe(false)
+    expect(second.clock.position).toBe('top-left')
   })
 })

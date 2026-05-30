@@ -4,23 +4,24 @@ import { RADIUS_STEP } from '@/lib/keyboardShortcutConstants'
 import type { SpotColorProfile } from '@/store'
 
 export default function SpotColorModeShortcuts() {
-  const profile = useAppStore(selectActiveProfile) as { id: string } & SpotColorProfile
-  const updateProfile = useAppStore((s) => s.updateProfile)
+  const profile = useAppStore(selectActiveProfile)
+  const light = profile.light as SpotColorProfile
+  const updateLight = useAppStore((s) => s.updateLight)
 
   useKeyboardShortcuts([
     {
       key: ']',
       handler: () => {
-        updateProfile(profile.id, {
-          radius: Math.min(100, profile.radius + RADIUS_STEP),
+        updateLight(profile.id, {
+          radius: Math.min(100, light.radius + RADIUS_STEP),
         })
       },
     },
     {
       key: '[',
       handler: () => {
-        updateProfile(profile.id, {
-          radius: Math.max(0, profile.radius - RADIUS_STEP),
+        updateLight(profile.id, {
+          radius: Math.max(0, light.radius - RADIUS_STEP),
         })
       },
     },
