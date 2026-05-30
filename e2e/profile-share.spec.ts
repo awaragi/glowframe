@@ -66,7 +66,7 @@ test.describe('profile share URL', () => {
     // Confirm import
     const dialog = page.getByTestId('import-profile-dialog')
     await expect(dialog).toBeVisible()
-    await dialog.getByRole('button', { name: /import/i }).click()
+    await dialog.getByRole('button', { name: /^import/i }).click()
 
     // Dialog should be gone
     await expect(dialog).not.toBeVisible()
@@ -119,7 +119,7 @@ test.describe('profile share URL', () => {
     await expect(page.getByTestId('import-profile-dialog')).not.toBeVisible()
 
     // Error toast must be visible
-    await expect(page.getByText('Invalid share link')).toBeVisible()
+    await expect(page.getByText('Invalid share link').first()).toBeVisible({ timeout: 10000 })
 
     // URL should remain dirty
     expect(page.url()).toContain('?profile=')
@@ -145,7 +145,7 @@ test.describe('profile share URL', () => {
     await expect(page.getByTestId('import-profile-dialog')).not.toBeVisible()
 
     // Error toast must be visible
-    await expect(page.getByText('Invalid share link')).toBeVisible()
+    await expect(page.getByText('Invalid share link').first()).toBeVisible({ timeout: 10000 })
 
     // URL should remain dirty (unchanged)
     expect(page.url()).toContain('?profile=')
@@ -163,6 +163,7 @@ test.describe('profile share URL', () => {
     await page.getByRole('tab', { name: 'Clock' }).click()
     const clockSwitch = page.getByRole('switch', { name: 'Show clock' })
     await expect(clockSwitch).toBeVisible()
+    await expect(clockSwitch).toHaveAttribute('aria-checked', 'true')
     await clockSwitch.click()
     await expect(clockSwitch).toHaveAttribute('aria-checked', 'false')
 
@@ -177,7 +178,7 @@ test.describe('profile share URL', () => {
 
     const dialog = page.getByTestId('import-profile-dialog')
     await expect(dialog).toBeVisible()
-    await dialog.getByRole('button', { name: /import/i }).click()
+    await dialog.getByRole('button', { name: /^import/i }).click()
     await expect(dialog).not.toBeVisible()
 
     // The imported profile is now active — verify its clock.enabled = false was preserved

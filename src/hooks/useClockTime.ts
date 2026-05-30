@@ -6,6 +6,7 @@ export function useClockTime(format: ClockFormat): string {
   const [time, setTime] = useState(() => formatTime(new Date(), format))
 
   useEffect(() => {
+    setTime(formatTime(new Date(), format))
     const id = setInterval(() => {
       setTime(formatTime(new Date(), format))
     }, 1000)

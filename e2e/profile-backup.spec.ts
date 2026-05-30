@@ -6,16 +6,13 @@ const validBackupJson = JSON.stringify({
   version: 1,
   profiles: [
     {
-      mode: 'full',
       name: 'Backup Alpha',
-      lightTemperature: 6500,
-      lightBrightness: 80,
+      light: { mode: 'full', lightTemperature: 6500, lightBrightness: 80 },
       clock: { enabled: true, position: 'bottom-left', size: 'medium', format: 'HH:mm' },
     },
     {
-      mode: 'full-color',
       name: 'Backup Beta',
-      lightColor: '#ff8800',
+      light: { mode: 'full-color', lightColor: '#ff8800' },
       clock: { enabled: false, position: 'top-left', size: 'small', format: 'hh:mm a' },
     },
   ],

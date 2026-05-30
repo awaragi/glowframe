@@ -2,39 +2,37 @@ import { test, expect } from '@playwright/test'
 import { HomePage } from './pages/home.page'
 
 test.describe('Clock keyboard shortcuts', () => {
-  test('T key cycles clock: off → top-left → bottom-left → bottom-right → off', async ({ page }) => {
+  test('T key cycles clock: bottom-left → bottom-right → off → top-left → bottom-left', async ({ page }) => {
     const home = new HomePage(page)
     await home.goto()
 
-    // Initially clock is off by default
-    await expect(page.getByLabel('Digital clock')).not.toBeVisible()
-
-    // Press T → clock on at top-left
-    await page.keyboard.press('t')
+    // Clock is on by default at bottom-left
     await expect(page.getByLabel('Digital clock')).toBeVisible()
 
-    // Press T → bottom-left
-    await page.keyboard.press('t')
-    await expect(page.getByLabel('Digital clock')).toBeVisible()
-
-    // Press T → bottom-right
+    // Press T → bottom-right (still visible)
     await page.keyboard.press('t')
     await expect(page.getByLabel('Digital clock')).toBeVisible()
 
     // Press T → off
     await page.keyboard.press('t')
     await expect(page.getByLabel('Digital clock')).not.toBeVisible()
+
+    // Press T → top-left
+    await page.keyboard.press('t')
+    await expect(page.getByLabel('Digital clock')).toBeVisible()
+
+    // Press T → bottom-left (back to start)
+    await page.keyboard.press('t')
+    await expect(page.getByLabel('Digital clock')).toBeVisible()
   })
 
   test('Shift+T cycles clock size', async ({ page }) => {
     const home = new HomePage(page)
     await home.goto()
 
-    // Enable the clock first so we can observe size class changes
-    await page.keyboard.press('t')
-    await expect(page.getByLabel('Digital clock')).toBeVisible()
-
+    // Clock is on by default
     const clock = page.getByLabel('Digital clock')
+    await expect(clock).toBeVisible()
 
     // Default size is 'medium' (text-4xl) — cycle to large
     await page.keyboard.press('Shift+T')

@@ -12,23 +12,26 @@ test.describe('Ring radius cross-validation', () => {
     await page.evaluate(() => {
       const store = {
         state: {
-          _version: 4,
+          _version: 5,
           profiles: [
             {
               id: 'ring-test',
               name: 'Ring Test',
-              mode: 'ring',
-              lightTemperature: 6500,
-              lightBrightness: 100,
-              innerRadius: 79,
-              outerRadius: 80,
-              backgroundLightTemperature: 0,
-              backgroundLightBrightness: 0,
+              light: {
+                mode: 'ring',
+                lightTemperature: 6500,
+                lightBrightness: 100,
+                innerRadius: 79,
+                outerRadius: 80,
+                backgroundLightTemperature: 0,
+                backgroundLightBrightness: 0,
+              },
+              clock: { enabled: true, position: 'bottom-left', size: 'medium', format: 'HH:mm' },
             },
           ],
           activeProfileId: 'ring-test',
         },
-        version: 4,
+        version: 5,
       }
       localStorage.setItem('glowframe-store', JSON.stringify(store))
     })
@@ -60,23 +63,26 @@ test.describe('Ring radius cross-validation', () => {
     await page.evaluate(() => {
       const store = {
         state: {
-          _version: 4,
+          _version: 5,
           profiles: [
             {
               id: 'ring-test',
               name: 'Ring Test',
-              mode: 'ring',
-              lightTemperature: 6500,
-              lightBrightness: 100,
-              innerRadius: 79,
-              outerRadius: 80,
-              backgroundLightTemperature: 0,
-              backgroundLightBrightness: 0,
+              light: {
+                mode: 'ring',
+                lightTemperature: 6500,
+                lightBrightness: 100,
+                innerRadius: 79,
+                outerRadius: 80,
+                backgroundLightTemperature: 0,
+                backgroundLightBrightness: 0,
+              },
+              clock: { enabled: true, position: 'bottom-left', size: 'medium', format: 'HH:mm' },
             },
           ],
           activeProfileId: 'ring-test',
         },
-        version: 4,
+        version: 5,
       }
       localStorage.setItem('glowframe-store', JSON.stringify(store))
     })
@@ -101,7 +107,7 @@ test.describe('Ring radius cross-validation', () => {
       return profiles.find((p: { id: string }) => p.id === 'ring-test') ?? null
     })
     expect(stored).not.toBeNull()
-    expect(stored.innerRadius).toBe(79)
-    expect(stored.outerRadius).toBe(80)
+    expect(stored.light.innerRadius).toBe(79)
+    expect(stored.light.outerRadius).toBe(80)
   })
 })

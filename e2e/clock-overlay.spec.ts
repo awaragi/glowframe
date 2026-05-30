@@ -2,13 +2,13 @@ import { test, expect } from '@playwright/test'
 import { HomePage } from './pages/home.page'
 import { SettingsPage } from './pages/settings.page'
 
-test('clock overlay is absent by default', async ({ page }) => {
+test('clock overlay is visible by default', async ({ page }) => {
   const home = new HomePage(page)
   await home.goto()
-  await expect(page.getByLabel('Digital clock')).not.toBeVisible()
+  await expect(page.getByLabel('Digital clock')).toBeVisible()
 })
 
-test('enabling clock via settings shows the overlay on the light surface', async ({ page }) => {
+test('disabling clock via settings hides the overlay', async ({ page }) => {
   const home = new HomePage(page)
   const settings = new SettingsPage(page)
   await home.goto()
@@ -17,23 +17,23 @@ test('enabling clock via settings shows the overlay on the light surface', async
   await page.getByRole('tab', { name: 'Clock' }).click()
   await page.getByRole('switch', { name: 'Show clock' }).click()
 
-  await expect(page.getByLabel('Digital clock')).toBeVisible()
+  await expect(page.getByLabel('Digital clock')).not.toBeVisible()
 })
 
-test('disabling clock hides the overlay', async ({ page }) => {
+test('re-enabling clock shows the overlay', async ({ page }) => {
   const home = new HomePage(page)
   const settings = new SettingsPage(page)
   await home.goto()
   await settings.open()
 
-  // Enable first
+  // Disable first
   await page.getByRole('tab', { name: 'Clock' }).click()
   await page.getByRole('switch', { name: 'Show clock' }).click()
-  await expect(page.getByLabel('Digital clock')).toBeVisible()
-
-  // Disable
-  await page.getByRole('switch', { name: 'Show clock' }).click()
   await expect(page.getByLabel('Digital clock')).not.toBeVisible()
+
+  // Re-enable
+  await page.getByRole('switch', { name: 'Show clock' }).click()
+  await expect(page.getByLabel('Digital clock')).toBeVisible()
 })
 
 test('position change moves the overlay', async ({ page }) => {
@@ -43,7 +43,6 @@ test('position change moves the overlay', async ({ page }) => {
   await settings.open()
 
   await page.getByRole('tab', { name: 'Clock' }).click()
-  await page.getByRole('switch', { name: 'Show clock' }).click()
 
   // Change position to top-left
   await page.getByLabel('Position').click()
@@ -59,11 +58,10 @@ test('format change updates the clock display', async ({ page }) => {
   await settings.open()
 
   await page.getByRole('tab', { name: 'Clock' }).click()
-  await page.getByRole('switch', { name: 'Show clock' }).click()
 
   // Switch to HH:mm:ss format (shows seconds)
   await page.getByLabel('Format').click()
-  await page.getByRole('option', { name: 'HH:mm:ss' }).click()
+  await page.getByRole('option', { name: 'HH:mm:ss', exact: true }).click()
 
   await expect(page.getByLabel('Digital clock')).toBeVisible()
   // Clock text should contain colons and match HH:mm:ss pattern (two colons)

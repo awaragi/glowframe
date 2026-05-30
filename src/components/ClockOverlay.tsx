@@ -21,13 +21,11 @@ export default function ClockOverlay() {
   if (!clock.enabled) return null
 
   return (
-    <div
-      className={`fixed z-10 ${POSITION_CLASSES[clock.position]}`}
-      aria-label="Digital clock"
-      aria-live="off"
-    >
+    <div className={`fixed z-10 ${POSITION_CLASSES[clock.position]}`}>
       <div
         className={`bg-black/40 backdrop-blur-sm rounded-lg px-3 py-1 text-white font-mono tabular-nums ${SIZE_CLASSES[clock.size]}`}
+        aria-label="Digital clock"
+        aria-live="off"
       >
         {time}
       </div>
