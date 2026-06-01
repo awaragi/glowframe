@@ -34,7 +34,8 @@ Use this checklist to track overall feature completion status.
 - [ ] **F-190** What's New dialog — surface release notes when a new PWA version installs
 - [ ] **F-200** PWA update alert — notify the user when a new version is available and prompt reload
 - [x] **F-210** App version display in the keyboard shortcuts help dialog footer
-- [x] **F-220** Digital clock overlay — corner-pinned clock with configurable display, position, size, and format
+- [ ] **F-220** Digital clock overlay — corner-pinned clock with configurable display, position, size, and format
+- [ ] **F-225** Keyboard shortcut to cycle light modes (`M`) with transient mode-name overlay
 - [ ] **F-230** "Forget Me" data reset — clear all configuration and data from settings
 - [x] **F-240** Clock keyboard shortcuts — `T` toggles clock visibility, `Shift+T` cycles clock position; both listed in the help dialog
 - [ ] **F-250** Profile schema refactor — restructure profile data as `Profile: { light, clock }`, moving all current light settings into a `light` sub-object
@@ -638,6 +639,48 @@ Display the current application version at the bottom of the keyboard shortcuts 
 - The value is sourced exclusively from the build-time constant — no runtime `fetch`, no `package.json` import.
 - Unit tests must cover: the version string renders correctly given a mocked `import.meta.env.VITE_APP_VERSION` value.
 - No E2E scenario required beyond the existing F-170 smoke coverage.
+
+---
+
+### F-225 — Keyboard Shortcut to Cycle Light Modes
+
+**Priority:** Low  
+**Status:** Not started
+
+Allow users to quickly cycle through all six light modes on the active preset without opening the settings modal, with a brief on-screen indicator showing the new mode name.
+
+**Requirements:**
+
+**Mode cycling (works in all states when focus is not in a form control):**
+
+| Key | Action |
+|---|---|
+| `M` | Cycle to the next light mode on the active preset |
+
+- The cycle order matches the settings modal mode dropdown exactly: `full` → `full-color` → `ring` → `ring-color` → `spot` → `spot-color` → `full` (wraps from the last mode back to the first).
+- A canonical ordered list of modes (e.g., `MODE_CYCLE_ORDER`) SHALL be defined in a single shared module and used by both the keyboard shortcut handler and any UI that needs the same ordering; the order MUST NOT be duplicated inline in multiple files.
+- Cycling calls the existing `switchMode(id, newMode)` store action. Mode switching is destructive: all mode-specific fields are replaced with the defaults for the new mode; only `id` and `name` are preserved (same behaviour as selecting a mode in the settings dropdown).
+- The shortcut MUST be registered in `GlobalShortcuts` alongside the other global bindings (`F`, `S`, `?`, `1`–`9`).
+- The shortcut MUST fire when the settings modal is open, subject to the same focus guard as all other global shortcuts (F-170): it is suppressed only when focus is inside a text input, `<select>`, `<textarea>`, `contentEditable` element, or drag handle — not merely because the settings modal is open.
+- Reverse cycling (e.g., `Shift+M`) is out of scope for this feature.
+
+**Transient mode-name overlay:**
+
+- Each successful mode cycle SHALL display a brief, non-blocking overlay centred on the light surface showing the human-readable mode label (e.g., `Full`, `Full Color`, `Ring`, `Ring Color`, `Spot`, `Spot Color`).
+- The overlay visual treatment SHALL match the legibility approach planned for the F-220 digital clock overlay: high-contrast text on a semi-transparent, blurred pill or rounded-rectangle backdrop so the label remains readable against any background colour or brightness level.
+- The overlay MUST auto-dismiss after a short, fixed duration (approximately 1.5–2 seconds) without requiring user interaction.
+- The overlay MUST NOT trap focus, block pointer events on the light surface, or obscure the gear, fullscreen, or help buttons.
+- If the user presses `M` again before the overlay has dismissed, the overlay MUST update to show the latest mode name and restart the dismiss timer.
+- The overlay MUST have an accessible label (e.g., `aria-live="polite"` with the mode name, or an `aria-label` on the overlay element) so screen readers announce the mode change once.
+
+**Help dialog:**
+
+- The F-170 keyboard shortcuts help dialog MUST list `M` under the **Global** group with a description such as "Cycle light mode (resets mode settings)".
+
+**Testing:**
+
+- Unit tests MUST cover: `M` advances to the next mode in cycle order, wrapping from `spot-color` back to `full`; each step calls `switchMode` with the correct mode; the overlay renders the correct label for each mode; rapid successive presses update the overlay and restart the timer; the shortcut is suppressed when a form control has focus and fires when the settings modal is open but no form control has focus.
+- E2E scenario: with the settings modal closed, press `M` twice and verify the light surface changes shape/colour scheme and the centred overlay shows the expected mode name; open the settings modal (without focusing a form control), press `M`, and verify the mode changes and the settings mode selector reflects the new value.
 
 ---
 
