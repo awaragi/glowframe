@@ -27,9 +27,18 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    ```
    Parse the JSON to understand:
    - `schemaName`: The workflow being used (e.g., "spec-driven")
+<<<<<<< HEAD
    - Which artifacts exist for this change
 
 3. **Get the change directory and load artifacts**
+=======
+   - `planningHome`, `changeRoot`, `artifactPaths`, and `actionContext`: path and scope context
+   - Which artifacts exist for this change
+
+   If status reports `actionContext.mode: "workspace-planning"`, explain that full workspace implementation verification is not supported in this slice and STOP. Do not infer repo-local implementation ownership or edit linked repos.
+
+3. **Get planning context and load artifacts**
+>>>>>>> 3319266 (updadted openspec for cursor and claude)
 
    ```bash
    openspec instructions apply --change "<name>" --json
@@ -57,7 +66,11 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
      - Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
 
    **Spec Coverage**:
+<<<<<<< HEAD
    - If delta specs exist in `openspec/changes/<name>/specs/`:
+=======
+   - If delta specs exist in `contextFiles.specs`:
+>>>>>>> 3319266 (updadted openspec for cursor and claude)
      - Extract all requirements (marked with "### Requirement:")
      - For each requirement:
        - Search codebase for keywords related to the requirement

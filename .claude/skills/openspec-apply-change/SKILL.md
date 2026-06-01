@@ -6,7 +6,11 @@ compatibility: Requires openspec CLI.
 metadata:
   author: openspec
   version: "1.0"
+<<<<<<< HEAD
   generatedBy: "1.3.1"
+=======
+  generatedBy: "1.4.0"
+>>>>>>> 3319266 (updadted openspec for cursor and claude)
 ---
 
 Implement tasks from an OpenSpec change.
@@ -30,6 +34,10 @@ Implement tasks from an OpenSpec change.
    ```
    Parse the JSON to understand:
    - `schemaName`: The workflow being used (e.g., "spec-driven")
+<<<<<<< HEAD
+=======
+   - `planningHome`, `changeRoot`, and `actionContext`: planning scope and edit constraints
+>>>>>>> 3319266 (updadted openspec for cursor and claude)
    - Which artifact contains the tasks (typically "tasks" for spec-driven, check status for others)
 
 3. **Get apply instructions**
@@ -49,6 +57,11 @@ Implement tasks from an OpenSpec change.
    - If `state: "all_done"`: congratulate, suggest archive
    - Otherwise: proceed to implementation
 
+<<<<<<< HEAD
+=======
+   **Workspace guard:** If status JSON reports `actionContext.mode: "workspace-planning"` and `allowedEditRoots` is empty, explain that full workspace apply is not supported in this slice. Treat linked repos and folders as read-only context, ask the user to select an affected area through an explicit implementation workflow, and STOP before editing files.
+
+>>>>>>> 3319266 (updadted openspec for cursor and claude)
 4. **Read context files**
 
    Read every file path listed under `contextFiles` from the apply instructions output.
