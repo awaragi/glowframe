@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { HomePage } from './pages/home.page'
+import { SettingsPage } from './pages/settings.page'
 
 test.describe('Keyboard shortcuts', () => {
   test('S key opens settings modal; S again closes it', async ({ page }) => {
@@ -74,5 +75,34 @@ test.describe('Keyboard shortcuts', () => {
     await page.keyboard.press('ArrowRight')
 
     await expect(home.lightSurface).toBeVisible()
+  })
+
+  test('M key cycles light mode and shows mode name overlay', async ({ page }) => {
+    const home = new HomePage(page)
+    await home.goto()
+
+    // Default mode is 'full'. First M press should cycle to 'full-color'.
+    await page.keyboard.press('m')
+    await expect(page.getByRole('status')).toBeVisible()
+    await expect(page.getByRole('status')).toContainText('Full Color')
+    await expect(home.lightSurface).toHaveAttribute('data-mode', 'full-color')
+
+    // Second M press cycles to 'ring'.
+    await page.keyboard.press('m')
+    await expect(page.getByRole('status')).toContainText('Ring')
+    await expect(home.lightSurface).toHaveAttribute('data-mode', 'ring')
+  })
+
+  test('M key cycles mode while settings modal is open', async ({ page }) => {
+    const home = new HomePage(page)
+    const settings = new SettingsPage(page)
+    await home.goto()
+
+    await settings.open()
+    await expect(settings.modal).toBeVisible()
+
+    // Press M without focusing any form control — mode should still change.
+    await page.keyboard.press('m')
+    await expect(settings.modeSelector).toContainText('Full Color')
   })
 })

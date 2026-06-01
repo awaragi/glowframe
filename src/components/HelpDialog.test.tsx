@@ -19,6 +19,13 @@ describe('HelpDialog', () => {
     expect(screen.getByRole('region', { name: 'Global shortcuts' })).toBeInTheDocument()
   })
 
+  it('renders the M key in the Global shortcuts group', () => {
+    render(<HelpDialog open={true} onOpenChange={vi.fn()} />)
+    const globalSection = screen.getByRole('region', { name: 'Global shortcuts' })
+    const kbdElements = Array.from(globalSection.querySelectorAll('kbd'))
+    expect(kbdElements.some((k) => k.textContent === 'M')).toBe(true)
+  })
+
   it('renders the Light surface shortcuts group', () => {
     render(<HelpDialog open={true} onOpenChange={vi.fn()} />)
     expect(screen.getByRole('region', { name: 'Light surface shortcuts' })).toBeInTheDocument()

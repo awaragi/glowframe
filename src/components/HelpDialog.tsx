@@ -35,6 +35,10 @@ export default function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
                   <td className="py-1 text-right"><kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">?</kbd></td>
                 </tr>
                 <tr>
+                  <td className="py-1 pr-4 text-muted-foreground">Cycle light mode (resets mode settings)</td>
+                  <td className="py-1 text-right"><kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">M</kbd></td>
+                </tr>
+                <tr>
                   <td className="py-1 pr-4 text-muted-foreground">Select preset 1–9</td>
                   <td className="py-1 text-right"><kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">1</kbd>–<kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">9</kbd></td>
                 </tr>

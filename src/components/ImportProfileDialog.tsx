@@ -8,17 +8,9 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store/index'
-import type { Profile, LightConfig } from '@/store/index'
+import type { Profile } from '@/store/index'
 import type { SharedProfile } from '@/lib/profileShare'
-
-const MODE_LABELS: Record<LightConfig['mode'], string> = {
-  'full': 'Full',
-  'full-color': 'Full Color',
-  'ring': 'Ring',
-  'ring-color': 'Ring Color',
-  'spot': 'Spot',
-  'spot-color': 'Spot Color',
-}
+import { MODE_LABELS } from '@/lib/modeCycle'
 
 interface ImportProfileDialogProps {
   profile: SharedProfile

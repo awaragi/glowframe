@@ -60,6 +60,65 @@ Use this checklist to track overall feature completion status.
 | Package manager | npm |
 | Hosting | GitHub Pages (serving `dist/`) |
 
+### Technology Stack Architecture
+
+```mermaid
+graph TB
+    subgraph "Build & Dev"
+        Vite["Vite"]
+        ESLint["ESLint"]
+        Prettier["Prettier"]
+    end
+    
+    subgraph "UI Layer"
+        React["React 19"]
+        TypeScript["TypeScript"]
+        Tailwind["Tailwind CSS"]
+        Shadcn["shadcn/ui"]
+        Radix["Radix UI"]
+    end
+    
+    subgraph "Routing & State"
+        ReactRouter["React Router v7"]
+        Zustand["Zustand"]
+        LocalStorage["localStorage"]
+    end
+    
+    subgraph "Forms & Validation"
+        RHF["React Hook Form"]
+        Zod["Zod"]
+    end
+    
+    subgraph "Testing"
+        Vitest["Vitest"]
+        RTL["React Testing Library"]
+        Playwright["Playwright"]
+    end
+    
+    subgraph "Deployment"
+        GitHub["GitHub Pages"]
+        Dist["dist/"]
+    end
+    
+    Vite -->|builds| React
+    React -->|uses| TypeScript
+    React -->|styled with| Tailwind
+    Tailwind -->|themes| Shadcn
+    Shadcn -->|primitives from| Radix
+    React -->|routing via| ReactRouter
+    React -->|state mgmt| Zustand
+    Zustand -->|persists to| LocalStorage
+    React -->|forms| RHF
+    RHF -->|validates with| Zod
+    ESLint -->|lints| TypeScript
+    Prettier -->|formats| TypeScript
+    Vitest -->|unit tests| React
+    RTL -->|tests| React
+    Playwright -->|e2e tests| React
+    Vite -->|outputs| Dist
+    Dist -->|deployed to| GitHub
+```
+
 ---
 
 ## Features

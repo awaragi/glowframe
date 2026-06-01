@@ -9,6 +9,7 @@ import HelpDialog from '@/components/HelpDialog'
 import GlobalShortcuts from '@/components/shortcuts/GlobalShortcuts'
 import ActiveModeShortcuts from '@/components/shortcuts/ActiveModeShortcuts'
 import ClockShortcuts from '@/components/shortcuts/ClockShortcuts'
+import ModeNameOverlay from '@/components/ModeNameOverlay'
 import ImportProfileDialog from '@/components/ImportProfileDialog'
 import { useFullscreen } from '@/hooks/useFullscreen'
 import { useAppStore } from '@/store'
@@ -18,6 +19,7 @@ import type { SharedProfile } from '@/lib/profileShare'
 export default function LightPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isHelpOpen, setIsHelpOpen] = useState(false)
+  const [modeOverlayLabel, setModeOverlayLabel] = useState<string | null>(null)
   const [pendingImport, setPendingImport] = useState<SharedProfile | null>(null)
   const { toggle } = useFullscreen()
   const profiles = useAppStore((s) => s.profiles)
@@ -57,9 +59,11 @@ export default function LightPage() {
         onToggleFullscreen={toggle}
         onToggleSettings={() => setIsSettingsOpen((v) => !v)}
         onToggleHelp={() => setIsHelpOpen((v) => !v)}
+        onModeCycled={setModeOverlayLabel}
         profiles={profiles}
         setActiveProfile={setActiveProfile}
       />
+      <ModeNameOverlay label={modeOverlayLabel} onDismiss={() => setModeOverlayLabel(null)} />
       <ActiveModeShortcuts />
       <ClockShortcuts />
       <FullscreenButton />

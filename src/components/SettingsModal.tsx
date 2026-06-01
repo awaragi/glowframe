@@ -21,6 +21,7 @@ import { Tabs } from '@base-ui/react/tabs'
 import { Switch } from '@base-ui/react/switch'
 import { useAppStore, selectActiveProfile } from '@/store/index'
 import type { Profile, LightConfig, ClockConfig } from '@/store/index'
+import { MODE_LABELS } from '@/lib/modeCycle'
 import { encodeProfile } from '@/lib/profileShare'
 import { exportBackup, importBackup } from '@/lib/profileBackup'
 import type { BackupPayload } from '@/lib/profileBackup'
@@ -144,15 +145,6 @@ function SortableProfileItem({
 interface SettingsModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-}
-
-const MODE_LABELS: Record<LightConfig['mode'], string> = {
-  'full': 'Full',
-  'full-color': 'Full Color',
-  'ring': 'Ring',
-  'ring-color': 'Ring Color',
-  'spot': 'Spot',
-  'spot-color': 'Spot Color',
 }
 
 export default function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
