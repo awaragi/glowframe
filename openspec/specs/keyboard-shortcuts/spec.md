@@ -56,9 +56,10 @@ The system SHALL provide a `GlobalShortcuts` headless React component (renders `
 | `f` (case-insensitive) | Toggle fullscreen (no-op when `isAvailable` is `false`) |
 | `s` (case-insensitive) | Toggle settings modal open/closed |
 | `?` / Shift+`/` | Toggle help dialog open/closed |
+| `m` (case-insensitive) | Cycle active preset to next light mode (destructive; calls `switchMode`) |
 | `1`–`9` | Select profile at array index `n-1`; no-op if index out of bounds |
 
-`GlobalShortcuts` SHALL be mounted once in `LightPage` and SHALL replace the existing inline `useEffect` `F` key handler.
+`GlobalShortcuts` SHALL be mounted once in `LightPage` and SHALL replace the existing inline `useEffect` `F` key handler. When the `m` binding fires, the component SHALL call `switchMode(activeProfileId, nextMode(currentMode))` using the canonical cycle order from `src/lib/modeCycle.ts`, then invoke an `onModeCycled(label)` callback with the human-readable label for the new mode.
 
 #### Scenario: F key toggles fullscreen
 - **WHEN** no form control has focus
@@ -92,6 +93,31 @@ The system SHALL provide a `GlobalShortcuts` headless React component (renders `
 - **WHEN** at least 9 profiles exist
 - **WHEN** the user presses `9`
 - **THEN** the ninth profile (index 8) becomes the active profile
+
+#### Scenario: M key cycles to next light mode
+- **WHEN** no form control has focus
+- **WHEN** the active profile has `mode: 'full'`
+- **WHEN** the user presses `M` or `m`
+- **THEN** `switchMode` is called with the active profile id and `'full-color'`
+- **THEN** `onModeCycled` is called with `'Full Color'`
+
+#### Scenario: M key wraps from last mode to first
+- **WHEN** no form control has focus
+- **WHEN** the active profile has `mode: 'spot-color'`
+- **WHEN** the user presses `M` or `m`
+- **THEN** `switchMode` is called with the active profile id and `'full'`
+- **THEN** `onModeCycled` is called with `'Full'`
+
+#### Scenario: M key fires when settings modal is open
+- **WHEN** the settings modal is open
+- **WHEN** no form control has focus
+- **WHEN** the user presses `M` or `m`
+- **THEN** `switchMode` is called for the active profile
+
+#### Scenario: M key is silent when a form control has focus
+- **WHEN** an `HTMLInputElement` has focus
+- **WHEN** the user presses `M` or `m`
+- **THEN** `switchMode` is not called
 
 ---
 
@@ -248,6 +274,7 @@ The dialog SHALL present shortcuts in five named groups:
 | `F` | Toggle fullscreen |
 | `S` | Toggle settings |
 | `?` | Toggle this help dialog |
+| `M` | Cycle light mode (resets mode settings) |
 
 **Light surface** (active for temperature-based modes: `full`, `ring`, `spot`):
 | Key | Action |
@@ -292,6 +319,10 @@ The dialog SHALL display a footer below the shortcut groups that shows the curre
 #### Scenario: All five shortcut groups are rendered
 - **WHEN** the help dialog is open
 - **THEN** the dialog contains sections for Global, Light surface, Ring & Spot radius, Clock, and Settings modal shortcuts
+
+#### Scenario: Global group lists M key
+- **WHEN** the help dialog is open
+- **THEN** the Global section contains a row for `M` with action text indicating mode cycling resets mode settings
 
 #### Scenario: Clock group lists T and Shift+T
 - **WHEN** the help dialog is open
